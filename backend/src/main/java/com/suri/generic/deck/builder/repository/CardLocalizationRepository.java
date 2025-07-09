@@ -1,9 +1,5 @@
 package com.suri.generic.deck.builder.repository;
 
-
-
-
-import com.suri.generic.deck.builder.model.Card;
 import com.suri.generic.deck.builder.model.CardLocalization;
 import org.springframework.data.jpa.repository.JpaRepository;
 
