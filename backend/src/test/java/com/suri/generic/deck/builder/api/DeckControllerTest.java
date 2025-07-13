@@ -2,9 +2,7 @@ package com.suri.generic.deck.builder.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suri.generic.deck.builder.Application;
-import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,6 @@ public class DeckControllerTest {
         String response = result.getResponse().getContentAsString();
         token = "Bearer " + new ObjectMapper().readValue(response, Map.class).get("token");
 
-        // Insert a game (if not done via data.sql)
         mockMvc.perform(post("/api/games")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", token)
