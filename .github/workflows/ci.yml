@@ -46,10 +46,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean install
         working-directory: ./backend
-
-      - name: Run tests
-        run: mvn test
-        working-directory: ./backend
         env:
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/testdb
           SPRING_DATASOURCE_USERNAME: test
