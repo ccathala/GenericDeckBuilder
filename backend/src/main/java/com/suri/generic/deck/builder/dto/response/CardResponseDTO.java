@@ -10,9 +10,9 @@ public class CardResponseDTO {
     private String name;
     private String description;
     private String imageUrl;
-    private Map<String, String> properties;
+    private Map<String, Object> properties;
 
-    public CardResponseDTO(String id, String name, String description, String imageUrl, Map<String, String> properties) {
+    public CardResponseDTO(String id, String name, String description, String imageUrl, Map<String, Object> properties) {
         this.id = id;
         this.name = name;
         this.description = description;
