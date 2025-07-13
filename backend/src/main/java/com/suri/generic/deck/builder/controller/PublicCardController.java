@@ -3,20 +3,18 @@ package com.suri.generic.deck.builder.controller;
 import com.suri.generic.deck.builder.dto.response.CardResponseDTO;
 import com.suri.generic.deck.builder.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/games")
-@SecurityRequirement(name = "bearerAuth") // Applique JWT à tous les endpoints du contrôleur
-public class CardController {
+@RequestMapping("/api/public/games")
+public class PublicCardController {
 
     private final CardService cardService;
 
-    public CardController(CardService cardService) {
+    public PublicCardController(CardService cardService) {
         this.cardService = cardService;
     }
 
