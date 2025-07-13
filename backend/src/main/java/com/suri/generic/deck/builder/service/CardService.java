@@ -6,28 +6,27 @@ import com.suri.generic.deck.builder.model.Card;
 import com.suri.generic.deck.builder.model.CardLocalization;
 import com.suri.generic.deck.builder.model.CardLocalizationId;
 import com.suri.generic.deck.builder.model.Game;
-import com.suri.generic.deck.builder.repository.CardLocalizationRepository;
 import com.suri.generic.deck.builder.repository.CardRepository;
 import com.suri.generic.deck.builder.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CardService {
 
     private final GameRepository gameRepository;
     private final CardRepository cardRepository;
-    private final CardLocalizationRepository cardLocalizationRepository;
 
     public CardService(
             GameRepository gameRepository,
-            CardRepository cardRepository,
-            CardLocalizationRepository cardLocalizationRepository
+            CardRepository cardRepository
     ) {
         this.gameRepository = gameRepository;
         this.cardRepository = cardRepository;
-        this.cardLocalizationRepository = cardLocalizationRepository;
     }
 
     /**
@@ -51,7 +50,7 @@ public class CardService {
             String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
 
             // Parser les propriétés
-            Map<String, String> props;
+            Map<String, Object> props;
             try {
                 props = new ObjectMapper().readValue(card.getProperties(), Map.class);
             } catch (Exception e) {
