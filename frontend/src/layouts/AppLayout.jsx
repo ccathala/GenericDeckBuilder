@@ -1,10 +1,10 @@
 // src/layouts/AppLayout.jsx
+import NavBar from "../components/NavBar";
+
 export default function AppLayout({ children }) {
   return (
     <div className="app-layout">
-      <header className="app-header">
-        <h1>Mage Noir</h1>
-      </header>
+      <NavBar />
       <main className="app-content">{children}</main>
     </div>
   );

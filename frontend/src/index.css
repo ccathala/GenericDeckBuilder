@@ -75,19 +75,6 @@ button:focus-visible {
   min-height: 100vh;
 }
 
-.app-header {
-  padding: 1rem;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.app-header h1 {
-  margin: 0;
-  color: #f0f0f0;
-  font-size: 2rem;
-}
-
 .app-content {
   flex: 1;
   padding: 2rem;
@@ -103,6 +90,36 @@ button:focus-visible {
   max-width: 1200px;
   margin: 0 auto;
   justify-items: center;
+}
+
+/* Styles pour les pages temporaires */
+.page-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.page-container h1 {
+  margin-bottom: 1rem;
+  color: #f0f0f0;
+}
+
+.page-container p {
+  margin-bottom: 2rem;
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.coming-soon {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  color: #ffc107;
+  font-weight: 500;
 }
 
 .card-image {
