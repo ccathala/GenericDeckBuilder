@@ -18,6 +18,18 @@ const translations = {
     manageProfile: "Gérez votre profil et vos préférences.",
     featureInDevelopment: "🚧 Fonctionnalité en cours de développement",
     loadingCards: "Chargement des cartes...",
+    // Authentification
+    signIn: "Se connecter",
+    signOut: "Se déconnecter",
+    email: "Email",
+    password: "Mot de passe",
+    enterEmail: "Entrez votre email",
+    enterPassword: "Entrez votre mot de passe",
+    signingIn: "Connexion...",
+    pleaseEnterCredentials: "Veuillez entrer vos identifiants",
+    loginError: "Erreur de connexion. Vérifiez vos identifiants.",
+    needAccount: "Besoin d'un compte ?",
+    contactAdmin: "Contactez l'administrateur pour créer un compte",
   },
   en: {
     cards: "Cards",
@@ -35,6 +47,18 @@ const translations = {
     manageProfile: "Manage your profile and preferences.",
     featureInDevelopment: "🚧 Feature in development",
     loadingCards: "Loading cards...",
+    // Authentification
+    signIn: "Sign In",
+    signOut: "Sign Out",
+    email: "Email",
+    password: "Password",
+    enterEmail: "Enter your email",
+    enterPassword: "Enter your password",
+    signingIn: "Signing in...",
+    pleaseEnterCredentials: "Please enter your credentials",
+    loginError: "Login error. Please check your credentials.",
+    needAccount: "Need an account?",
+    contactAdmin: "Contact the administrator to create an account",
   },
 };
 

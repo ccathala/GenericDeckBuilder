@@ -1,11 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useAuth } from "../contexts/AuthContext";
 import LanguageSelector from "./LanguageSelector";
 import "./NavBar.css";
 
 export default function NavBar() {
   const location = useLocation();
   const { t } = useLanguage();
+  const { isAuthenticated, logout } = useAuth();
 
   const navItems = [
     { path: "/", label: t("cards"), icon: "🃏" },
@@ -39,6 +41,21 @@ export default function NavBar() {
 
         <div className="navbar-actions">
           <LanguageSelector />
+          {!isAuthenticated ? (
+            <Link to="/login" className="login-button">
+              <span>🔑</span>
+              <span className="login-text">{t("signIn")}</span>
+            </Link>
+          ) : (
+            <button
+              className="navbar-button logout-button"
+              onClick={logout}
+              title={t("signOut")}
+            >
+              <span>🚪</span>
+              <span className="logout-text">{t("signOut")}</span>
+            </button>
+          )}
           <button className="navbar-button" title={t("settings")}>
             <span>⚙️</span>
           </button>
