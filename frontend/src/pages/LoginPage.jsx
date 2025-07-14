@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
 import "./LoginPage.css";
@@ -94,8 +94,12 @@ export default function LoginPage() {
         </form>
 
         <div className="login-footer">
-          <p>{t("needAccount")}</p>
-          <small>{t("contactAdmin")}</small>
+          <p>
+            {t("needAccount")}{" "}
+            <Link to="/register" className="register-link">
+              {t("createAccount")}
+            </Link>
+          </p>
         </div>
       </div>
     </div>

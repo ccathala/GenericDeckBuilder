@@ -42,10 +42,16 @@ export default function NavBar() {
         <div className="navbar-actions">
           <LanguageSelector />
           {!isAuthenticated ? (
-            <Link to="/login" className="login-button">
-              <span>🔑</span>
-              <span className="login-text">{t("signIn")}</span>
-            </Link>
+            <div className="auth-buttons">
+              <Link to="/register" className="register-button">
+                <span>✨</span>
+                <span className="register-text">{t("createAccount")}</span>
+              </Link>
+              <Link to="/login" className="login-button">
+                <span>🔑</span>
+                <span className="login-text">{t("signIn")}</span>
+              </Link>
+            </div>
           ) : (
             <button
               className="navbar-button logout-button"

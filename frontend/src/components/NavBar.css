@@ -126,6 +126,13 @@
   transform: scale(1.1);
 }
 
+/* Conteneur des boutons d'authentification */
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Bouton de connexion */
 .login-button {
   display: flex;
@@ -147,6 +154,29 @@
   background: linear-gradient(135deg, #535bf2, #4c4fd8);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(100, 108, 255, 0.3);
+}
+
+/* Bouton d'inscription */
+.register-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
 }
 
 /* Bouton de déconnexion */
@@ -171,7 +201,8 @@
 }
 
 .login-text,
-.logout-text {
+.logout-text,
+.register-text {
   font-size: 0.9rem;
 }
 
@@ -207,13 +238,19 @@
   }
 
   .login-text,
-  .logout-text {
+  .logout-text,
+  .register-text {
     display: none;
   }
 
   .login-button,
-  .logout-button {
+  .logout-button,
+  .register-button {
     padding: 0.5rem;
+  }
+
+  .auth-buttons {
+    gap: 0.25rem;
   }
 }
 

@@ -6,6 +6,7 @@ import CardGallery from "./components/CardGallery";
 import DecksPage from "./pages/DecksPage";
 import ProfilePage from "./pages/ProfilePage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import AppLayout from "./layouts/AppLayout";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route
               path="*"
               element={
