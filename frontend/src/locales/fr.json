@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "myDecks": "Mes Decks",
+    "cardGallery": "Galerie de cartes",
+    "profile": "Profil",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Déconnexion",
+    "settings": "Paramètres",
+    "myProfile": "Mon profil"
+  },
+  "common": {
+    "appName": "Generic Deck Builder",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher"
+  },
+  "pages": {
+    "home": {
+      "welcome": "Bienvenue sur Generic Deck Builder",
+      "description": "Créez, gérez et optimisez vos decks de cartes avec notre outil puissant et intuitif.",
+      "welcomeBack": "Bienvenue, {{name}} !",
+      "browseCards": "Parcourir les cartes",
+      "myDecks": "Mes decks",
+      "getStarted": "Commencer",
+      "login": "Se connecter",
+      "features": {
+        "collection": "Collection complète",
+        "collectionDesc": "Parcourez une vaste collection de cartes avec des filtres avancés",
+        "builder": "Constructeur de decks",
+        "builderDesc": "Créez des decks équilibrés avec notre interface intuitive",
+        "strategies": "Stratégies optimisées",
+        "strategiesDesc": "Analysez et optimisez vos stratégies de jeu"
+      }
+    },
+    "cards": {
+      "title": "Galerie de cartes",
+      "description": "Explorez toutes les cartes disponibles et ajoutez-les à vos decks",
+      "cardsFound": "cartes trouvées"
+    }
+  },
+  "cards": {
+    "filters": {
+      "title": "Filtres",
+      "clear": "Effacer",
+      "search": "Rechercher",
+      "searchPlaceholder": "Nom ou description de la carte...",
+      "type": "Type",
+      "allTypes": "Tous les types",
+      "cost": "Coût",
+      "allCosts": "Tous les coûts",
+      "rarity": "Rareté",
+      "allRarities": "Toutes les raretés"
+    },
+    "gallery": {
+      "noCards": "Aucune carte trouvée",
+      "noCardsDescription": "Essayez de modifier vos critères de recherche",
+      "addToDeck": "Ajouter au deck"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "Home",
+    "myDecks": "My Decks",
+    "cardGallery": "Card Gallery",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "settings": "Settings",
+    "myProfile": "My Profile"
+  },
+  "common": {
+    "appName": "Generic Deck Builder",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search"
+  },
+  "pages": {
+    "home": {
+      "welcome": "Welcome to Generic Deck Builder",
+      "description": "Create, manage and optimize your card decks with our powerful and intuitive tool.",
+      "welcomeBack": "Welcome back, {{name}}!",
+      "browseCards": "Browse Cards",
+      "myDecks": "My Decks",
+      "getStarted": "Get Started",
+      "login": "Login",
+      "features": {
+        "collection": "Complete Collection",
+        "collectionDesc": "Browse a vast collection of cards with advanced filters",
+        "builder": "Deck Builder",
+        "builderDesc": "Create balanced decks with our intuitive interface",
+        "strategies": "Optimized Strategies",
+        "strategiesDesc": "Analyze and optimize your game strategies"
+      }
+    },
+    "cards": {
+      "title": "Card Gallery",
+      "description": "Explore all available cards and add them to your decks",
+      "cardsFound": "cards found"
+    }
+  },
+  "cards": {
+    "filters": {
+      "title": "Filters",
+      "clear": "Clear",
+      "search": "Search",
+      "searchPlaceholder": "Card name or description...",
+      "type": "Type",
+      "allTypes": "All types",
+      "cost": "Cost",
+      "allCosts": "All costs",
+      "rarity": "Rarity",
+      "allRarities": "All rarities"
+    },
+    "gallery": {
+      "noCards": "No cards found",
+      "noCardsDescription": "Try modifying your search criteria",
+      "addToDeck": "Add to deck"
+    }
+  }
+}
