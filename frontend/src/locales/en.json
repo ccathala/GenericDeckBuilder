@@ -73,14 +73,36 @@
         "passwordNoUppercase": "Password must contain at least one uppercase letter",
         "passwordNoLowercase": "Password must contain at least one lowercase letter",
         "passwordNoNumber": "Password must contain at least one number",
+        "passwordNoSpecialChar": "Password must contain at least one special character (!@#$%^&*...)",
         "confirmPasswordRequired": "Password confirmation is required",
-        "passwordsDoNotMatch": "Passwords do not match",
+        "passwordMismatch": "Passwords do not match",
         "emailAlreadyExists": "This email address is already in use",
         "registrationFailed": "Error creating account"
       },
       "success": {
         "accountCreated": "Account created successfully!",
         "redirecting": "Redirecting..."
+      }
+    },
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Access your account",
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submitButton": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "forgotPassword": "Forgot password?",
+      "errors": {
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Invalid email format",
+        "passwordRequired": "Password is required",
+        "invalidCredentials": "Invalid email or password",
+        "accountNotFound": "No account found with this email address",
+        "loginFailed": "Login failed"
       }
     }
   },

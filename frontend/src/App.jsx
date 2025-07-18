@@ -6,6 +6,7 @@ import NavBar from "./components/NavBar";
 import HomePage from "./pages/HomePage";
 import CardsPage from "./pages/CardsPage";
 import RegisterPage from "./pages/RegisterPage";
+import LoginPage from "./pages/LoginPage";
 import "./App.css";
 
 function App() {
@@ -43,13 +44,7 @@ function App() {
                 />
                 <Route
                   path="/login"
-                  element={
-                    <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center w-full">
-                      <div className="text-white text-2xl">
-                        Page de connexion - À venir
-                      </div>
-                    </div>
-                  }
+                  element={<LoginPage />}
                 />
                 <Route
                   path="/register"

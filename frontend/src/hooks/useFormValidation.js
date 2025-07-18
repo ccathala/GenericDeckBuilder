@@ -4,19 +4,6 @@ import { useLanguage } from "../contexts/LanguageContext";
 export const useFormValidation = () => {
   const { t } = useLanguage();
 
-  const validateName = useCallback((name) => {
-    if (!name) {
-      return t("auth.register.errors.nameRequired");
-    }
-    if (name.length < 2) {
-      return t("auth.register.errors.nameTooShort");
-    }
-    if (name.length > 50) {
-      return t("auth.register.errors.nameTooLong");
-    }
-    return null;
-  }, [t]);
-
   const validateEmail = useCallback((email) => {
     if (!email) {
       return t("auth.register.errors.emailRequired");
@@ -35,15 +22,26 @@ export const useFormValidation = () => {
     if (password.length < 8) {
       return t("auth.register.errors.passwordTooShort");
     }
-    if (!/[A-Z]/.test(password)) {
+    
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    // Return the first specific error found
+    if (!hasUpperCase) {
       return t("auth.register.errors.passwordNoUppercase");
     }
-    if (!/[a-z]/.test(password)) {
+    if (!hasLowerCase) {
       return t("auth.register.errors.passwordNoLowercase");
     }
-    if (!/[0-9]/.test(password)) {
+    if (!hasNumbers) {
       return t("auth.register.errors.passwordNoNumber");
     }
+    if (!hasSpecialChar) {
+      return t("auth.register.errors.passwordNoSpecialChar");
+    }
+    
     return null;
   }, [t]);
 
@@ -52,20 +50,35 @@ export const useFormValidation = () => {
       return t("auth.register.errors.confirmPasswordRequired");
     }
     if (password !== confirmPassword) {
-      return t("auth.register.errors.passwordsDoNotMatch");
+      return t("auth.register.errors.passwordMismatch");
+    }
+    return null;
+  }, [t]);
+
+  const validateName = useCallback((name) => {
+    if (!name) {
+      return t("auth.register.errors.nameRequired");
+    }
+    if (name.length < 2) {
+      return t("auth.register.errors.nameTooShort");
+    }
+    if (name.length > 50) {
+      return t("auth.register.errors.nameTooLong");
     }
     return null;
   }, [t]);
 
   return {
-    validateName,
     validateEmail,
     validatePassword,
     validateConfirmPassword,
+    validateName,
   };
 };
 
 export const useRegisterForm = () => {
+  const { t } = useLanguage();
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -77,7 +90,7 @@ export const useRegisterForm = () => {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { validateName, validateEmail, validatePassword, validateConfirmPassword } = useFormValidation();
+  const { validateEmail, validatePassword, validateConfirmPassword, validateName } = useFormValidation();
 
   const updateField = (field, value) => {
     setFormData(prev => ({

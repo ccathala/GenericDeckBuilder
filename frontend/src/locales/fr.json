@@ -73,14 +73,36 @@
         "passwordNoUppercase": "Le mot de passe doit contenir au moins une majuscule",
         "passwordNoLowercase": "Le mot de passe doit contenir au moins une minuscule",
         "passwordNoNumber": "Le mot de passe doit contenir au moins un chiffre",
+        "passwordNoSpecialChar": "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...)",
         "confirmPasswordRequired": "La confirmation du mot de passe est requise",
-        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
         "emailAlreadyExists": "Cette adresse email est déjà utilisée",
         "registrationFailed": "Erreur lors de la création du compte"
       },
       "success": {
         "accountCreated": "Compte créé avec succès !",
         "redirecting": "Redirection en cours..."
+      }
+    },
+    "login": {
+      "title": "Se connecter",
+      "subtitle": "Accédez à votre compte",
+      "email": "Adresse email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submitButton": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "noAccount": "Pas encore de compte ?",
+      "registerLink": "S'inscrire",
+      "forgotPassword": "Mot de passe oublié ?",
+      "errors": {
+        "emailRequired": "L'adresse email est requise",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "invalidCredentials": "Email ou mot de passe incorrect",
+        "accountNotFound": "Aucun compte trouvé avec cette adresse email",
+        "loginFailed": "Erreur lors de la connexion"
       }
     }
   },
