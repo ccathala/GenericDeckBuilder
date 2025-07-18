@@ -21,13 +21,55 @@ const DeckForm = ({ isEdit = false }) => {
   // Current deck cards state
   const [deckCards, setDeckCards] = useState([]);
   const [browserCards, setBrowserCards] = useState([]); // Array to store fresh card data from CardBrowser
-  const [deckCardIds, setDeckCardIds] = useState([]); // Store original deck card IDs and quantities
+  const [originalCardIds, setOriginalCardIds] = useState([]); // Store original deck card IDs and quantities for cross-referencing only
 
   // UI state
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCards, setSelectedCards] = useState(new Set());
+
+  // Helper components
+  const LoadingSpinner = () => (
+    <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
+      <div className="text-white">
+        <div className="animate-spin w-8 h-8 border-2 border-gray-400 border-t-white rounded-full mx-auto mb-4"></div>
+        {t("common.loading")}
+      </div>
+    </div>
+  );
+
+  const AuthRequired = () => (
+    <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {t("auth.loginRequired")}
+        </h2>
+        <p className="text-gray-400">{t("decks.form.loginMessage")}</p>
+      </div>
+    </div>
+  );
+
+  const ErrorMessage = ({ error }) => (
+    <div className="p-3 bg-red-900/50 border border-red-500 rounded-md flex-shrink-0">
+      <div className="flex items-center">
+        <svg
+          className="w-4 h-4 text-red-400 mr-2 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <p className="text-red-400 text-sm">{error}</p>
+      </div>
+    </div>
+  );
 
   // Load deck data for editing
   useEffect(() => {
@@ -36,11 +78,11 @@ const DeckForm = ({ isEdit = false }) => {
     }
   }, [isEdit, id]);
 
-  // Update deck cards with fresh browser card data when available
+  // Update deck cards with fresh browser card data when available (for language switching)
   useEffect(() => {
-    if (browserCards.length > 0 && deckCardIds.length > 0) {
-      // Cross-reference deck card IDs with fresh browser card data
-      const updatedDeckCards = deckCardIds.map((deckCard) => {
+    if (browserCards.length > 0 && originalCardIds.length > 0) {
+      // Cross-reference original deck card IDs with fresh browser card data
+      const updatedDeckCards = originalCardIds.map((deckCard) => {
         const freshCard = browserCards.find(
           (browserCard) => browserCard.id === deckCard.id
         );
@@ -53,7 +95,7 @@ const DeckForm = ({ isEdit = false }) => {
       });
       setDeckCards(updatedDeckCards);
     }
-  }, [browserCards, deckCardIds]);
+  }, [browserCards, originalCardIds]);
 
   const fetchDeckData = async () => {
     try {
@@ -69,25 +111,25 @@ const DeckForm = ({ isEdit = false }) => {
           gameId: "mage_noir", // Force le jeu à mage_noir même en édition
         });
 
-        // Transform deck cards for display and store original IDs/quantities
+        // Transform deck cards for display
         const cards =
           deckData.cards?.map((deckCard) => ({
             ...deckCard.card,
             quantity: deckCard.quantity,
           })) || [];
+
         setDeckCards(cards);
 
-        // Store original deck card IDs and quantities for cross-referencing
-        const cardIds =
+        // Store original card IDs and quantities for cross-referencing with fresh language data
+        setOriginalCardIds(
           deckData.cards?.map((deckCard) => ({
             id: deckCard.card.id,
             quantity: deckCard.quantity,
-          })) || [];
-        setDeckCardIds(cardIds);
+          })) || []
+        );
 
         // Create selected cards set for CardBrowser
-        const selected = new Set(cards.map((card) => card.id));
-        setSelectedCards(selected);
+        setSelectedCards(new Set(cards.map((card) => card.id)));
       } else {
         setError(result.error);
       }
@@ -123,8 +165,8 @@ const DeckForm = ({ isEdit = false }) => {
         }
       });
 
-      // Update deckCardIds as well
-      setDeckCardIds((prev) => {
+      // Also update originalCardIds to keep cross-referencing working
+      setOriginalCardIds((prev) => {
         const existing = prev.find((card) => card.id === cardId);
         if (existing) {
           return prev.map((card) =>
@@ -140,7 +182,8 @@ const DeckForm = ({ isEdit = false }) => {
       newSelectedCards.delete(cardId);
       // Remove card from deck
       setDeckCards((prev) => prev.filter((card) => card.id !== cardId));
-      setDeckCardIds((prev) => prev.filter((card) => card.id !== cardId));
+      // Also remove from originalCardIds
+      setOriginalCardIds((prev) => prev.filter((card) => card.id !== cardId));
     }
 
     setSelectedCards(newSelectedCards);
@@ -153,6 +196,13 @@ const DeckForm = ({ isEdit = false }) => {
     }
 
     setDeckCards((prev) =>
+      prev.map((card) =>
+        card.id === cardId ? { ...card, quantity: Math.max(1, quantity) } : card
+      )
+    );
+
+    // Also update originalCardIds to keep sync
+    setOriginalCardIds((prev) =>
       prev.map((card) =>
         card.id === cardId ? { ...card, quantity: Math.max(1, quantity) } : card
       )
@@ -200,27 +250,11 @@ const DeckForm = ({ isEdit = false }) => {
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {t("auth.loginRequired")}
-          </h2>
-          <p className="text-gray-400">{t("decks.form.loginMessage")}</p>
-        </div>
-      </div>
-    );
+    return <AuthRequired />;
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
-        <div className="text-white">
-          <div className="animate-spin w-8 h-8 border-2 border-gray-400 border-t-white rounded-full mx-auto mb-4"></div>
-          {t("common.loading")}
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
@@ -230,26 +264,7 @@ const DeckForm = ({ isEdit = false }) => {
       <div className="w-full px-6 py-4 h-[calc(105vh-6rem)] flex flex-col">
         <div className="flex flex-col gap-4 h-full overflow-hidden">
           {/* Error Message */}
-          {error && (
-            <div className="p-3 bg-red-900/50 border border-red-500 rounded-md flex-shrink-0">
-              <div className="flex items-center">
-                <svg
-                  className="w-4 h-4 text-red-400 mr-2 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            </div>
-          )}
+          {error && <ErrorMessage error={error} />}
 
           {/* Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
