@@ -1,12 +1,12 @@
 import React from "react";
 
-const CardGallery = ({ 
-  cards, 
-  loading, 
-  error, 
+const CardGallery = ({
+  cards,
+  loading,
+  error,
   onCardClick = null,
   showSelection = false,
-  selectedCards = []
+  selectedCards = [],
 }) => {
   if (loading) {
     return (
@@ -33,18 +33,18 @@ const CardGallery = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10 pb-4">
       {cards.map((card) => {
-        const isSelected = showSelection && selectedCards.some(selectedCard => selectedCard.id === card.id);
-        
+        const isSelected =
+          showSelection &&
+          selectedCards.some((selectedCard) => selectedCard.id === card.id);
+
         return (
           <div
             key={card.id}
             className={`overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative ${
-              onCardClick ? 'cursor-pointer hover:scale-105' : ''
-            } ${
-              isSelected ? 'ring-4 ring-blue-500' : ''
-            }`}
+              onCardClick ? "cursor-pointer hover:scale-105" : ""
+            } ${isSelected ? "ring-4 ring-blue-500" : ""}`}
             onClick={() => onCardClick && onCardClick(card)}
           >
             <img

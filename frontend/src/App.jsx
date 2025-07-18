@@ -5,8 +5,13 @@ import { AuthProvider } from "./contexts/AuthContext";
 import NavBar from "./components/NavBar";
 import HomePage from "./pages/HomePage";
 import CardsPage from "./pages/CardsPage";
+import DecksPage from "./pages/DecksPage";
+import CreateDeckPage from "./pages/CreateDeckPage";
+import EditDeckPage from "./pages/EditDeckPage";
+import DeckDetailPage from "./pages/DeckDetailPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+import TestScroll from "./components/TestScroll";
 import "./App.css";
 
 function App() {
@@ -22,16 +27,11 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/cards" element={<CardsPage />} />
-                <Route
-                  path="/decks"
-                  element={
-                    <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center w-full">
-                      <div className="text-white text-2xl">
-                        Page des decks - À venir
-                      </div>
-                    </div>
-                  }
-                />
+                <Route path="/decks" element={<DecksPage />} />
+                <Route path="/decks/new" element={<CreateDeckPage />} />
+                <Route path="/decks/:id" element={<DeckDetailPage />} />
+                <Route path="/decks/:id/edit" element={<EditDeckPage />} />
+                <Route path="/test-scroll" element={<TestScroll />} />
                 <Route
                   path="/profile"
                   element={
