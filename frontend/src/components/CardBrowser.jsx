@@ -19,7 +19,7 @@ const CardBrowser = ({
   className = "",
   maxColumns = null, // Nouveau prop pour limiter le nombre de colonnes
 }) => {
-  const { t } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const [localCards, setLocalCards] = useState([]);
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -37,7 +37,7 @@ const CardBrowser = ({
     if (cards === null) {
       fetchCards();
     }
-  }, [cards, gameId]);
+  }, [cards, gameId, currentLanguage]);
 
   const fetchCards = async () => {
     try {
@@ -47,7 +47,7 @@ const CardBrowser = ({
       // Utiliser gameId ou par défaut "mage_noir"
       const currentGameId = gameId || "mage_noir";
 
-      const data = await cardService.getCardsByGame(currentGameId, "fr");
+      const data = await cardService.getCardsByGame(currentGameId, currentLanguage);
       setLocalCards(data);
     } catch (err) {
       console.error("Erreur lors du chargement des cartes:", err);
