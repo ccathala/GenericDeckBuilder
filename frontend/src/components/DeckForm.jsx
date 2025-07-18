@@ -177,66 +177,36 @@ const DeckForm = ({ isEdit = false }) => {
   const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-mage-bg-900 text-white">
-      <div className="w-full px-6 py-8 h-screen flex flex-col max-h-screen">
-        <div className="flex flex-col gap-6 h-full overflow-hidden">
-          {/* Ligne 1: Titre + Informations du deck (même ligne) */}
-          <div className="bg-mage-dark-800 rounded-lg p-4 flex-shrink-0">
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded-md">
-                <div className="flex items-center">
-                  <svg
-                    className="w-4 h-4 text-red-400 mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <p className="text-red-400 text-sm">{error}</p>
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-end gap-4">
-              {/* Titre */}
-              <div className="flex items-end min-w-[200px]">
-                <div>
-                  <h1 className="text-xl font-bold text-white">
-                    {isEdit
-                      ? t("decks.form.editTitle")
-                      : t("decks.form.createTitle")}
-                  </h1>
-                  <p className="text-sm text-blue-400 font-medium">Mage Noir</p>
-                </div>
-              </div>
-
-              {/* Total de cartes */}
-              <div className="text-center min-w-[60px]">
-                <div className="text-sm font-bold text-white">
-                  {totalCards}
-                </div>
-                <div className="text-xs text-gray-400 whitespace-nowrap">
-                  {t("decks.form.totalCards")}
-                </div>
+    <div className="bg-mage-bg-900 text-white">
+      <div className="w-full px-6 py-4 h-[calc(100vh-6rem)] flex flex-col">
+        <div className="flex flex-col gap-4 h-full overflow-hidden">
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 bg-red-900/50 border border-red-500 rounded-md flex-shrink-0">
+              <div className="flex items-center">
+                <svg
+                  className="w-4 h-4 text-red-400 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-red-400 text-sm">{error}</p>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Ligne 2: Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0 overflow-hidden">
+          {/* Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
             {/* Zone 3: Sélection de cartes (gauche - 3/4 = 75%) */}
-            <div className="lg:col-span-3 bg-mage-dark-800 rounded-lg p-6 flex flex-col h-full max-h-full overflow-hidden">
-              <h2 className="text-xl font-semibold text-white mb-4 flex-shrink-0">
-                {t("decks.form.cardSelection")}
-              </h2>
-              <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="lg:col-span-3 bg-mage-dark-800 rounded-lg p-6 flex flex-col min-h-0">
+              <div className="flex-1 overflow-hidden">
                 <CardBrowser
                   onCardSelection={handleCardSelectionChange}
                   selectedCards={selectedCards}
@@ -249,7 +219,7 @@ const DeckForm = ({ isEdit = false }) => {
             </div>
 
             {/* Zone 2: Deck actuel (droite - 1/4 = 25%) */}
-            <div className="lg:col-span-1 bg-mage-dark-800 rounded-lg p-6 flex flex-col h-full max-h-full overflow-hidden">
+            <div className="lg:col-span-1 bg-mage-dark-800 rounded-lg p-6 flex flex-col min-h-0">
               <div className="mb-4 flex-shrink-0">
                 {/* Nom du deck éditable */}
                 <div className="mb-3 relative">
@@ -316,7 +286,7 @@ const DeckForm = ({ isEdit = false }) => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 flex-1 overflow-y-auto min-h-0 pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <div className="space-y-2 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                   {deckCards.map((card) => (
                     <div
                       key={card.id}
@@ -363,7 +333,7 @@ const DeckForm = ({ isEdit = false }) => {
               )}
 
               {/* Boutons d'action */}
-              <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-600 flex-shrink-0">
+              <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-600">
                 <button
                   type="button"
                   onClick={() => navigate("/decks")}
