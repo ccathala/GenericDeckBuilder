@@ -18,6 +18,7 @@ const CardBrowser = ({
   showTitle = true,
   className = "",
   maxColumns = null, // Nouveau prop pour limiter le nombre de colonnes
+  onCardsLoaded = null, // Callback when cards are loaded
 }) => {
   const { t, currentLanguage } = useLanguage();
   const [localCards, setLocalCards] = useState([]);
@@ -52,6 +53,11 @@ const CardBrowser = ({
         currentLanguage
       );
       setLocalCards(data);
+
+      // Notify parent component about loaded cards
+      if (onCardsLoaded) {
+        onCardsLoaded(data);
+      }
     } catch (err) {
       console.error("Erreur lors du chargement des cartes:", err);
       setLocalError(err.message || "Erreur lors du chargement des cartes");

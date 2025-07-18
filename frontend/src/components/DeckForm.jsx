@@ -20,6 +20,8 @@ const DeckForm = ({ isEdit = false }) => {
 
   // Current deck cards state
   const [deckCards, setDeckCards] = useState([]);
+  const [browserCards, setBrowserCards] = useState([]); // Array to store fresh card data from CardBrowser
+  const [deckCardIds, setDeckCardIds] = useState([]); // Store original deck card IDs and quantities
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,25 @@ const DeckForm = ({ isEdit = false }) => {
       fetchDeckData();
     }
   }, [isEdit, id]);
+
+  // Update deck cards with fresh browser card data when available
+  useEffect(() => {
+    if (browserCards.length > 0 && deckCardIds.length > 0) {
+      // Cross-reference deck card IDs with fresh browser card data
+      const updatedDeckCards = deckCardIds.map((deckCard) => {
+        const freshCard = browserCards.find(
+          (browserCard) => browserCard.id === deckCard.id
+        );
+        if (freshCard) {
+          // Use fresh card data with preserved quantity
+          return { ...freshCard, quantity: deckCard.quantity };
+        }
+        // Fallback to original data if fresh card not found
+        return deckCard;
+      });
+      setDeckCards(updatedDeckCards);
+    }
+  }, [browserCards, deckCardIds]);
 
   const fetchDeckData = async () => {
     try {
@@ -48,13 +69,21 @@ const DeckForm = ({ isEdit = false }) => {
           gameId: "mage_noir", // Force le jeu à mage_noir même en édition
         });
 
-        // Transform deck cards for display
+        // Transform deck cards for display and store original IDs/quantities
         const cards =
           deckData.cards?.map((deckCard) => ({
             ...deckCard.card,
             quantity: deckCard.quantity,
           })) || [];
         setDeckCards(cards);
+
+        // Store original deck card IDs and quantities for cross-referencing
+        const cardIds =
+          deckData.cards?.map((deckCard) => ({
+            id: deckCard.card.id,
+            quantity: deckCard.quantity,
+          })) || [];
+        setDeckCardIds(cardIds);
 
         // Create selected cards set for CardBrowser
         const selected = new Set(cards.map((card) => card.id));
@@ -69,13 +98,33 @@ const DeckForm = ({ isEdit = false }) => {
     }
   };
 
-  const handleCardSelectionChange = (cardId, isSelected, quantity = 1) => {
+  const handleCardSelectionChange = (
+    cardId,
+    isSelected,
+    quantity = 1,
+    cardData
+  ) => {
     const newSelectedCards = new Set(selectedCards);
 
     if (isSelected) {
       newSelectedCards.add(cardId);
-      // Add card to deck with quantity
+      // Add card to deck with quantity using fresh card data from CardBrowser
       setDeckCards((prev) => {
+        const existing = prev.find((card) => card.id === cardId);
+        if (existing) {
+          return prev.map((card) =>
+            card.id === cardId
+              ? { ...cardData, quantity: Math.max(1, quantity) }
+              : card
+          );
+        } else {
+          // Use fresh card data from CardBrowser
+          return [...prev, { ...cardData, quantity: Math.max(1, quantity) }];
+        }
+      });
+
+      // Update deckCardIds as well
+      setDeckCardIds((prev) => {
         const existing = prev.find((card) => card.id === cardId);
         if (existing) {
           return prev.map((card) =>
@@ -84,7 +133,6 @@ const DeckForm = ({ isEdit = false }) => {
               : card
           );
         } else {
-          // Need to get card data - this would ideally come from CardBrowser
           return [...prev, { id: cardId, quantity: Math.max(1, quantity) }];
         }
       });
@@ -92,6 +140,7 @@ const DeckForm = ({ isEdit = false }) => {
       newSelectedCards.delete(cardId);
       // Remove card from deck
       setDeckCards((prev) => prev.filter((card) => card.id !== cardId));
+      setDeckCardIds((prev) => prev.filter((card) => card.id !== cardId));
     }
 
     setSelectedCards(newSelectedCards);
@@ -215,6 +264,7 @@ const DeckForm = ({ isEdit = false }) => {
                   showTitle={false}
                   className="h-full"
                   maxColumns={4}
+                  onCardsLoaded={setBrowserCards}
                 />
               </div>
             </div>
