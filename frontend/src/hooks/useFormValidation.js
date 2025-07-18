@@ -4,69 +4,81 @@ import { useLanguage } from "../contexts/LanguageContext";
 export const useFormValidation = () => {
   const { t } = useLanguage();
 
-  const validateEmail = useCallback((email) => {
-    if (!email) {
-      return t("auth.register.errors.emailRequired");
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return t("auth.register.errors.emailInvalid");
-    }
-    return null;
-  }, [t]);
+  const validateEmail = useCallback(
+    (email) => {
+      if (!email) {
+        return t("auth.register.errors.emailRequired");
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return t("auth.register.errors.emailInvalid");
+      }
+      return null;
+    },
+    [t]
+  );
 
-  const validatePassword = useCallback((password) => {
-    if (!password) {
-      return t("auth.register.errors.passwordRequired");
-    }
-    if (password.length < 8) {
-      return t("auth.register.errors.passwordTooShort");
-    }
-    
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const validatePassword = useCallback(
+    (password) => {
+      if (!password) {
+        return t("auth.register.errors.passwordRequired");
+      }
+      if (password.length < 8) {
+        return t("auth.register.errors.passwordTooShort");
+      }
 
-    // Return the first specific error found
-    if (!hasUpperCase) {
-      return t("auth.register.errors.passwordNoUppercase");
-    }
-    if (!hasLowerCase) {
-      return t("auth.register.errors.passwordNoLowercase");
-    }
-    if (!hasNumbers) {
-      return t("auth.register.errors.passwordNoNumber");
-    }
-    if (!hasSpecialChar) {
-      return t("auth.register.errors.passwordNoSpecialChar");
-    }
-    
-    return null;
-  }, [t]);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
-  const validateConfirmPassword = useCallback((password, confirmPassword) => {
-    if (!confirmPassword) {
-      return t("auth.register.errors.confirmPasswordRequired");
-    }
-    if (password !== confirmPassword) {
-      return t("auth.register.errors.passwordMismatch");
-    }
-    return null;
-  }, [t]);
+      // Return the first specific error found
+      if (!hasUpperCase) {
+        return t("auth.register.errors.passwordNoUppercase");
+      }
+      if (!hasLowerCase) {
+        return t("auth.register.errors.passwordNoLowercase");
+      }
+      if (!hasNumbers) {
+        return t("auth.register.errors.passwordNoNumber");
+      }
+      if (!hasSpecialChar) {
+        return t("auth.register.errors.passwordNoSpecialChar");
+      }
 
-  const validateName = useCallback((name) => {
-    if (!name) {
-      return t("auth.register.errors.nameRequired");
-    }
-    if (name.length < 2) {
-      return t("auth.register.errors.nameTooShort");
-    }
-    if (name.length > 50) {
-      return t("auth.register.errors.nameTooLong");
-    }
-    return null;
-  }, [t]);
+      return null;
+    },
+    [t]
+  );
+
+  const validateConfirmPassword = useCallback(
+    (password, confirmPassword) => {
+      if (!confirmPassword) {
+        return t("auth.register.errors.confirmPasswordRequired");
+      }
+      if (password !== confirmPassword) {
+        return t("auth.register.errors.passwordMismatch");
+      }
+      return null;
+    },
+    [t]
+  );
+
+  const validateName = useCallback(
+    (name) => {
+      if (!name) {
+        return t("auth.register.errors.nameRequired");
+      }
+      if (name.length < 2) {
+        return t("auth.register.errors.nameTooShort");
+      }
+      if (name.length > 50) {
+        return t("auth.register.errors.nameTooLong");
+      }
+      return null;
+    },
+    [t]
+  );
 
   return {
     validateEmail,
@@ -78,7 +90,7 @@ export const useFormValidation = () => {
 
 export const useRegisterForm = () => {
   const { t } = useLanguage();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -90,17 +102,22 @@ export const useRegisterForm = () => {
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { validateEmail, validatePassword, validateConfirmPassword, validateName } = useFormValidation();
+  const {
+    validateEmail,
+    validatePassword,
+    validateConfirmPassword,
+    validateName,
+  } = useFormValidation();
 
   const updateField = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const touchField = (field) => {
-    setTouched(prev => ({
+    setTouched((prev) => ({
       ...prev,
       [field]: true,
     }));
@@ -118,7 +135,10 @@ export const useRegisterForm = () => {
     const passwordError = validatePassword(formData.password);
     if (passwordError) newErrors.password = passwordError;
 
-    const confirmPasswordError = validateConfirmPassword(formData.password, formData.confirmPassword);
+    const confirmPasswordError = validateConfirmPassword(
+      formData.password,
+      formData.confirmPassword
+    );
     if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
 
     setErrors(newErrors);
@@ -128,7 +148,7 @@ export const useRegisterForm = () => {
   useEffect(() => {
     if (touched.name) {
       const nameError = validateName(formData.name);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         name: nameError,
       }));
@@ -138,7 +158,7 @@ export const useRegisterForm = () => {
   useEffect(() => {
     if (touched.email) {
       const emailError = validateEmail(formData.email);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         email: emailError,
       }));
@@ -148,7 +168,7 @@ export const useRegisterForm = () => {
   useEffect(() => {
     if (touched.password) {
       const passwordError = validatePassword(formData.password);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
         password: passwordError,
       }));
@@ -157,13 +177,21 @@ export const useRegisterForm = () => {
 
   useEffect(() => {
     if (touched.confirmPassword) {
-      const confirmPasswordError = validateConfirmPassword(formData.password, formData.confirmPassword);
-      setErrors(prev => ({
+      const confirmPasswordError = validateConfirmPassword(
+        formData.password,
+        formData.confirmPassword
+      );
+      setErrors((prev) => ({
         ...prev,
         confirmPassword: confirmPasswordError,
       }));
     }
-  }, [formData.password, formData.confirmPassword, touched.confirmPassword, validateConfirmPassword]);
+  }, [
+    formData.password,
+    formData.confirmPassword,
+    touched.confirmPassword,
+    validateConfirmPassword,
+  ]);
 
   return {
     formData,

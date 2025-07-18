@@ -1,17 +1,19 @@
 package com.suri.generic.deck.builder.repository;
 
 import com.suri.generic.deck.builder.model.CardLocalization;
+import com.suri.generic.deck.builder.model.CardLocalizationId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CardLocalizationRepository extends JpaRepository<CardLocalization, Long> {
+public interface CardLocalizationRepository extends JpaRepository<CardLocalization, CardLocalizationId> {
 
     // 🔍 Trouver une localisation précise d'une carte
     Optional<CardLocalization> findByIdCardAndIdLocale(String cardId, String locale);
 
-    // 🔍 Toutes les localisations pour une langue donnée (peu utile seul, mais dispo)
+    // 🔍 Toutes les localisations pour une langue donnée (peu utile seul, mais
+    // dispo)
     List<CardLocalization> findAllByIdLocale(String locale);
 
     // 🔍 Toutes les localisations d'une carte
@@ -21,4 +23,3 @@ public interface CardLocalizationRepository extends JpaRepository<CardLocalizati
     boolean existsByIdCardAndIdLocale(String cardId, String locale);
 
 }
-

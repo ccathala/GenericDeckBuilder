@@ -35,30 +35,39 @@ const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await authService.register(formData.name, formData.email, formData.password);
+      const result = await authService.register(
+        formData.name,
+        formData.email,
+        formData.password
+      );
 
       if (result.success) {
         setSuccess(true);
-        
+
         // Use the registration response data directly (no double API call)
         const userData = {
           id: result.data.user.id,
           email: result.data.user.email,
-          name: result.data.user.name
+          name: result.data.user.name,
         };
-        
+
         // Update auth context immediately with registration data
         setAuthenticatedUser(result.data.token, userData);
-        
+
         // Redirect to home page after a short delay
         setTimeout(() => {
           navigate("/");
         }, 1500);
       } else {
-        if (result.error === "Email déjà utilisé" || result.error.includes("already")) {
+        if (
+          result.error === "Email déjà utilisé" ||
+          result.error.includes("already")
+        ) {
           setServerError(t("auth.register.errors.emailAlreadyExists"));
         } else {
-          setServerError(result.error || t("auth.register.errors.registrationFailed"));
+          setServerError(
+            result.error || t("auth.register.errors.registrationFailed")
+          );
         }
       }
     } catch (error) {
@@ -75,7 +84,12 @@ const RegisterPage = () => {
         <div className="max-w-md w-full bg-mage-dark-800 rounded-lg shadow-xl p-8 text-center">
           <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -107,9 +121,7 @@ const RegisterPage = () => {
             <h1 className="text-3xl font-bold text-white mb-2">
               {t("auth.register.title")}
             </h1>
-            <p className="text-gray-400">
-              {t("auth.register.subtitle")}
-            </p>
+            <p className="text-gray-400">{t("auth.register.subtitle")}</p>
           </div>
         </div>
 
@@ -120,7 +132,12 @@ const RegisterPage = () => {
             {serverError && (
               <div className="mb-6 p-4 bg-red-900/50 border border-red-500 rounded-md">
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-5 h-5 text-red-400 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -188,7 +205,9 @@ const RegisterPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting || Object.keys(errors).some(key => errors[key])}
+              disabled={
+                isSubmitting || Object.keys(errors).some((key) => errors[key])
+              }
               className="w-full py-3 px-4 bg-mage-dark-600 hover:bg-mage-dark-500 disabled:bg-mage-dark-700 
                        disabled:cursor-not-allowed text-white font-medium rounded-md 
                        transition-colors duration-200 flex items-center justify-center"

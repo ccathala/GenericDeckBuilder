@@ -11,7 +11,8 @@ public class UserResponse {
     private String email;
     private String name;
 
-    public UserResponse() {}
+    public UserResponse() {
+    }
 
     public UserResponse(Long id, String email, String name) {
         this.id = id;

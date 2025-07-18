@@ -16,7 +16,9 @@ export const LanguageProvider = ({ children }) => {
   // Initialiser directement avec la langue sauvegardée ou "fr" par défaut
   const [currentLanguage, setCurrentLanguage] = useState(() => {
     const savedLanguage = localStorage.getItem("language");
-    return savedLanguage && ["fr", "en"].includes(savedLanguage) ? savedLanguage : "fr";
+    return savedLanguage && ["fr", "en"].includes(savedLanguage)
+      ? savedLanguage
+      : "fr";
   });
   const [translations] = useState({
     fr: frTranslations,
@@ -50,7 +52,7 @@ export const LanguageProvider = ({ children }) => {
     }
 
     // Interpolation des variables {{variable}} si des paramètres sont fournis
-    if (typeof value === 'string' && params && Object.keys(params).length > 0) {
+    if (typeof value === "string" && params && Object.keys(params).length > 0) {
       return value.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
         return params[varName] !== undefined ? params[varName] : match;
       });

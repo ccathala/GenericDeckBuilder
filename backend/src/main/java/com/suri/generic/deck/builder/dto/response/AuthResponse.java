@@ -10,7 +10,8 @@ public class AuthResponse {
     private String token;
     private UserResponse user;
 
-    public AuthResponse() {}
+    public AuthResponse() {
+    }
 
     public AuthResponse(String token) {
         this.token = token;
@@ -21,4 +22,3 @@ public class AuthResponse {
         this.user = user;
     }
 }
-

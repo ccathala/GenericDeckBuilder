@@ -1,7 +1,12 @@
 import React from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 
-const CardFilter = ({ searchTerm, onSearchChange, selectedElements, onElementToggle }) => {
+const CardFilter = ({
+  searchTerm,
+  onSearchChange,
+  selectedElements,
+  onElementToggle,
+}) => {
   const { t } = useLanguage();
 
   const elements = [
@@ -10,7 +15,7 @@ const CardFilter = ({ searchTerm, onSearchChange, selectedElements, onElementTog
     { key: "Eau", color: "bg-blue-600 hover:bg-blue-700" },
     { key: "Air", color: "bg-cyan-600 hover:bg-cyan-700" },
     { key: "Mineral", color: "bg-gray-600 hover:bg-gray-700" },
-    { key: "Arcane", color: "bg-purple-600 hover:bg-purple-700" }
+    { key: "Arcane", color: "bg-purple-600 hover:bg-purple-700" },
   ];
 
   return (
@@ -31,9 +36,10 @@ const CardFilter = ({ searchTerm, onSearchChange, selectedElements, onElementTog
               key={element.key}
               onClick={() => onElementToggle(element.key)}
               className={`px-3 py-2 rounded-md text-white text-sm font-medium transition-colors
-                ${selectedElements.includes(element.key) 
-                  ? element.color 
-                  : 'bg-mage-dark-700 hover:bg-mage-dark-600'
+                ${
+                  selectedElements.includes(element.key)
+                    ? element.color
+                    : "bg-mage-dark-700 hover:bg-mage-dark-600"
                 }`}
             >
               {t(`cards.elements.${element.key}`)}

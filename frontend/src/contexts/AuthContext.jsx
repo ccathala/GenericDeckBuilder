@@ -48,12 +48,12 @@ export const AuthProvider = ({ children }) => {
       if (result.success) {
         // Store token
         localStorage.setItem("authToken", result.data.token);
-        
+
         // Use enhanced user data from backend response
         const userData = {
           id: result.data.user.id,
           email: result.data.user.email,
-          name: result.data.user.name
+          name: result.data.user.name,
         };
         localStorage.setItem("userData", JSON.stringify(userData));
 
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
     // Store in localStorage
     localStorage.setItem("authToken", token);
     localStorage.setItem("userData", JSON.stringify(userData));
-    
+
     // Update context state immediately
     setUser(userData);
     setIsAuthenticated(true);

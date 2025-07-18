@@ -11,6 +11,6 @@ public class RegisterRequest {
     private String password;
     private String name;
 
-    public RegisterRequest() {}
+    public RegisterRequest() {
+    }
 }
-
