@@ -36,10 +36,10 @@ const CardGallery = ({
   // Déterminer les classes de grille basées sur maxColumns
   const getGridClasses = () => {
     if (maxColumns === 4) {
-      return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4";
+      return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4 pt-3 pl-3";
     }
     if (maxColumns === 5) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-4";
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-4 pt-3 pl-3";
     }
     // Grille par défaut (utilisée pour la galerie principale)
     return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10 pb-4";
