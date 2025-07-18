@@ -47,7 +47,10 @@ const CardBrowser = ({
       // Utiliser gameId ou par défaut "mage_noir"
       const currentGameId = gameId || "mage_noir";
 
-      const data = await cardService.getCardsByGame(currentGameId, currentLanguage);
+      const data = await cardService.getCardsByGame(
+        currentGameId,
+        currentLanguage
+      );
       setLocalCards(data);
     } catch (err) {
       console.error("Erreur lors du chargement des cartes:", err);
