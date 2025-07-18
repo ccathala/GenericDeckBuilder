@@ -4,7 +4,7 @@ import CardBrowser from "../components/CardBrowser";
 import { getCardsByGame } from "../services/cardService";
 
 const CardsPage = () => {
-  const { t, language } = useLanguage();
+  const { t, currentLanguage } = useLanguage();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +15,7 @@ const CardsPage = () => {
         setLoading(true);
         setError(null);
 
-        const data = await getCardsByGame("mage_noir", language);
+        const data = await getCardsByGame("mage_noir", currentLanguage);
         setCards(data);
       } catch (err) {
         setError(err.message);
@@ -25,7 +25,7 @@ const CardsPage = () => {
     };
 
     fetchCards();
-  }, [language]);
+  }, [currentLanguage]);
 
   return (
     <div className="min-h-screen bg-mage-bg-900 text-white">

@@ -13,19 +13,15 @@ export const useLanguage = () => {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [currentLanguage, setCurrentLanguage] = useState("fr");
+  // Initialiser directement avec la langue sauvegardée ou "fr" par défaut
+  const [currentLanguage, setCurrentLanguage] = useState(() => {
+    const savedLanguage = localStorage.getItem("language");
+    return savedLanguage && ["fr", "en"].includes(savedLanguage) ? savedLanguage : "fr";
+  });
   const [translations] = useState({
     fr: frTranslations,
     en: enTranslations,
   });
-
-  // Charger la langue sauvegardée au démarrage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem("language");
-    if (savedLanguage && ["fr", "en"].includes(savedLanguage)) {
-      setCurrentLanguage(savedLanguage);
-    }
-  }, []);
 
   // Sauvegarder la langue quand elle change
   useEffect(() => {

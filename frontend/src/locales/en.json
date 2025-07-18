@@ -59,6 +59,14 @@
       "rarity": "Rarity",
       "allRarities": "All rarities"
     },
+    "elements": {
+      "Végétal": "Vegetal",
+      "Feu": "Fire",
+      "Eau": "Water",
+      "Air": "Air",
+      "Mineral": "Mineral",
+      "Arcane": "Arcane"
+    },
     "gallery": {
       "noCards": "No cards found",
       "noCardsDescription": "Try modifying your search criteria",

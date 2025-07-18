@@ -36,7 +36,7 @@ const CardFilter = ({ searchTerm, onSearchChange, selectedElements, onElementTog
                   : 'bg-mage-dark-700 hover:bg-mage-dark-600'
                 }`}
             >
-              {element.key}
+              {t(`cards.elements.${element.key}`)}
             </button>
           ))}
         </div>
