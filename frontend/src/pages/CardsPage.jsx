@@ -37,7 +37,15 @@ const CardsPage = () => {
         (card) =>
           card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (card.description &&
-            card.description.toLowerCase().includes(searchTerm.toLowerCase()))
+            card.description
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())) ||
+          (card.properties &&
+            card.properties.type &&
+            card.properties.type
+              .toString()
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()))
       );
       setFilteredCards(filtered);
     } else {
