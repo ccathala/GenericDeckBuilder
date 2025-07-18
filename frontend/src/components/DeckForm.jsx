@@ -178,7 +178,7 @@ const DeckForm = ({ isEdit = false }) => {
 
   return (
     <div className="bg-mage-bg-900 text-white">
-      <div className="w-full px-6 py-4 h-[calc(100vh-6rem)] flex flex-col">
+      <div className="w-full px-6 py-4 h-[calc(105vh-6rem)] flex flex-col">
         <div className="flex flex-col gap-4 h-full overflow-hidden">
           {/* Error Message */}
           {error && (
@@ -214,6 +214,7 @@ const DeckForm = ({ isEdit = false }) => {
                   gameId={deck.gameId}
                   showTitle={false}
                   className="h-full"
+                  maxColumns={4}
                 />
               </div>
             </div>
@@ -246,30 +247,6 @@ const DeckForm = ({ isEdit = false }) => {
                   </svg>
                 </div>
                 
-                {/* Description éditable */}
-                <div className="mb-3 relative">
-                  <input
-                    type="text"
-                    value={deck.description}
-                    onChange={(e) => setDeck({ ...deck, description: e.target.value })}
-                    className="w-full text-sm bg-transparent border-b border-gray-700 text-gray-300 placeholder-gray-500 focus:outline-none focus:border-blue-400 transition-colors pb-1 pr-6"
-                    placeholder={t("decks.form.descriptionPlaceholder")}
-                  />
-                  <svg
-                    className="absolute right-1 top-1 w-3 h-3 text-gray-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
-                </div>
-                
                 {/* Statistiques */}
                 <div className="flex justify-between text-sm text-gray-400">
                   <span>{deckCards.length} {t("decks.form.uniqueCards")}</span>
@@ -278,51 +255,48 @@ const DeckForm = ({ isEdit = false }) => {
               </div>
 
               {deckCards.length === 0 ? (
-                <div className="text-center py-8 flex-1 flex flex-col justify-center">
-                  <div className="text-4xl mb-4">🃏</div>
-                  <p className="text-gray-400">{t("decks.form.noDeckCards")}</p>
-                  <p className="text-gray-500 text-sm mt-2">
+                <div className="text-center py-4 flex-1 flex flex-col justify-center">
+                  <div className="text-3xl mb-2">🃏</div>
+                  <p className="text-gray-400 text-sm">{t("decks.form.noDeckCards")}</p>
+                  <p className="text-gray-500 text-xs mt-1">
                     {t("decks.form.selectCardsBelow")}
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <div className="space-y-0.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                   {deckCards.map((card) => (
                     <div
                       key={card.id}
-                      className="flex items-center justify-between p-3 bg-mage-dark-700 rounded-md"
+                      className="flex items-center justify-between p-1.5 bg-mage-dark-700 rounded text-xs"
                     >
-                      <div className="flex-1">
-                        <h3 className="font-medium text-white">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-white truncate leading-tight">
                           {card.name || `${card.id}`}
                         </h3>
-                        <p className="text-sm text-gray-400">
-                          {card.manaCost || "N/A"} • {card.type || "Unknown"}
-                        </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-0.5 ml-1.5">
                         <button
                           onClick={() =>
                             updateCardQuantity(card.id, card.quantity - 1)
                           }
-                          className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center justify-center transition-colors"
+                          className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center transition-colors"
                         >
                           -
                         </button>
-                        <span className="w-8 text-center font-semibold">
+                        <span className="w-5 text-center font-semibold text-xs">
                           {card.quantity}
                         </span>
                         <button
                           onClick={() =>
                             updateCardQuantity(card.id, card.quantity + 1)
                           }
-                          className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center transition-colors"
+                          className="w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded text-xs flex items-center justify-center transition-colors"
                         >
                           +
                         </button>
                         <button
                           onClick={() => removeCardFromDeck(card.id)}
-                          className="w-8 h-8 bg-gray-600 hover:bg-gray-700 text-white rounded-md flex items-center justify-center transition-colors ml-2"
+                          className="w-5 h-5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs flex items-center justify-center transition-colors"
                         >
                           ×
                         </button>
@@ -333,11 +307,11 @@ const DeckForm = ({ isEdit = false }) => {
               )}
 
               {/* Boutons d'action */}
-              <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-600">
+              <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-600">
                 <button
                   type="button"
                   onClick={() => navigate("/decks")}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded transition-colors duration-200"
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
                 >
                   {t("common.cancel")}
                 </button>
@@ -345,7 +319,7 @@ const DeckForm = ({ isEdit = false }) => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={saving || !deck.name.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-sm font-medium py-2 px-3 rounded transition-colors duration-200"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
                 >
                   {saving
                     ? t("common.saving")

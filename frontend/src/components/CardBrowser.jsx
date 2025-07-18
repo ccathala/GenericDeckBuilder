@@ -17,6 +17,7 @@ const CardBrowser = ({
   title = null,
   showTitle = true,
   className = "",
+  maxColumns = null, // Nouveau prop pour limiter le nombre de colonnes
 }) => {
   const { t } = useLanguage();
   const [localCards, setLocalCards] = useState([]);
@@ -148,6 +149,7 @@ const CardBrowser = ({
           onCardClick={handleCardClick}
           showSelection={allowMultiSelect || showSelection}
           selectedCards={selectedCardsArray}
+          maxColumns={maxColumns}
         />
       </div>
     </div>
