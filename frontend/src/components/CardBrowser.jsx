@@ -123,7 +123,9 @@ const CardBrowser = ({
   const selectedCardsArray = Array.from(selectedCards).map((id) => ({ id }));
 
   return (
-    <div className={`w-full h-full flex flex-col overflow-hidden ${className}`}>
+    <div
+      className={`w-full h-full flex flex-col overflow-hidden pt-4 ${className}`}
+    >
       {showTitle && title && (
         <div className="mb-8 flex-shrink-0">
           <h1 className="text-3xl font-bold mb-4 text-center text-white">

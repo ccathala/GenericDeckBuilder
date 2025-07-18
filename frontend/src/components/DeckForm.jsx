@@ -246,18 +246,24 @@ const DeckForm = ({ isEdit = false }) => {
                     />
                   </svg>
                 </div>
-                
+
                 {/* Statistiques */}
                 <div className="flex justify-between text-sm text-gray-400">
-                  <span>{deckCards.length} {t("decks.form.uniqueCards")}</span>
-                  <span>{totalCards} {t("decks.form.totalCards")}</span>
+                  <span>
+                    {deckCards.length} {t("decks.form.uniqueCards")}
+                  </span>
+                  <span>
+                    {totalCards} {t("decks.form.totalCards")}
+                  </span>
                 </div>
               </div>
 
               {deckCards.length === 0 ? (
                 <div className="text-center py-4 flex-1 flex flex-col justify-center">
                   <div className="text-3xl mb-2">🃏</div>
-                  <p className="text-gray-400 text-sm">{t("decks.form.noDeckCards")}</p>
+                  <p className="text-gray-400 text-sm">
+                    {t("decks.form.noDeckCards")}
+                  </p>
                   <p className="text-gray-500 text-xs mt-1">
                     {t("decks.form.selectCardsBelow")}
                   </p>
