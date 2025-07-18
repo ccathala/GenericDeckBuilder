@@ -46,6 +46,44 @@
       "cardsFound": "cards found"
     }
   },
+  "auth": {
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join Generic Deck Builder",
+      "name": "Username",
+      "namePlaceholder": "Your username",
+      "email": "Email Address",
+      "emailPlaceholder": "your@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "submitButton": "Create Account",
+      "submitting": "Creating account...",
+      "alreadyAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "errors": {
+        "nameRequired": "Username is required",
+        "nameTooShort": "Username must be at least 2 characters long",
+        "nameTooLong": "Username must be at most 50 characters long",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Invalid email format",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 8 characters long",
+        "passwordNoUppercase": "Password must contain at least one uppercase letter",
+        "passwordNoLowercase": "Password must contain at least one lowercase letter",
+        "passwordNoNumber": "Password must contain at least one number",
+        "confirmPasswordRequired": "Password confirmation is required",
+        "passwordsDoNotMatch": "Passwords do not match",
+        "emailAlreadyExists": "This email address is already in use",
+        "registrationFailed": "Error creating account"
+      },
+      "success": {
+        "accountCreated": "Account created successfully!",
+        "redirecting": "Redirecting..."
+      }
+    }
+  },
   "cards": {
     "filters": {
       "title": "Filters",

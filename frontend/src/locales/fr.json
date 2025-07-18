@@ -46,6 +46,44 @@
       "cardsFound": "cartes trouvées"
     }
   },
+  "auth": {
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Generic Deck Builder",
+      "name": "Nom d'utilisateur",
+      "namePlaceholder": "Votre nom d'utilisateur",
+      "email": "Adresse email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+      "submitButton": "Créer mon compte",
+      "submitting": "Création en cours...",
+      "alreadyAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter",
+      "errors": {
+        "nameRequired": "Le nom d'utilisateur est requis",
+        "nameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
+        "nameTooLong": "Le nom d'utilisateur doit contenir au maximum 50 caractères",
+        "emailRequired": "L'adresse email est requise",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "passwordNoUppercase": "Le mot de passe doit contenir au moins une majuscule",
+        "passwordNoLowercase": "Le mot de passe doit contenir au moins une minuscule",
+        "passwordNoNumber": "Le mot de passe doit contenir au moins un chiffre",
+        "confirmPasswordRequired": "La confirmation du mot de passe est requise",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "emailAlreadyExists": "Cette adresse email est déjà utilisée",
+        "registrationFailed": "Erreur lors de la création du compte"
+      },
+      "success": {
+        "accountCreated": "Compte créé avec succès !",
+        "redirecting": "Redirection en cours..."
+      }
+    }
+  },
   "cards": {
     "filters": {
       "title": "Filtres",

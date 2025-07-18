@@ -85,7 +85,7 @@ const NavBar = () => {
                       </span>
                     )}
                   </div>
-                  <span className="text-gray-200 font-medium">
+                  <span className="text-gray-700 font-medium hover:text-white transition-colors duration-200">
                     {user?.name}
                   </span>
                 </button>
@@ -211,7 +211,7 @@ const NavBar = () => {
                       </span>
                     )}
                   </div>
-                  <span className="text-gray-200 font-medium">
+                  <span className="text-gray-700 font-medium">
                     {user?.name}
                   </span>
                 </div>

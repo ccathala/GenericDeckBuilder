@@ -39,24 +39,31 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      // TODO: Implémenter l'appel API de connexion
-      // const response = await api.login(credentials);
+      // Use the actual auth service
+      const result = await require("../services/authService").default.login(
+        credentials.email,
+        credentials.password
+      );
 
-      // Mock pour le développement
-      const mockUser = {
-        id: 1,
-        name: "John Doe",
-        email: credentials.email,
-        avatar: null,
-      };
+      if (result.success) {
+        // Store token
+        localStorage.setItem("authToken", result.data.token);
+        
+        // Use enhanced user data from backend response
+        const userData = {
+          id: result.data.user.id,
+          email: result.data.user.email,
+          name: result.data.user.name
+        };
+        localStorage.setItem("userData", JSON.stringify(userData));
 
-      localStorage.setItem("authToken", "mock-token");
-      localStorage.setItem("userData", JSON.stringify(mockUser));
+        setUser(userData);
+        setIsAuthenticated(true);
 
-      setUser(mockUser);
-      setIsAuthenticated(true);
-
-      return { success: true };
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, error: error.message };
@@ -70,12 +77,23 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const setAuthenticatedUser = (token, userData) => {
+    // Store in localStorage
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("userData", JSON.stringify(userData));
+    
+    // Update context state immediately
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
   const value = {
     user,
     isAuthenticated,
     isLoading,
     login,
     logout,
+    setAuthenticatedUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

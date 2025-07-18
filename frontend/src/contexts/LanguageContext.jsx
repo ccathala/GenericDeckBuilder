@@ -32,7 +32,7 @@ export const LanguageProvider = ({ children }) => {
     setCurrentLanguage((prev) => (prev === "fr" ? "en" : "fr"));
   };
 
-  const t = (key, defaultValue = key) => {
+  const t = (key, params = {}, defaultValue = key) => {
     if (!translations[currentLanguage]) {
       return defaultValue;
     }
@@ -47,6 +47,13 @@ export const LanguageProvider = ({ children }) => {
       } else {
         return defaultValue;
       }
+    }
+
+    // Interpolation des variables {{variable}} si des paramètres sont fournis
+    if (typeof value === 'string' && params && Object.keys(params).length > 0) {
+      return value.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+        return params[varName] !== undefined ? params[varName] : match;
+      });
     }
 
     return value || defaultValue;

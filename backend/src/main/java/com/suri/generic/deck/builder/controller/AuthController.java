@@ -1,5 +1,7 @@
 package com.suri.generic.deck.builder.controller;
 
+import com.suri.generic.deck.builder.dto.response.AuthResponse;
+import com.suri.generic.deck.builder.dto.response.UserResponse;
 import com.suri.generic.deck.builder.model.User;
 import com.suri.generic.deck.builder.repository.UserRepository;
 import com.suri.generic.deck.builder.service.JwtService;
@@ -29,6 +31,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         String password = payload.get("password");
+        String name = payload.get("name");
 
         if (userRepository.existsByEmail(email)) {
             return ResponseEntity.badRequest().body(Map.of("error", "Email déjà utilisé"));
@@ -37,10 +40,13 @@ public class AuthController {
         User user = new User();
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
+        user.setName(name);
         userRepository.save(user);
 
         String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(Map.of("token", token));
+        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), user.getName());
+        
+        return ResponseEntity.ok(new AuthResponse(token, userResponse));
     }
 
     @PostMapping("/login")
@@ -54,6 +60,8 @@ public class AuthController {
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
 
         String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(Map.of("token", token));
+        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), user.getName());
+        
+        return ResponseEntity.ok(new AuthResponse(token, userResponse));
     }
 }
