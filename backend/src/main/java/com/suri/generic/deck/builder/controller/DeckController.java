@@ -3,7 +3,6 @@ package com.suri.generic.deck.builder.controller;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckSummaryResponseDTO;
-import com.suri.generic.deck.builder.model.Deck;
 import com.suri.generic.deck.builder.model.User;
 import com.suri.generic.deck.builder.service.DeckService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

@@ -1,0 +1,191 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "myDecks": "Mes Decks",
+    "cardGallery": "Galerie de cartes",
+    "profile": "Profil",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "logout": "Déconnexion",
+    "settings": "Paramètres",
+    "myProfile": "Mon profil"
+  },
+  "common": {
+    "appName": "Generic Deck Builder",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher"
+  },
+  "pages": {
+    "home": {
+      "welcome": "Bienvenue sur Generic Deck Builder",
+      "description": "Créez, gérez et optimisez vos decks de cartes avec notre outil puissant et intuitif.",
+      "welcomeBack": "Bienvenue, {{name}} !",
+      "browseCards": "Parcourir les cartes",
+      "myDecks": "Mes decks",
+      "getStarted": "Commencer",
+      "login": "Se connecter",
+      "features": {
+        "collection": "Collection complète",
+        "collectionDesc": "Parcourez une vaste collection de cartes avec des filtres avancés",
+        "builder": "Constructeur de decks",
+        "builderDesc": "Créez des decks équilibrés avec notre interface intuitive",
+        "strategies": "Stratégies optimisées",
+        "strategiesDesc": "Analysez et optimisez vos stratégies de jeu"
+      }
+    },
+    "cards": {
+      "title": "Galerie de cartes",
+      "description": "Explorez toutes les cartes disponibles et ajoutez-les à vos decks",
+      "cardsFound": "cartes trouvées"
+    }
+  },
+  "auth": {
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez Generic Deck Builder",
+      "name": "Nom d'utilisateur",
+      "namePlaceholder": "Votre nom d'utilisateur",
+      "email": "Adresse email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+      "submitButton": "Créer mon compte",
+      "submitting": "Création en cours...",
+      "alreadyAccount": "Déjà un compte ?",
+      "loginLink": "Se connecter",
+      "errors": {
+        "nameRequired": "Le nom d'utilisateur est requis",
+        "nameTooShort": "Le nom d'utilisateur doit contenir au moins 2 caractères",
+        "nameTooLong": "Le nom d'utilisateur doit contenir au maximum 50 caractères",
+        "emailRequired": "L'adresse email est requise",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "passwordNoUppercase": "Le mot de passe doit contenir au moins une majuscule",
+        "passwordNoLowercase": "Le mot de passe doit contenir au moins une minuscule",
+        "passwordNoNumber": "Le mot de passe doit contenir au moins un chiffre",
+        "passwordNoSpecialChar": "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...)",
+        "confirmPasswordRequired": "La confirmation du mot de passe est requise",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "emailAlreadyExists": "Cette adresse email est déjà utilisée",
+        "registrationFailed": "Erreur lors de la création du compte"
+      },
+      "success": {
+        "accountCreated": "Compte créé avec succès !",
+        "redirecting": "Redirection en cours..."
+      }
+    },
+    "login": {
+      "title": "Se connecter",
+      "subtitle": "Accédez à votre compte",
+      "email": "Adresse email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submitButton": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "noAccount": "Pas encore de compte ?",
+      "registerLink": "S'inscrire",
+      "forgotPassword": "Mot de passe oublié ?",
+      "errors": {
+        "emailRequired": "L'adresse email est requise",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "invalidCredentials": "Email ou mot de passe incorrect",
+        "accountNotFound": "Aucun compte trouvé avec cette adresse email",
+        "loginFailed": "Erreur lors de la connexion"
+      }
+    }
+  },
+  "cards": {
+    "filters": {
+      "title": "Filtres",
+      "clear": "Effacer",
+      "search": "Rechercher",
+      "searchPlaceholder": "Nom ou description de la carte...",
+      "type": "Type",
+      "allTypes": "Tous les types",
+      "cost": "Coût",
+      "allCosts": "Tous les coûts",
+      "rarity": "Rareté",
+      "allRarities": "Toutes les raretés"
+    },
+    "elements": {
+      "Végétal": "Végétal",
+      "Feu": "Feu",
+      "Eau": "Eau",
+      "Air": "Air",
+      "Mineral": "Minéral",
+      "Arcane": "Arcane"
+    },
+    "gallery": {
+      "noCards": "Aucune carte trouvée",
+      "noCardsDescription": "Essayez de modifier vos critères de recherche",
+      "addToDeck": "Ajouter au deck"
+    },
+    "manaCost": "Coût de mana",
+    "type": "Type",
+    "rarity": "Rareté"
+  },
+  "decks": {
+    "title": "Mes Decks",
+    "subtitle": "Gérez et organisez vos collections de cartes",
+    "createNew": "Nouveau deck",
+    "createFirst": "Créer mon premier deck",
+    "noDecks": "Aucun deck",
+    "noDecksMessage": "Vous n'avez pas encore créé de deck. Commencez par en créer un !",
+    "loginMessage": "Connectez-vous pour gérer vos decks.",
+    "cardsCount": "cartes",
+    "view": "Voir",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce deck ?",
+    "noDescription": "Aucune description",
+    "form": {
+      "createTitle": "Créer un nouveau deck",
+      "createSubtitle": "Construisez votre deck en sélectionnant vos cartes favorites",
+      "editTitle": "Modifier le deck",
+      "editSubtitle": "Ajustez la composition de votre deck",
+      "metadata": "Informations du deck",
+      "name": "Nom du deck",
+      "namePlaceholder": "Entrez le nom de votre deck",
+      "nameRequired": "Le nom du deck est requis",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez votre stratégie...",
+      "game": "Jeu",
+      "gameRequired": "Vous devez sélectionner un jeu",
+      "selectGame": "Sélectionnez un jeu",
+      "publicDeck": "Deck public",
+      "totalCards": "Total de cartes",
+      "uniqueCards": "cartes uniques",
+      "currentDeck": "Deck actuel",
+      "noDeckCards": "Aucune carte dans le deck",
+      "selectCardsBelow": "Sélectionnez des cartes ci-dessous pour les ajouter",
+      "cardSelection": "Sélection de cartes",
+      "loginMessage": "Connectez-vous pour créer des decks."
+    },
+    "detail": {
+      "public": "Public",
+      "uniqueCards": "Cartes uniques",
+      "totalCards": "Total de cartes",
+      "averageQuantity": "Quantité moyenne",
+      "cardList": "Liste des cartes",
+      "noCards": "Aucune carte",
+      "noCardsMessage": "Ce deck ne contient aucune carte.",
+      "addCards": "Ajouter des cartes",
+      "notFound": "Deck introuvable",
+      "notFoundMessage": "Ce deck n'existe pas ou vous n'avez pas les permissions pour le voir.",
+      "backToDecks": "Retour aux decks",
+      "loginMessage": "Connectez-vous pour voir les détails du deck."
+    }
+  }
+}
