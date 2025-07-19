@@ -26,10 +26,12 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final UserService userService;
+    private final SecurityDebugFilter securityDebugFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserService userService) {
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService, SecurityDebugFilter securityDebugFilter) {
         this.jwtFilter = jwtFilter;
         this.userService = userService;
+        this.securityDebugFilter = securityDebugFilter;
     }
 
     @Bean
@@ -58,6 +60,7 @@ public class SecurityConfig {
                                 "/webjars/**")
                         .permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(securityDebugFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
