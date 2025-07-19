@@ -115,6 +115,7 @@ const DeckForm = ({ isEdit = false }) => {
         const cards =
           deckData.cards?.map((deckCard) => ({
             ...deckCard.card,
+            id: deckCard.cardId, // Use cardId for cross-referencing
             quantity: deckCard.quantity,
           })) || [];
 
@@ -123,7 +124,7 @@ const DeckForm = ({ isEdit = false }) => {
         // Store original card IDs and quantities for cross-referencing with fresh language data
         setOriginalCardIds(
           deckData.cards?.map((deckCard) => ({
-            id: deckCard.card.id,
+            id: deckCard.cardId, // Use cardId to match with deckCards
             quantity: deckCard.quantity,
           })) || []
         );
