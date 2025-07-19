@@ -1,6 +1,6 @@
 # Dockerfile multi-stage pour GenericDeckBuilder
 # Build frontend
-FROM node:18-alpine AS frontend-build
+FROM node:18-slim AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci --only=production
