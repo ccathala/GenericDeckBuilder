@@ -349,6 +349,52 @@
 			</build>
 		</profile>
 		
+		<!-- Profil pour production -->
+		<profile>
+			<id>production</id>
+			<properties>
+				<spring.profiles.active>prod</spring.profiles.active>
+				<maven.test.skip>false</maven.test.skip>
+			</properties>
+			<build>
+				<finalName>${project.artifactId}</finalName>
+				<plugins>
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<configuration>
+							<executable>true</executable>
+							<layers>
+								<enabled>true</enabled>
+							</layers>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>repackage</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					
+					<!-- Plugin pour optimisation des ressources -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.3.1</version>
+						<configuration>
+							<nonFilteredFileExtensions>
+								<nonFilteredFileExtension>woff</nonFilteredFileExtension>
+								<nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+								<nonFilteredFileExtension>ttf</nonFilteredFileExtension>
+								<nonFilteredFileExtension>eot</nonFilteredFileExtension>
+							</nonFilteredFileExtensions>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		
 		<!-- Profil pour génération de rapports étendus -->
 		<profile>
 			<id>coverage-report</id>
