@@ -51,8 +51,9 @@ public class DeckServiceImpl implements DeckService {
 
         deck.setCards(deckCards);
 
-        // Nouvelle validation : bloquer uniquement les excès par carte
-        validateCardLimits(deck);
+        if (!isDeckValid(deck)) {
+            throw new IllegalArgumentException("Deck invalide pour ce jeu");
+        }
 
         return toResponseDto(deckRepository.save(deck));
     }
@@ -101,8 +102,9 @@ public class DeckServiceImpl implements DeckService {
             deck.getCards().add(deckCard);
         }
 
-        // Nouvelle validation : bloquer uniquement les excès par carte
-        validateCardLimits(deck);
+        if (!isDeckValid(deck)) {
+            throw new IllegalArgumentException("Deck invalide pour ce jeu");
+        }
 
         return toResponseDto(deckRepository.save(deck));
     }
@@ -115,23 +117,19 @@ public class DeckServiceImpl implements DeckService {
         deckRepository.delete(existing);
     }
 
-    /**
-     * Validation flexible : autorise les decks avec peu de cartes,
-     * mais bloque les excès par carte individuelle
-     */
-    private void validateCardLimits(Deck deck) {
-        Optional<DeckRuleset> rulesetOpt = rulesetRepository.findByGame(deck.getGame());
-
-        if (rulesetOpt.isPresent()) {
-            DeckRuleset rules = rulesetOpt.get();
-
-            // Vérifier uniquement les excès par carte (pas le minimum total)
-            for (DeckCard deckCard : deck.getCards()) {
-                if (deckCard.getQuantity() > rules.getMaxCopiesPerCard()) {
-                    throw new IllegalArgumentException("Au moins une carte dépasse le nombre d'exemplaires autorisés");
-                }
-            }
-        }
+    @Override
+    public boolean isDeckValid(Deck deck) {
+        return rulesetRepository.findByGame(deck.getGame())
+                .map(rules -> {
+                    int totalCards = deck.getCards().stream()
+                            .mapToInt(DeckCard::getQuantity)
+                            .sum();
+                    boolean minOk = totalCards >= rules.getMinCards();
+                    boolean maxOk = deck.getCards().stream()
+                            .allMatch(dc -> dc.getQuantity() <= rules.getMaxCopiesPerCard());
+                    return minOk && maxOk;
+                })
+                .orElse(true); // No ruleset → valid
     }
 
     public DeckResponseDTO toResponseDto(Deck deck) {
