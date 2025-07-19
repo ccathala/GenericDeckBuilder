@@ -59,22 +59,25 @@ jobs:
         run: mvn jacoco:check -P ci
 
       - name: Generate coverage badge
+        if: always()
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: backend/target/site/jacoco/jacoco.csv
-          badges-directory: badges
+          badges-directory: .github/badges
           generate-branches-badge: true
           generate-summary: true
+        continue-on-error: true
 
       - name: Upload coverage to Codecov
+        if: github.repository == 'ccathala/GenericDeckBuilder'
         uses: codecov/codecov-action@v4
         with:
-          file: ./backend/target/site/jacoco/jacoco.xml
-          directory: ./backend/target/site/jacoco/
+          files: ./backend/target/site/jacoco/jacoco.xml
           flags: backend
           name: backend-coverage
-          fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+          verbose: true
+        continue-on-error: true
 
       - name: Upload test artifacts
         if: always()
@@ -85,6 +88,14 @@ jobs:
             backend/target/site/jacoco/
             backend/target/surefire-reports/
           retention-days: 30
+
+      - name: Coverage Summary
+        if: always()
+        run: |
+          echo "## 📊 Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **JaCoCo Report**: Available in artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests Run**: $(find backend/target/surefire-reports -name 'TEST-*.xml' | wc -l) test suites" >> $GITHUB_STEP_SUMMARY
+          echo "- **Coverage Files**: Generated in target/site/jacoco/" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment PR with coverage
         if: github.event_name == 'pull_request'
