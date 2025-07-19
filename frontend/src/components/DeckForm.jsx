@@ -81,72 +81,67 @@ const DeckForm = ({ isEdit = false }) => {
     </div>
   );
 
+  // Load ruleset data at component initialization
+  useEffect(() => {
+    const loadRuleset = async () => {
+      try {
+        console.log("Loading ruleset for mage_noir...");
+        const rulesetResult = await gameService.getGameRuleset("mage_noir");
+        if (rulesetResult.success) {
+          console.log("Ruleset loaded successfully:", rulesetResult.data);
+          setValidationRules(rulesetResult.data);
+        } else {
+          console.warn("Could not load ruleset:", rulesetResult.error);
+        }
+      } catch (error) {
+        console.error("Error loading ruleset:", error);
+      }
+    };
+
+    loadRuleset();
+  }, []);
+
   // Load deck data for editing
   useEffect(() => {
     if (isEdit && id) {
       fetchDeckData();
-    } else {
-      // Pour un nouveau deck, faire une validation initiale pour récupérer les règles
-      initializeValidationRules();
     }
   }, [isEdit, id]);
 
-  // Initialiser les règles de validation pour un nouveau deck
-  const initializeValidationRules = async () => {
-    try {
-      const emptyDeckData = {
-        name: "temp",
-        description: "",
-        gameId: "mage_noir", // Option 1: Hardcodé temporaire pour éviter deck.gameId undefined
-        cards: [],
-      };
-
-      const result = await gameService.validateDeck(emptyDeckData);
-      if (result.success && result.data.appliedRules) {
-        setValidationRules(result.data.appliedRules);
-      }
-    } catch (error) {
-      console.error("Error initializing validation rules:", error);
-    }
-  };
-
-  // Validation temps réel côté client
+  // Validation locale avec calcul du nombre total de cartes
   const validateDeckLocally = (deckCards, rules) => {
-    if (!rules) {
-      return {
-        isValid: true,
-        violations: [],
-        totalCards: deckCards.reduce((sum, card) => sum + card.quantity, 0),
-        uniqueCards: deckCards.length,
-      };
-    }
-
     const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
     const violations = [];
 
-    // Vérifier minimum de cartes
-    if (totalCards < rules.minCards) {
-      violations.push({
-        type: "ERROR",
-        messageCode: "deck.min_cards",
-        message: `Minimum ${rules.minCards} cartes requis, actuel: ${totalCards}`,
-        params: [rules.minCards, totalCards],
-      });
-    }
-
-    // Vérifier maximum par carte
-    deckCards.forEach((card) => {
-      if (card.quantity > rules.maxCopiesPerCard) {
+    if (rules) {
+      // Vérifier minimum de cartes
+      if (totalCards < rules.minCards) {
         violations.push({
           type: "ERROR",
-          messageCode: "deck.max_copies",
-          message: `${card.name || card.id} dépasse le maximum de ${
-            rules.maxCopiesPerCard
-          } exemplaires`,
-          params: [card.name || card.id, rules.maxCopiesPerCard, card.quantity],
+          messageCode: "deck.min_cards",
+          message: `Minimum ${rules.minCards} cartes requis, actuel: ${totalCards}`,
+          params: [rules.minCards, totalCards],
         });
       }
-    });
+
+      // Vérifier maximum par carte
+      deckCards.forEach((card) => {
+        if (card.quantity > rules.maxCopiesPerCard) {
+          violations.push({
+            type: "ERROR",
+            messageCode: "deck.max_copies",
+            message: `${card.name || card.id} dépasse le maximum de ${
+              rules.maxCopiesPerCard
+            } exemplaires`,
+            params: [
+              card.name || card.id,
+              rules.maxCopiesPerCard,
+              card.quantity,
+            ],
+          });
+        }
+      });
+    }
 
     return {
       isValid: violations.length === 0,
@@ -156,12 +151,10 @@ const DeckForm = ({ isEdit = false }) => {
     };
   };
 
-  // Validation automatique à chaque changement de cartes
+  // Validation automatique à chaque changement de cartes ou de règles
   useEffect(() => {
-    if (validationRules && deckCards) {
-      const validation = validateDeckLocally(deckCards, validationRules);
-      setValidationStatus(validation);
-    }
+    const validation = validateDeckLocally(deckCards, validationRules);
+    setValidationStatus(validation);
   }, [deckCards, validationRules]);
 
   // Update deck cards with fresh browser card data when available (for language switching)
@@ -430,8 +423,8 @@ const DeckForm = ({ isEdit = false }) => {
                           : "text-white"
                       }`}
                     >
-                      {validationStatus.totalCards}
-                      {validationRules && `/${validationRules.minCards}`}
+                      {validationStatus.totalCards}/
+                      {validationRules?.minCards || 0}
                     </span>
                   </div>
                 </div>

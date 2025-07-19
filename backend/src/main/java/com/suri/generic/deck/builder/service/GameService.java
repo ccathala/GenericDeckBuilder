@@ -1,5 +1,6 @@
 package com.suri.generic.deck.builder.service;
 
+import com.suri.generic.deck.builder.model.DeckRuleset;
 import com.suri.generic.deck.builder.model.Game;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface GameService {
     Game update(String id, Game updatedGame);
 
     void delete(String id);
+
+    Optional<DeckRuleset> getRulesetByGameId(String gameId);
 }

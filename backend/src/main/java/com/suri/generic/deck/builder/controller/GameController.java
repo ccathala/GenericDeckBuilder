@@ -1,5 +1,6 @@
 package com.suri.generic.deck.builder.controller;
 
+import com.suri.generic.deck.builder.model.DeckRuleset;
 import com.suri.generic.deck.builder.model.Game;
 import com.suri.generic.deck.builder.service.GameService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,5 +55,13 @@ public class GameController {
     public ResponseEntity<Void> deleteGame(@PathVariable String id) {
         gameService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Récupérer le ruleset d'un jeu")
+    @GetMapping("/{id}/ruleset")
+    public ResponseEntity<DeckRuleset> getGameRuleset(@PathVariable String id) {
+        return gameService.getRulesetByGameId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -1,6 +1,8 @@
 package com.suri.generic.deck.builder.service.impl;
 
+import com.suri.generic.deck.builder.model.DeckRuleset;
 import com.suri.generic.deck.builder.model.Game;
+import com.suri.generic.deck.builder.repository.DeckRulesetRepository;
 import com.suri.generic.deck.builder.repository.GameRepository;
 import com.suri.generic.deck.builder.service.GameService;
 import org.springframework.stereotype.Service;
@@ -12,9 +14,11 @@ import java.util.Optional;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository gameRepository;
+    private final DeckRulesetRepository rulesetRepository;
 
-    public GameServiceImpl(GameRepository gameRepository) {
+    public GameServiceImpl(GameRepository gameRepository, DeckRulesetRepository rulesetRepository) {
         this.gameRepository = gameRepository;
+        this.rulesetRepository = rulesetRepository;
     }
 
     @Override
@@ -46,5 +50,11 @@ public class GameServiceImpl implements GameService {
     @Override
     public void delete(String id) {
         gameRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<DeckRuleset> getRulesetByGameId(String gameId) {
+        return gameRepository.findById(gameId)
+                .flatMap(rulesetRepository::findByGame);
     }
 }
