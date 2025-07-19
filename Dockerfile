@@ -1,6 +1,6 @@
-# Dockerfile avec images les plus stables pour Railway
-# Build frontend avec Node.js officiel
-FROM node:18 AS frontend-build
+# Dockerfile optimisé pour Railway avec images cloud-native
+# Build frontend
+FROM node:18-bullseye AS frontend-build
 WORKDIR /app/frontend
 
 # Copie des fichiers package
@@ -9,8 +9,8 @@ RUN npm install
 COPY frontend/ .
 RUN npm run build
 
-# Build backend avec OpenJDK et Maven installés manuellement
-FROM openjdk:17-jdk-slim AS backend-build
+# Build backend avec Amazon Corretto (optimisé cloud)
+FROM amazoncorretto:17 AS backend-build
 WORKDIR /app
 
 # Installation de Maven
@@ -32,12 +32,12 @@ COPY backend/src ./backend/src/
 COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/static/
 RUN mvn -f backend/pom.xml clean package -DskipTests -Dmaven.javadoc.skip=true
 
-# Production image - JRE seulement
-FROM openjdk:17-jre-slim
+# Production image - Amazon Corretto JRE (cloud-optimized)
+FROM amazoncorretto:17
 WORKDIR /app
 
-# Installation des outils de monitoring
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Installation des outils de monitoring (Amazon Linux)
+RUN yum update -y && yum install -y curl && yum clean all
 
 # Création d'un utilisateur non-root pour la sécurité
 RUN groupadd -r appuser && useradd -r -g appuser appuser
