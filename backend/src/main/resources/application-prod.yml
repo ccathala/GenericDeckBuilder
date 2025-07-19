@@ -17,7 +17,7 @@ spring:
   # JPA/Hibernate pour production
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update  # Permet la création des tables au premier déploiement
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: false
@@ -31,12 +31,9 @@ spring:
         cache:
           use_second_level_cache: false
 
-  # Flyway pour les migrations en production
+  # Flyway désactivé pour le premier déploiement (pas de migrations prêtes)
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    validate-on-migrate: true
-    clean-disabled: true
+    enabled: false
 
   # Configuration du cache
   cache:
