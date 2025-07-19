@@ -1,8 +1,7 @@
 # Configuration pour l'environnement de production
 server:
   port: ${PORT:8080}
-  servlet:
-    context-path: /api
+  # Context-path retiré pour servir React à la racine
   error:
     include-stacktrace: never
     include-message: always
