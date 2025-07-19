@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import CardFilter from "./CardFilter";
 import CardGallery from "./CardGallery";
@@ -20,7 +20,7 @@ const CardBrowser = ({
   maxColumns = null, // Nouveau prop pour limiter le nombre de colonnes
   onCardsLoaded = null, // Callback when cards are loaded
 }) => {
-  const { t, currentLanguage } = useLanguage();
+  const { currentLanguage } = useLanguage();
   const [localCards, setLocalCards] = useState([]);
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -33,14 +33,8 @@ const CardBrowser = ({
   const loadingState = cards !== null ? loading : localLoading;
   const errorState = cards !== null ? error : localError;
 
-  // Charger les cartes si pas fournies en props
-  useEffect(() => {
-    if (cards === null) {
-      fetchCards();
-    }
-  }, [cards, gameId, currentLanguage]);
-
-  const fetchCards = async () => {
+  // Fonction pour charger les cartes
+  const fetchCards = useCallback(async () => {
     try {
       setLocalLoading(true);
       setLocalError(null);
@@ -64,7 +58,14 @@ const CardBrowser = ({
     } finally {
       setLocalLoading(false);
     }
-  };
+  }, [gameId, currentLanguage, onCardsLoaded]);
+
+  // Charger les cartes si pas fournies en props
+  useEffect(() => {
+    if (cards === null) {
+      fetchCards();
+    }
+  }, [cards, fetchCards]);
 
   // Fonction pour normaliser les chaînes (supprime les accents)
   const normalizeString = (str) => {
