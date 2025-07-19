@@ -1,7 +1,7 @@
 package com.suri.generic.deck.builder.config;
 
 import com.suri.generic.deck.builder.security.JwtFilter;
-import com.suri.generic.deck.builder.service.UserDetailsServiceImpl;
+import com.suri.generic.deck.builder.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,20 +25,20 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserDetailsServiceImpl userDetailsService) {
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService) {
         this.jwtFilter = jwtFilter;
-        this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Ajouter CORS explicitement
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Add CORS explicitly
                 .headers(headers -> headers
-                        .disable() // ✅ désactive tous les headers de sécurité, y compris X-Frame-Options (iframe)
+                        .disable() // Disable all security headers, including X-Frame-Options (iframe)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
@@ -58,17 +58,18 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Bean pour encoder les mots de passe avec BCrypt
+    // Bean to encode passwords using BCrypt
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // AuthenticationProvider utilisant UserService et PasswordEncoder
+    // AuthenticationProvider using UserService and PasswordEncoder
     @Bean
+    @SuppressWarnings("deprecation") // TODO: Update when Spring Security provides non-deprecated alternative
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        provider.setUserDetailsService(userService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

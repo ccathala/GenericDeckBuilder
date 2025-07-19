@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/games")
-@SecurityRequirement(name = "bearerAuth") // Protège tous les endpoints via JWT
+@SecurityRequirement(name = "bearerAuth") // Protect all endpoints via JWT
 public class GameController {
 
     private final GameService gameService;

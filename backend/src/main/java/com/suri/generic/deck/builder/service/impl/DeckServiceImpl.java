@@ -23,7 +23,6 @@ public class DeckServiceImpl implements DeckService {
     private final DeckRulesetRepository rulesetRepository;
     private final GameRepository gameRepository;
     private final CardRepository cardRepository;
-    private final DeckCardRepository deckCardRepository;
 
     @Override
     public DeckResponseDTO createDeck(DeckRequestDTO deckDTO, User owner) {
@@ -51,7 +50,7 @@ public class DeckServiceImpl implements DeckService {
 
         deck.setCards(deckCards);
 
-        // Nouvelle validation : bloquer uniquement les excès par carte
+        // New validation: only block excess cards per individual card
         validateCardLimits(deck);
 
         return toResponseDto(deckRepository.save(deck));
@@ -88,7 +87,7 @@ public class DeckServiceImpl implements DeckService {
         deck.getCards().clear();
         deckRepository.flush();
 
-        // Ajoute les nouvelles cartes
+        // Add new cards
         for (DeckCardRequestDTO cardDto : request.getCards()) {
             Card card = cardRepository.findById(cardDto.getCardId())
                     .orElseThrow(() -> new IllegalArgumentException("Carte introuvable : " + cardDto.getCardId()));
@@ -101,7 +100,7 @@ public class DeckServiceImpl implements DeckService {
             deck.getCards().add(deckCard);
         }
 
-        // Nouvelle validation : bloquer uniquement les excès par carte
+        // New validation: only block excess cards per individual card
         validateCardLimits(deck);
 
         return toResponseDto(deckRepository.save(deck));
@@ -125,7 +124,7 @@ public class DeckServiceImpl implements DeckService {
         if (rulesetOpt.isPresent()) {
             DeckRuleset rules = rulesetOpt.get();
 
-            // Vérifier uniquement les excès par carte (pas le minimum total)
+            // Only check excess cards per individual card (not minimum total)
             for (DeckCard deckCard : deck.getCards()) {
                 if (deckCard.getQuantity() > rules.getMaxCopiesPerCard()) {
                     throw new IllegalArgumentException("Au moins une carte dépasse le nombre d'exemplaires autorisés");

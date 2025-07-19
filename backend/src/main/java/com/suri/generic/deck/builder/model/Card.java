@@ -19,10 +19,8 @@ public class Card {
     private Game game;
 
     @Column(columnDefinition = "TEXT")
-    private String properties; // JSON sérialisé ou texte brut
+    private String properties; // Serialized JSON or plain text
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CardLocalization> localizations;
 }
-
-

@@ -9,17 +9,17 @@ import java.util.Optional;
 
 public interface CardLocalizationRepository extends JpaRepository<CardLocalization, CardLocalizationId> {
 
-    // 🔍 Trouver une localisation précise d'une carte
+    // Find a specific localization for a card
     Optional<CardLocalization> findByIdCardAndIdLocale(String cardId, String locale);
 
-    // 🔍 Toutes les localisations pour une langue donnée (peu utile seul, mais
+    // All localizations for a given language (not very useful alone, but available)
     // dispo)
     List<CardLocalization> findAllByIdLocale(String locale);
 
-    // 🔍 Toutes les localisations d'une carte
+    // All localizations for a card
     List<CardLocalization> findAllByIdCard(String cardId);
 
-    // 🔍 Existence rapide
+    // Quick existence check
     boolean existsByIdCardAndIdLocale(String cardId, String locale);
 
 }

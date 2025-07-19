@@ -32,31 +32,31 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // Tu pourras ajouter des rôles plus tard
+        return Collections.emptyList(); // Can be extended with roles later
     }
 
     @Override
     public String getUsername() {
-        return email; // C’est ce qu’on utilise comme identifiant
+        return email; // Email used as username identifier
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // true = compte actif
+        return true; // Account is active
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // true = non bloqué
+        return true; // Account is not locked
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // true = mot de passe encore valide
+        return true; // Password is still valid
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // true = compte activé
+        return true; // Account is enabled
     }
 }

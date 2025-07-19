@@ -1,5 +1,6 @@
 package com.suri.generic.deck.builder.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suri.generic.deck.builder.dto.response.CardResponseDTO;
 import com.suri.generic.deck.builder.model.Card;
@@ -18,13 +19,15 @@ import java.util.Optional;
 @Service
 public class CardService {
 
+    private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {
+    };
+
     private final GameRepository gameRepository;
     private final CardRepository cardRepository;
 
     public CardService(
             GameRepository gameRepository,
-            CardRepository cardRepository
-    ) {
+            CardRepository cardRepository) {
         this.gameRepository = gameRepository;
         this.cardRepository = cardRepository;
     }
@@ -40,7 +43,7 @@ public class CardService {
         List<CardResponseDTO> result = new ArrayList<>();
 
         for (Card card : cards) {
-            // Chercher la bonne localisation
+            // Find the right localization
             Optional<CardLocalization> loc = card.getLocalizations().stream()
                     .filter(l -> l.getId().getLocale().equalsIgnoreCase(locale))
                     .findFirst();
@@ -49,10 +52,10 @@ public class CardService {
             String description = loc.map(CardLocalization::getDescription).orElse("");
             String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
 
-            // Parser les propriétés
+            // Parse properties
             Map<String, Object> props;
             try {
-                props = new ObjectMapper().readValue(card.getProperties(), Map.class);
+                props = new ObjectMapper().readValue(card.getProperties(), MAP_TYPE_REF);
             } catch (Exception e) {
                 props = Map.of(); // fail-safe
             }
@@ -62,7 +65,6 @@ public class CardService {
 
         return result;
     }
-
 
     public void importCards(String gameId, List<Map<String, Object>> rawCards) {
         Game game = gameRepository.findById(gameId)
@@ -76,12 +78,12 @@ public class CardService {
                 throw new IllegalArgumentException("Chaque carte doit avoir un champ 'id'");
             }
 
-            // Créer la carte
+            // Create the card
             Card card = new Card();
             card.setId(cardId);
             card.setGame(game);
 
-            // Stocker les propriétés (objet → JSON string)
+            // Store properties (object → JSON string)
             Object properties = cardData.get("properties");
             if (properties == null || !(properties instanceof Map)) {
                 throw new IllegalArgumentException("Le champ 'properties' est requis et doit être un objet.");
@@ -94,10 +96,12 @@ public class CardService {
                 throw new RuntimeException("Erreur JSON dans 'properties'", e);
             }
 
-            // Traiter les localizations
+            // Process localizations
             Object localizationsObj = cardData.get("localizations");
-            if (!(localizationsObj instanceof Map)) continue;
+            if (!(localizationsObj instanceof Map<?, ?>))
+                continue;
 
+            @SuppressWarnings("unchecked")
             Map<String, Object> localizations = (Map<String, Object>) localizationsObj;
             List<CardLocalization> localizationList = new ArrayList<>();
 
@@ -105,12 +109,14 @@ public class CardService {
                 String locale = entry.getKey();
                 Object locData = entry.getValue();
 
-                if (!(locData instanceof Map)) continue;
+                if (!(locData instanceof Map<?, ?>))
+                    continue;
 
+                @SuppressWarnings("unchecked")
                 Map<String, String> locMap = (Map<String, String>) locData;
                 String name = locMap.getOrDefault("name", "");
                 String description = locMap.getOrDefault("description", "");
-                String imageUrl = locMap.getOrDefault("imageUrl","");
+                String imageUrl = locMap.getOrDefault("imageUrl", "");
 
                 CardLocalization localization = new CardLocalization();
                 localization.setCard(card);
