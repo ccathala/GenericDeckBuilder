@@ -11,7 +11,6 @@ import EditDeckPage from "./pages/EditDeckPage";
 import DeckDetailPage from "./pages/DeckDetailPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
-import TestScroll from "./components/TestScroll";
 import "./App.css";
 
 function App() {
@@ -31,7 +30,6 @@ function App() {
                 <Route path="/decks/new" element={<CreateDeckPage />} />
                 <Route path="/decks/:id" element={<DeckDetailPage />} />
                 <Route path="/decks/:id/edit" element={<EditDeckPage />} />
-                <Route path="/test-scroll" element={<TestScroll />} />
                 <Route
                   path="/profile"
                   element={

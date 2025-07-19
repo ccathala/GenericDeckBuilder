@@ -85,10 +85,8 @@ const DeckForm = ({ isEdit = false }) => {
   useEffect(() => {
     const loadRuleset = async () => {
       try {
-        console.log("Loading ruleset for mage_noir...");
         const rulesetResult = await gameService.getGameRuleset("mage_noir");
         if (rulesetResult.success) {
-          console.log("Ruleset loaded successfully:", rulesetResult.data);
           setValidationRules(rulesetResult.data);
         } else {
           console.warn("Could not load ruleset:", rulesetResult.error);

@@ -248,7 +248,6 @@ const LoginPage = () => {
               onClick={(e) => {
                 e.preventDefault();
                 // TODO: Implement forgot password functionality
-                console.log("Forgot password clicked");
               }}
             >
               {t("auth.login.forgotPassword")}
