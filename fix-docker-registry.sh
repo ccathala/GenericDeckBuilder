@@ -4,8 +4,10 @@ echo "🔧 Fixing Docker Registry Issues for Railway Deployment"
 echo "=============================================="
 
 # Option 1: Use the stable Dockerfile (already updated)
-echo "✅ Option 1: Using stable base images (node:18-slim instead of node:18-alpine)"
-echo "   - Main Dockerfile updated with node:18-slim"
+echo "✅ Option 1: Using stable base images (completely removed Alpine dependencies)"
+echo "   - Frontend: node:18-slim (instead of node:18-alpine)"
+echo "   - Backend build: maven:3.9-openjdk-17 (instead of maven:3.9-openjdk-17-alpine)"
+echo "   - Production: eclipse-temurin:17-jre-jammy (instead of eclipse-temurin:17-jre-alpine)"
 echo ""
 
 # Option 2: Use Ubuntu-based images

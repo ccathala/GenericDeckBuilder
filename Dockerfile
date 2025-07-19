@@ -8,7 +8,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Build backend
-FROM maven:3.9-openjdk-17-alpine AS backend-build
+FROM maven:3.9-openjdk-17 AS backend-build
 WORKDIR /app
 COPY backend/pom.xml ./backend/
 COPY backend/src ./backend/src/
@@ -17,11 +17,11 @@ COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/stati
 RUN mvn -f backend/pom.xml clean package -DskipTests -Dmaven.javadoc.skip=true
 
 # Production image
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # Installation des outils de monitoring
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Création d'un utilisateur non-root pour la sécurité
 RUN addgroup -g 1001 -S appuser && \
