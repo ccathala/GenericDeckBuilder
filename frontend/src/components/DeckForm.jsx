@@ -342,25 +342,7 @@ const DeckForm = ({ isEdit = false }) => {
         : await deckService.createDeck(deckData);
 
       if (result.success) {
-        // Message différent selon la validité
-        if (validationStatus.isValid) {
-          // Deck valide, redirection normale
-          navigate("/decks");
-        } else {
-          // Deck invalide mais sauvegardé, informer l'utilisateur
-          const continueWorking = window.confirm(
-            `✅ Deck sauvegardé avec succès !\n\n⚠️ Note: Le deck contient encore des erreurs de validation.\n\nVoulez-vous :\n- Continuer à travailler dessus ? (Annuler)\n- Retourner à la liste des decks ? (OK)`
-          );
-
-          if (continueWorking) {
-            // Rester sur l'éditeur
-            setSaving(false);
-            return;
-          } else {
-            // Aller à la liste
-            navigate("/decks");
-          }
-        }
+        navigate("/decks");
       } else {
         setError(result.error);
       }
@@ -555,18 +537,10 @@ const DeckForm = ({ isEdit = false }) => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={saving || !deck.name.trim()}
-                  className={`flex-1 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 ${
-                    !validationStatus.isValid
-                      ? "bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600"
-                      : "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600"
-                  } disabled:cursor-not-allowed`}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 disabled:cursor-not-allowed"
                 >
                   {saving
                     ? t("common.saving")
-                    : !validationStatus.isValid
-                    ? isEdit
-                      ? "Sauvegarder (brouillon)"
-                      : "Créer (brouillon)"
                     : isEdit
                     ? t("common.save")
                     : t("common.create")}
