@@ -50,8 +50,8 @@ JWT_SECRET=super-secure-jwt-secret-key-for-production-at-least-256-bits-long
 # Profil Spring Boot
 SPRING_PROFILES_ACTIVE=prod
 
-# Port (Railway le définit automatiquement)
-PORT=${{PORT}}
+# Port (Railway détecte automatiquement le port 8080)
+# PORT=8080  # <- OPTIONNEL : Railway détecte automatiquement
 ```
 
 ### 🔐 **Génération JWT_SECRET Sécurisé** :
