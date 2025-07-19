@@ -30,6 +30,13 @@ public class DatabaseConfig {
         // Récupération de l'URL depuis Railway
         String databaseUrl = environment.getProperty("DATABASE_URL");
         
+        // Log de diagnostic pour Railway
+        System.out.println("=== RAILWAY DATABASE CONFIG DEBUG ===");
+        System.out.println("DATABASE_URL présente: " + (databaseUrl != null));
+        if (databaseUrl != null) {
+            System.out.println("DATABASE_URL format: " + databaseUrl.substring(0, Math.min(30, databaseUrl.length())) + "...");
+        }
+        
         if (databaseUrl != null) {
             try {
                 // Parse de l'URL Railway

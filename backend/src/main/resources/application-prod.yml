@@ -45,14 +45,17 @@ app:
     secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyNotForProduction}
     expiration: 86400000 # 24 heures
 
-# Configuration des logs
+# Configuration des logs (verbose pour diagnostiquer Railway)
 logging:
   level:
     "[com.suri.generic.deck.builder]": INFO
-    "[org.springframework.security]": WARN
-    "[org.hibernate.SQL]": WARN
-    "[org.springframework.web]": WARN
+    "[org.springframework.security]": INFO
+    "[org.hibernate.SQL]": INFO
+    "[org.springframework.web]": INFO
     "[org.springframework.boot.autoconfigure.security]": INFO
+    "[org.springframework.boot]": INFO
+    "[org.springframework]": INFO
+    root: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
