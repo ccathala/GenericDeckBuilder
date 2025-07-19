@@ -1,25 +1,24 @@
 package com.suri.generic.deck.builder.service;
 
 import com.suri.generic.deck.builder.model.User;
-import com.suri.generic.deck.builder.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
-@Service
-public class UserService implements UserDetailsService {
+/**
+ * Service interface for User management and authentication operations.
+ * Extends UserDetailsService for Spring Security integration.
+ */
+public interface UserService extends UserDetailsService {
 
-    private final UserRepository userRepository;
-
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
+    /**
+     * Load user by username for Spring Security authentication
+     * 
+     * @param email the user's email address
+     * @return User entity implementing UserDetails
+     * @throws UsernameNotFoundException if user not found
+     */
     @Override
-    public User loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
-    }
+    User loadUserByUsername(String email) throws UsernameNotFoundException;
 
     /**
      * Find a user by email address
@@ -28,8 +27,29 @@ public class UserService implements UserDetailsService {
      * @return the User entity
      * @throws UsernameNotFoundException if user not found
      */
-    public User findUserByEmail(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-    }
+    User findUserByEmail(String email) throws UsernameNotFoundException;
+
+    /**
+     * Create a new user
+     * 
+     * @param user the user to create
+     * @return the created user
+     */
+    User createUser(User user);
+
+    /**
+     * Update an existing user
+     * 
+     * @param user the user with updated information
+     * @return the updated user
+     */
+    User updateUser(User user);
+
+    /**
+     * Check if a user exists by email
+     * 
+     * @param email the email to check
+     * @return true if user exists, false otherwise
+     */
+    boolean existsByEmail(String email);
 }

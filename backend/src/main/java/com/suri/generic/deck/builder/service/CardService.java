@@ -1,135 +1,55 @@
 package com.suri.generic.deck.builder.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suri.generic.deck.builder.dto.response.CardResponseDTO;
-import com.suri.generic.deck.builder.model.Card;
-import com.suri.generic.deck.builder.model.CardLocalization;
-import com.suri.generic.deck.builder.model.CardLocalizationId;
-import com.suri.generic.deck.builder.model.Game;
-import com.suri.generic.deck.builder.repository.CardRepository;
-import com.suri.generic.deck.builder.repository.GameRepository;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-@Service
-public class CardService {
-
-    private static final TypeReference<Map<String, Object>> MAP_TYPE_REF = new TypeReference<Map<String, Object>>() {
-    };
-
-    private final GameRepository gameRepository;
-    private final CardRepository cardRepository;
-
-    public CardService(
-            GameRepository gameRepository,
-            CardRepository cardRepository) {
-        this.gameRepository = gameRepository;
-        this.cardRepository = cardRepository;
-    }
+/**
+ * Service interface for Card management operations.
+ * Handles card data retrieval, localization, and import functionality.
+ */
+public interface CardService {
 
     /**
-     * Récupère toutes les cartes localisées d'un jeu dans une langue donnée
+     * Get all cards for a specific game in a given locale
+     * 
+     * @param gameId the game identifier
+     * @param locale the locale (e.g., "fr", "en")
+     * @return list of localized card data
      */
-    public List<CardResponseDTO> getCardsByLocale(String gameId, String locale) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable : " + gameId));
+    List<CardResponseDTO> getCardsByLocale(String gameId, String locale);
 
-        List<Card> cards = cardRepository.findByGame(game);
-        List<CardResponseDTO> result = new ArrayList<>();
+    /**
+     * Import cards from raw data
+     * 
+     * @param gameId   the game identifier
+     * @param rawCards raw card data
+     */
+    void importCards(String gameId, List<Map<String, Object>> rawCards);
 
-        for (Card card : cards) {
-            // Find the right localization
-            Optional<CardLocalization> loc = card.getLocalizations().stream()
-                    .filter(l -> l.getId().getLocale().equalsIgnoreCase(locale))
-                    .findFirst();
+    /**
+     * Get a single card by ID in a specific locale
+     * 
+     * @param cardId the card identifier
+     * @param locale the locale (e.g., "fr", "en")
+     * @return the localized card data or null if not found
+     */
+    CardResponseDTO getCardById(String cardId, String locale);
 
-            String name = loc.map(CardLocalization::getName).orElse("Nom inconnu");
-            String description = loc.map(CardLocalization::getDescription).orElse("");
-            String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
+    /**
+     * Get available locales for a specific card
+     * 
+     * @param cardId the card identifier
+     * @return list of available locale codes
+     */
+    List<String> getAvailableLocales(String cardId);
 
-            // Parse properties
-            Map<String, Object> props;
-            try {
-                props = new ObjectMapper().readValue(card.getProperties(), MAP_TYPE_REF);
-            } catch (Exception e) {
-                props = Map.of(); // fail-safe
-            }
-
-            result.add(new CardResponseDTO(card.getId(), name, description, imageUrl, props));
-        }
-
-        return result;
-    }
-
-    public void importCards(String gameId, List<Map<String, Object>> rawCards) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable : " + gameId));
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        for (Map<String, Object> cardData : rawCards) {
-            String cardId = (String) cardData.get("id");
-            if (cardId == null || cardId.isBlank()) {
-                throw new IllegalArgumentException("Chaque carte doit avoir un champ 'id'");
-            }
-
-            // Create the card
-            Card card = new Card();
-            card.setId(cardId);
-            card.setGame(game);
-
-            // Store properties (object → JSON string)
-            Object properties = cardData.get("properties");
-            if (properties == null || !(properties instanceof Map)) {
-                throw new IllegalArgumentException("Le champ 'properties' est requis et doit être un objet.");
-            }
-
-            try {
-                String propertiesJson = mapper.writeValueAsString(properties);
-                card.setProperties(propertiesJson);
-            } catch (Exception e) {
-                throw new RuntimeException("Erreur JSON dans 'properties'", e);
-            }
-
-            // Process localizations
-            Object localizationsObj = cardData.get("localizations");
-            if (!(localizationsObj instanceof Map<?, ?>))
-                continue;
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> localizations = (Map<String, Object>) localizationsObj;
-            List<CardLocalization> localizationList = new ArrayList<>();
-
-            for (Map.Entry<String, Object> entry : localizations.entrySet()) {
-                String locale = entry.getKey();
-                Object locData = entry.getValue();
-
-                if (!(locData instanceof Map<?, ?>))
-                    continue;
-
-                @SuppressWarnings("unchecked")
-                Map<String, String> locMap = (Map<String, String>) locData;
-                String name = locMap.getOrDefault("name", "");
-                String description = locMap.getOrDefault("description", "");
-                String imageUrl = locMap.getOrDefault("imageUrl", "");
-
-                CardLocalization localization = new CardLocalization();
-                localization.setCard(card);
-                localization.setName(name);
-                localization.setDescription(description);
-                localization.setImageUrl(imageUrl);
-                localization.setId(new CardLocalizationId(card.getId(), locale));
-
-                localizationList.add(localization);
-            }
-
-            card.setLocalizations(localizationList);
-            cardRepository.save(card);
-        }
-    }
+    /**
+     * Check if a card exists
+     * 
+     * @param cardId the card identifier
+     * @return true if card exists, false otherwise
+     */
+    boolean cardExists(String cardId);
 }
