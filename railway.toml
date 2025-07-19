@@ -1,0 +1,28 @@
+# Railway configuration pour GenericDeckBuilder
+version: 2
+
+build:
+  # Configuration du build Docker
+  dockerfile: Dockerfile
+  
+  # Variables d'environnement pour le build
+  env:
+    - DOCKER_BUILDKIT=1
+  
+  # Retry en cas d'échec réseau
+  retry:
+    attempts: 3
+    delay: 30s
+
+deploy:
+  # Configuration du déploiement
+  healthcheck:
+    path: /api/actuator/health
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    
+  # Resources
+  resources:
+    memory: 512Mi
+    cpu: 0.5
