@@ -21,14 +21,19 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // Servir les ressources statiques React
+        // Servir les ressources statiques React (SANS CACHE pour debug)
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("classpath:/static/assets/")
-                .setCachePeriod(31556926);
+                .setCachePeriod(0);  // Pas de cache !
                 
         registry.addResourceHandler("/static/**")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(31556926);
+                .setCachePeriod(0);  // Pas de cache !
+                
+        // Ajout de patterns supplémentaires pour couvrir tous les cas
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(0);
     }
 
     @Override
