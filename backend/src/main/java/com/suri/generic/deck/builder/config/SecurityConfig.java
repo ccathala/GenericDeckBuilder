@@ -41,11 +41,14 @@ public class SecurityConfig {
                         .disable() // Disable all security headers, including X-Frame-Options (iframe)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Frontend et assets en PREMIER (priorité maximale)
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js").permitAll()
+                        // API et services
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour Railway
-                        .requestMatchers("/", "/index.html", "/static/**", "/assets/**").permitAll() // Frontend React
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
