@@ -3,6 +3,7 @@ package com.suri.generic.deck.builder.controller;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckSummaryResponseDTO;
+import com.suri.generic.deck.builder.dto.response.DeckValidationResponseDTO;
 import com.suri.generic.deck.builder.model.Deck;
 import com.suri.generic.deck.builder.model.User;
 import com.suri.generic.deck.builder.service.DeckService;
@@ -26,13 +27,13 @@ public class DeckController {
 
     @PostMapping
     public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestDTO deckDTO,
-                                                      @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(deckService.createDeck(deckDTO, user));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DeckResponseDTO> getDeck(@PathVariable UUID id,
-                                        @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(deckService.getDeck(id, user));
     }
 
@@ -43,14 +44,21 @@ public class DeckController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DeckResponseDTO> updateDeck(@PathVariable UUID id,
-                                           @RequestBody DeckRequestDTO deckRequestDTO,
-                                           @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(deckService.updateDeck(id, deckRequestDTO, user));
+            @RequestBody DeckRequestDTO deckRequestDTO,
+            @RequestParam(defaultValue = "true") boolean enforceValidation,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(deckService.updateDeck(id, deckRequestDTO, user, enforceValidation));
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<DeckValidationResponseDTO> validateDeck(@RequestBody DeckRequestDTO deckRequestDTO,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(deckService.validateDeckRequest(deckRequestDTO, user));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteDeck(@PathVariable UUID id,
-                                                          @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) {
         deckService.deleteDeck(id, user);
         return ResponseEntity.ok(Map.of("message", "Deck supprimé avec succès"));
     }

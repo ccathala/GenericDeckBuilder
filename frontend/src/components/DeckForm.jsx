@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import deckService from "../services/deckService";
+import gameService from "../services/gameService";
 import CardBrowser from "./CardBrowser";
 
 const DeckForm = ({ isEdit = false }) => {
@@ -22,6 +23,15 @@ const DeckForm = ({ isEdit = false }) => {
   const [deckCards, setDeckCards] = useState([]);
   const [browserCards, setBrowserCards] = useState([]); // Array to store fresh card data from CardBrowser
   const [originalCardIds, setOriginalCardIds] = useState([]); // Store original deck card IDs and quantities for cross-referencing only
+
+  // Validation state
+  const [validationRules, setValidationRules] = useState(null);
+  const [validationStatus, setValidationStatus] = useState({
+    isValid: true,
+    violations: [],
+    totalCards: 0,
+    uniqueCards: 0,
+  });
 
   // UI state
   const [loading, setLoading] = useState(false);
@@ -75,8 +85,84 @@ const DeckForm = ({ isEdit = false }) => {
   useEffect(() => {
     if (isEdit && id) {
       fetchDeckData();
+    } else {
+      // Pour un nouveau deck, faire une validation initiale pour récupérer les règles
+      initializeValidationRules();
     }
   }, [isEdit, id]);
+
+  // Initialiser les règles de validation pour un nouveau deck
+  const initializeValidationRules = async () => {
+    try {
+      const emptyDeckData = {
+        name: "temp",
+        description: "",
+        gameId: "mage_noir", // Option 1: Hardcodé temporaire pour éviter deck.gameId undefined
+        cards: [],
+      };
+
+      const result = await gameService.validateDeck(emptyDeckData);
+      if (result.success && result.data.appliedRules) {
+        setValidationRules(result.data.appliedRules);
+      }
+    } catch (error) {
+      console.error("Error initializing validation rules:", error);
+    }
+  };
+
+  // Validation temps réel côté client
+  const validateDeckLocally = (deckCards, rules) => {
+    if (!rules) {
+      return {
+        isValid: true,
+        violations: [],
+        totalCards: deckCards.reduce((sum, card) => sum + card.quantity, 0),
+        uniqueCards: deckCards.length,
+      };
+    }
+
+    const totalCards = deckCards.reduce((sum, card) => sum + card.quantity, 0);
+    const violations = [];
+
+    // Vérifier minimum de cartes
+    if (totalCards < rules.minCards) {
+      violations.push({
+        type: "ERROR",
+        messageCode: "deck.min_cards",
+        message: `Minimum ${rules.minCards} cartes requis, actuel: ${totalCards}`,
+        params: [rules.minCards, totalCards],
+      });
+    }
+
+    // Vérifier maximum par carte
+    deckCards.forEach((card) => {
+      if (card.quantity > rules.maxCopiesPerCard) {
+        violations.push({
+          type: "ERROR",
+          messageCode: "deck.max_copies",
+          message: `${card.name || card.id} dépasse le maximum de ${
+            rules.maxCopiesPerCard
+          } exemplaires`,
+          params: [card.name || card.id, rules.maxCopiesPerCard, card.quantity],
+        });
+      }
+    });
+
+    return {
+      isValid: violations.length === 0,
+      violations,
+      totalCards,
+      uniqueCards: deckCards.length,
+    };
+  };
+
+  // Validation automatique à chaque changement de cartes
+  useEffect(() => {
+    if (validationRules && deckCards) {
+      const validation = validateDeckLocally(deckCards, validationRules);
+      setValidationStatus(validation);
+    }
+  }, [deckCards, validationRules]);
 
   // Update deck cards with fresh browser card data when available (for language switching)
   useEffect(() => {
@@ -131,6 +217,22 @@ const DeckForm = ({ isEdit = false }) => {
 
         // Create selected cards set for CardBrowser
         setSelectedCards(new Set(cards.map((card) => card.id)));
+
+        // Récupérer les règles via validation du deck existant
+        const validationResult = await gameService.validateDeck({
+          name: deckData.name,
+          description: deckData.description || "",
+          gameId: "mage_noir",
+          cards:
+            deckData.cards?.map((deckCard) => ({
+              cardId: deckCard.cardId,
+              quantity: deckCard.quantity,
+            })) || [],
+        });
+
+        if (validationResult.success && validationResult.data.appliedRules) {
+          setValidationRules(validationResult.data.appliedRules);
+        }
       } else {
         setError(result.error);
       }
@@ -234,12 +336,31 @@ const DeckForm = ({ isEdit = false }) => {
         })),
       };
 
+      // Toujours sauvegarder, même si invalide (workflow utilisateur)
       const result = isEdit
         ? await deckService.updateDeck(id, deckData)
         : await deckService.createDeck(deckData);
 
       if (result.success) {
-        navigate("/decks");
+        // Message différent selon la validité
+        if (validationStatus.isValid) {
+          // Deck valide, redirection normale
+          navigate("/decks");
+        } else {
+          // Deck invalide mais sauvegardé, informer l'utilisateur
+          const continueWorking = window.confirm(
+            `✅ Deck sauvegardé avec succès !\n\n⚠️ Note: Le deck contient encore des erreurs de validation.\n\nVoulez-vous :\n- Continuer à travailler dessus ? (Annuler)\n- Retourner à la liste des decks ? (OK)`
+          );
+
+          if (continueWorking) {
+            // Rester sur l'éditeur
+            setSaving(false);
+            return;
+          } else {
+            // Aller à la liste
+            navigate("/decks");
+          }
+        }
       } else {
         setError(result.error);
       }
@@ -313,14 +434,24 @@ const DeckForm = ({ isEdit = false }) => {
                   </svg>
                 </div>
 
-                {/* Statistiques */}
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>
-                    {deckCards.length} {t("decks.form.uniqueCards")}
-                  </span>
-                  <span>
-                    {totalCards} {t("decks.form.totalCards")}
-                  </span>
+                {/* Statistiques avec indicateurs de validation */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">
+                      {t("decks.form.totalCards")}
+                    </span>
+                    <span
+                      className={`${
+                        validationRules &&
+                        validationStatus.totalCards < validationRules.minCards
+                          ? "text-red-400"
+                          : "text-white"
+                      }`}
+                    >
+                      {validationStatus.totalCards}
+                      {validationRules && `/${validationRules.minCards}`}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -336,45 +467,78 @@ const DeckForm = ({ isEdit = false }) => {
                 </div>
               ) : (
                 <div className="space-y-0.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  {deckCards.map((card) => (
-                    <div
-                      key={card.id}
-                      className="flex items-center justify-between p-1.5 bg-mage-dark-700 rounded text-xs"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-white truncate leading-tight">
-                          {card.name || `${card.id}`}
-                        </h3>
+                  {deckCards.map((card) => {
+                    // Vérifier si cette carte dépasse la limite
+                    const exceedsLimit =
+                      validationRules &&
+                      card.quantity > validationRules.maxCopiesPerCard;
+
+                    return (
+                      <div
+                        key={card.id}
+                        className={`flex items-center justify-between p-1.5 rounded text-xs transition-colors ${
+                          exceedsLimit
+                            ? "bg-red-900/50 border border-red-500/50"
+                            : "bg-mage-dark-700"
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <h3
+                            className={`font-medium truncate leading-tight ${
+                              exceedsLimit ? "text-red-300" : "text-white"
+                            }`}
+                          >
+                            {card.name || `${card.id}`}
+                            {exceedsLimit && (
+                              <span className="text-red-400 ml-1 text-xs">
+                                (max: {validationRules.maxCopiesPerCard})
+                              </span>
+                            )}
+                          </h3>
+                        </div>
+                        <div className="flex items-center space-x-0.5 ml-1.5">
+                          <button
+                            onClick={() =>
+                              updateCardQuantity(card.id, card.quantity - 1)
+                            }
+                            className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center transition-colors"
+                          >
+                            -
+                          </button>
+                          <span
+                            className={`w-5 text-center font-semibold text-xs ${
+                              exceedsLimit ? "text-red-300" : "text-white"
+                            }`}
+                          >
+                            {card.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateCardQuantity(card.id, card.quantity + 1)
+                            }
+                            disabled={
+                              validationRules &&
+                              card.quantity >= validationRules.maxCopiesPerCard
+                            }
+                            className={`w-5 h-5 text-white rounded text-xs flex items-center justify-center transition-colors ${
+                              validationRules &&
+                              card.quantity >= validationRules.maxCopiesPerCard
+                                ? "bg-gray-500 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
+                            }`}
+                          >
+                            +
+                          </button>
+                          <button
+                            onClick={() => removeCardFromDeck(card.id)}
+                            className="w-5 h-5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs flex items-center justify-center transition-colors ml-1"
+                          >
+                            ×
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-0.5 ml-1.5">
-                        <button
-                          onClick={() =>
-                            updateCardQuantity(card.id, card.quantity - 1)
-                          }
-                          className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center transition-colors"
-                        >
-                          -
-                        </button>
-                        <span className="w-5 text-center font-semibold text-xs">
-                          {card.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateCardQuantity(card.id, card.quantity + 1)
-                          }
-                          className="w-5 h-5 bg-green-600 hover:bg-green-700 text-white rounded text-xs flex items-center justify-center transition-colors"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => removeCardFromDeck(card.id)}
-                          className="w-5 h-5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs flex items-center justify-center transition-colors"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -391,10 +555,18 @@ const DeckForm = ({ isEdit = false }) => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={saving || !deck.name.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
+                  className={`flex-1 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 ${
+                    !validationStatus.isValid
+                      ? "bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600"
+                      : "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600"
+                  } disabled:cursor-not-allowed`}
                 >
                   {saving
                     ? t("common.saving")
+                    : !validationStatus.isValid
+                    ? isEdit
+                      ? "Sauvegarder (brouillon)"
+                      : "Créer (brouillon)"
                     : isEdit
                     ? t("common.save")
                     : t("common.create")}

@@ -45,8 +45,7 @@ public class GameController {
     @PutMapping("/{id}")
     public ResponseEntity<Game> updateGame(
             @PathVariable String id,
-            @Valid @RequestBody Game game
-    ) {
+            @Valid @RequestBody Game game) {
         return ResponseEntity.ok(gameService.update(id, game));
     }
 
