@@ -1,46 +1,31 @@
-# Dockerfile avec images les plus stables pour Railway
-# Build frontend avec Node.js officiel
+# Dockerfile multi-stage pour GenericDeckBuilder
+# Build frontend
 FROM node:18 AS frontend-build
 WORKDIR /app/frontend
-
-# Copie des fichiers package
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci --only=production
 COPY frontend/ .
 RUN npm run build
 
-# Build backend avec OpenJDK et Maven installés manuellement
-FROM openjdk:17-jdk-slim AS backend-build
+# Build backend
+FROM maven:3.9.6-openjdk-17 AS backend-build
 WORKDIR /app
-
-# Installation de Maven
-RUN apt-get update && \
-    apt-get install -y wget && \
-    wget https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz && \
-    tar -xzf apache-maven-3.9.6-bin.tar.gz && \
-    mv apache-maven-3.9.6 /opt/maven && \
-    rm apache-maven-3.9.6-bin.tar.gz && \
-    apt-get clean
-
-ENV MAVEN_HOME=/opt/maven
-ENV PATH="$MAVEN_HOME/bin:$PATH"
-
-# Build du backend
 COPY backend/pom.xml ./backend/
 COPY backend/src ./backend/src/
-# Copier les assets frontend buildés
+# Copier les assets frontend buildés dans les ressources statiques
 COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/static/
 RUN mvn -f backend/pom.xml clean package -DskipTests -Dmaven.javadoc.skip=true
 
-# Production image - JRE seulement
-FROM openjdk:17-jre-slim
+# Production image
+FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Installation des outils de monitoring
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Création d'un utilisateur non-root pour la sécurité
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN addgroup -g 1001 -S appuser && \
+    adduser -S -u 1001 -G appuser appuser
 
 # Copie de l'application
 COPY --from=backend-build --chown=appuser:appuser /app/backend/target/*.jar app.jar
