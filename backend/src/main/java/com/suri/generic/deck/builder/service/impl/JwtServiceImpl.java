@@ -41,8 +41,16 @@ public class JwtServiceImpl implements JwtService {
     }
 
     public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        try {
+            final String username = extractUsername(token);
+            return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // Token is expired
+            return false;
+        } catch (Exception e) {
+            // Token is malformed or invalid
+            return false;
+        }
     }
 
     private boolean isTokenExpired(String token) {
