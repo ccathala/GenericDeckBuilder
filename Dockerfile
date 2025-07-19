@@ -17,7 +17,7 @@ COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/stati
 RUN mvn -f backend/pom.xml clean package -DskipTests -Dmaven.javadoc.skip=true
 
 # Production image
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
 # Installation des outils de monitoring
