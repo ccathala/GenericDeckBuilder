@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()  // Autoriser actuator pour Railway
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
