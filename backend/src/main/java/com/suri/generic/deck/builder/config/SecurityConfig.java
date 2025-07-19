@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour Railway
+                        .requestMatchers("/", "/index.html", "/static/**", "/assets/**").permitAll() // Frontend React
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
