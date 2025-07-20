@@ -47,6 +47,8 @@ public class SecurityConfig {
                         // Frontend et assets en PREMIER (priorité maximale)
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js").permitAll()
+                        // Routes SPA (pages frontend accessibles publiquement)
+                        .requestMatchers("/cards", "/decks", "/profile", "/login", "/register").permitAll()
                         // API et services
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
