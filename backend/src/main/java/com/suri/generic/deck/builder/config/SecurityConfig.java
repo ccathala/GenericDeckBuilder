@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Frontend et assets en PREMIER (priorité maximale)
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js").permitAll()
+                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js", "/*.svg", "/*.png", "/*.ico", "/*.txt").permitAll()
                         // Routes SPA (pages frontend accessibles publiquement)
                         .requestMatchers("/cards", "/decks", "/profile", "/login", "/register").permitAll()
                         // API et services
