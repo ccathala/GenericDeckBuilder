@@ -1,7 +1,18 @@
 import axios from "axios";
 
+// Configuration automatique de l'URL backend selon l'environnement
+const getBaseURL = () => {
+  if (import.meta.env.PROD) {
+    // En production, utiliser la même origine que le frontend (Railway)
+    return window.location.origin;
+  } else {
+    // En développement, utiliser localhost
+    return "http://localhost:8080";
+  }
+};
+
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080", // URL de votre backend Spring Boot
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
