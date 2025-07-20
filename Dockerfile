@@ -1,65 +1,111 @@
-# DOCKERFILE SIMPLIFIÉ pour Railway - Installation rapide
-# Build frontend avec Node.js via snap (ultra-rapide)
-FROM ubuntu:22.04 AS frontend-build
+# =============================================================================
+# DOCKERFILE MULTI-STAGE OPTIMISÉ - GenericDeckBuilder
+# =============================================================================
+# 🎯 Automatise complètement le build frontend + backend
+# 🚀 Cache optimal avec layers séparés
+# 🔒 Sécurité avec utilisateur non-root
+# 📦 Image production minimale
+
+# =============================================================================
+# STAGE 1: Build Frontend React + Vite
+# =============================================================================
+FROM node:18-alpine AS frontend-build
+
+LABEL stage=frontend-build
+LABEL description="Build du frontend React avec Vite et Tailwind"
+
 WORKDIR /app/frontend
 
-# Installation simple et rapide de Node.js
-RUN apt-get update
-RUN apt-get install -y curl
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
-RUN apt-get clean
-
-# Build frontend
+# Cache des dépendances npm (layer séparé)
 COPY frontend/package*.json ./
-RUN npm install
+RUN npm ci --only=production --silent
+
+# Build frontend avec validation
 COPY frontend/ .
 RUN npm run build
 
-# Build backend avec OpenJDK Ubuntu (pas de téléchargement externe)
-FROM ubuntu:22.04 AS backend-build
+# Validation du build frontend
+RUN test -f dist/index.html || (echo "❌ Frontend build failed: index.html not found" && exit 1)
+RUN test -d dist/assets || (echo "❌ Frontend build failed: assets/ not found" && exit 1)
+RUN echo "✅ Frontend build validated successfully"
+
+# =============================================================================
+# STAGE 2: Build Backend Spring Boot
+# =============================================================================
+FROM eclipse-temurin:17-jdk-alpine AS backend-build
+
+LABEL stage=backend-build
+LABEL description="Build du backend Spring Boot avec Maven"
+
 WORKDIR /app
 
-# Installation Java et Maven depuis les repos Ubuntu (ultra-rapide)
-RUN apt-get update
-RUN apt-get install -y openjdk-17-jdk maven
-RUN apt-get clean
+# Installation Maven
+RUN apk add --no-cache maven
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-
-# Build backend
+# Cache des dépendances Maven (layer séparé)
 COPY backend/pom.xml ./backend/
-COPY backend/src ./backend/src/
-COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/static/
-RUN mvn -f backend/pom.xml clean package -DskipTests -Dmaven.javadoc.skip=true
+RUN mvn -f backend/pom.xml dependency:resolve dependency:resolve-sources -B -q
 
-# Production runtime simplifié
-FROM ubuntu:22.04
+# Copie automatique des assets frontend dans backend
+COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/static/
+
+# Build backend avec assets intégrés
+COPY backend/src ./backend/src/
+RUN mvn -f backend/pom.xml clean package -DskipTests -B -q \
+    -Dmaven.javadoc.skip=true \
+    -Dmaven.source.skip=true
+
+# Validation du build backend
+RUN test -f backend/target/*.jar || (echo "❌ Backend build failed: JAR not found" && exit 1)
+RUN echo "✅ Backend build validated successfully"
+
+# =============================================================================
+# STAGE 3: Runtime Production (Image Finale)
+# =============================================================================
+FROM eclipse-temurin:17-jre-alpine AS production
+
+LABEL maintainer="GenericDeckBuilder Team"
+LABEL description="GenericDeckBuilder - Full-Stack Application"
+LABEL version="1.0"
+
 WORKDIR /app
 
-# Installation JRE depuis Ubuntu repos (ultra-rapide)
-RUN apt-get update
-RUN apt-get install -y openjdk-17-jre-headless curl
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Installation utilitaires système minimaux
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    && rm -rf /var/cache/apk/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+# Configuration timezone
+ENV TZ=Europe/Paris
 
-# Utilisateur non-root
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Utilisateur non-root pour sécurité
+RUN addgroup -g 1001 -S appuser && \
+    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G appuser appuser
 
-# Application
+# Copie de l'application buildée
 COPY --from=backend-build --chown=appuser:appuser /app/backend/target/*.jar app.jar
 
-# Configuration
+# Configuration JVM optimisée pour containers
+ENV JAVA_OPTS="-Xms512m -Xmx1024m \
+    -XX:+UseG1GC \
+    -XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=80 \
+    -XX:+PrintGCDetails \
+    -XX:+ExitOnOutOfMemoryError"
+
+# Configuration Spring Boot
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport"
+ENV SERVER_PORT=8080
 
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+# Health check avec retry intelligent
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:8080/api/actuator/health || exit 1
 
+# Switch to non-root user
 USER appuser
 
-CMD ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]
+# Point d'entrée optimisé
+CMD ["sh", "-c", "exec java $JAVA_OPTS -Dspring.profiles.active=$SPRING_PROFILES_ACTIVE -jar app.jar"]

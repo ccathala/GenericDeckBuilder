@@ -1,0 +1,44 @@
+# =============================================================================
+# .dockerignore - Optimisation du contexte Docker
+# =============================================================================
+
+# Fichiers système et éditeurs
+.git/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers temporaires et logs
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Documentation et scripts (pas nécessaires dans l'image)
+docs/
+scripts/
+README.md
+*.md
+
+# Environnements et configuration locale
+.env
+.env.local
+railway.env.example
+codecov.yml
+
+# Builds et caches locaux
+backend/target/
+backend/src/main/resources/static/
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+
+# Fichiers de test et CI
+.github/
+**/*test*
+**/*spec*
+
+# Dockerfiles alternatifs
+Dockerfile.*
