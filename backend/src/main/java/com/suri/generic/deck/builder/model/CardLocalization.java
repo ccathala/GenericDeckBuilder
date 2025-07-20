@@ -28,11 +28,13 @@ public class CardLocalization {
     @JoinColumn(name = "card_id")
     private Card card;
 
+    @Column(name = "name")
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
 }

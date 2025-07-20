@@ -7,18 +7,20 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
+@Table(name = "card")
 @Getter
 @Setter
 public class Card {
 
     @Id
+    @Column(name = "id")
     private String id; // Ex: "wind_blast"
 
     @ManyToOne
     @JoinColumn(name = "game_id")
     private Game game;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "properties", columnDefinition = "TEXT")
     private String properties; // Serialized JSON or plain text
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)

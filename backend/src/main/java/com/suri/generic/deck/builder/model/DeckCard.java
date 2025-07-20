@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "deck_card")
 @Getter @Setter
 @NoArgsConstructor
 public class DeckCard {
@@ -21,5 +22,6 @@ public class DeckCard {
     @JoinColumn(name = "card_id")
     private Card card;
 
+    @Column(name = "quantity")
     private int quantity;
 }

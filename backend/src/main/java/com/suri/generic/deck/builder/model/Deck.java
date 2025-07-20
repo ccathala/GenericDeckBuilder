@@ -6,6 +6,7 @@ import lombok.*;
 import java.util.*;
 
 @Entity
+@Table(name = "deck")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,10 +14,13 @@ public class Deck {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
     private UUID id;
 
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "description")
     private String description;
 
     @ManyToOne(optional = false)
