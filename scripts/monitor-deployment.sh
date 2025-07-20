@@ -7,7 +7,7 @@
 set -e
 
 APP_URL="https://mage-noir-deckbuilder.up.railway.app"
-HEALTH_URL="$APP_URL/api/actuator/health"
+HEALTH_URL="$APP_URL/actuator/health"
 ASSETS_URL="$APP_URL/assets/index-CbiFZ2XG.css"
 
 echo "🔍 Surveillance du déploiement Railway - GenericDeckBuilder"
@@ -49,7 +49,7 @@ check_production_headers() {
 monitor_deployment() {
     local start_time=$(date +%s)
     local max_wait=900  # 15 minutes max
-    local check_interval=30  # Vérification toutes les 30 secondes
+    local check_interval=5  # Vérification toutes les 30 secondes
     
     echo "⏰ Démarrage surveillance (max 15 minutes)..."
     echo ""

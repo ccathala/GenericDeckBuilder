@@ -76,6 +76,22 @@ SPRING_PROFILES_ACTIVE=prod
 - Settings → Domains → Generate Domain
 - Ou connecter votre propre domaine
 
+### 4. URLs de Production Railway
+
+Une fois déployé, votre application sera accessible via :
+
+**URL principale :** https://mage-noir-deckbuilder.up.railway.app
+
+**Endpoints de monitoring :**
+- **Health Check :** https://mage-noir-deckbuilder.up.railway.app/actuator/health
+- **Métriques :** https://mage-noir-deckbuilder.up.railway.app/actuator/metrics
+- **Info Application :** https://mage-noir-deckbuilder.up.railway.app/actuator/info
+
+**API Endpoints :**
+- **Authentification :** `/auth/register`, `/auth/login`
+- **Cartes publiques :** `/api/public/{gameId}/cards`
+- **APIs privées :** `/api/**` (JWT requis)
+
 ## 📦 Déploiement sur Heroku
 
 ### 1. Installation Heroku CLI
@@ -116,15 +132,15 @@ git push heroku main
 docker-compose -f docker-compose.prod.yml up --build
 
 # Vérification
-curl http://localhost:8080/api/actuator/health
+curl http://localhost:8080/actuator/health
 ```
 
 ### 2. Accès à l'application
 
 - **API** : http://localhost:8080/api
 - **Frontend** : http://localhost:8080/
-- **Health Check** : http://localhost:8080/api/actuator/health
-- **Métriques** : http://localhost:8080/api/actuator/metrics
+- **Health Check** : http://localhost:8080/actuator/health
+- **Métriques** : http://localhost:8080/actuator/metrics
 
 ## 🧪 Tests Avant Déploiement
 
@@ -152,9 +168,9 @@ docker build -t deckbuilder-test .
 
 ### Endpoints de surveillance
 
-- **Health** : `/api/actuator/health`
-- **Métriques** : `/api/actuator/metrics` 
-- **Info** : `/api/actuator/info`
+- **Health** : `/actuator/health`
+- **Métriques** : `/actuator/metrics` 
+- **Info** : `/actuator/info`
 
 ### Logs
 

@@ -9,7 +9,30 @@
 
 Un constructeur de deck générique et extensible pour jeux de cartes, développé avec Spring Boot et React.
 
-## 📊 Métriques de qualité
+## � Application en Production
+
+**URL principale :** https://mage-noir-deckbuilder.up.railway.app
+
+### 🔍 Endpoints de Monitoring
+
+- **Health Check :** https://mage-noir-deckbuilder.up.railway.app/actuator/health
+- **Métriques :** https://mage-noir-deckbuilder.up.railway.app/actuator/metrics
+- **Info Application :** https://mage-noir-deckbuilder.up.railway.app/actuator/info
+
+### 📡 API Endpoints
+
+- **Authentification :** `/auth/register`, `/auth/login`
+- **Cartes :** `/api/public/{gameId}/cards`
+- **API Privées :** `/api/**` (nécessite JWT)
+
+### 🏗️ Architecture
+
+- **Frontend :** React + Vite (SPA)
+- **Backend :** Spring Boot 3.5.3 + PostgreSQL
+- **Déploiement :** Railway (Docker multi-stage)
+- **Base de données :** PostgreSQL (Railway)
+
+## �📊 Métriques de qualité
 
 - **Couverture de code** : Baseline 48% (Objectif: 80% progressif)
 - **Tests unitaires** : 67 tests avec 100% de réussite  
