@@ -30,15 +30,29 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             System.out.println("🚀 Initialisation des données de base...");
 
+            // Debug: Comptages initiaux
+            Integer initialGameCount = safeCount("SELECT COUNT(*) FROM game");
+            Integer initialCardCount = safeCount("SELECT COUNT(*) FROM card");
+            Integer initialRulesCount = safeCount("SELECT COUNT(*) FROM deckruleset");
+            
+            System.out.println("📊 État initial:");
+            System.out.println("   - Jeux: " + initialGameCount);
+            System.out.println("   - Cartes: " + initialCardCount);
+            System.out.println("   - Règles: " + initialRulesCount);
+            System.out.println();
+
             // Exécuter les scripts d'initialisation dans l'ordre
             executeScript("mage_noir_game_init.sql");
-            System.out.println("✅ Jeux initialisés");
+            Integer afterGameCount = safeCount("SELECT COUNT(*) FROM game");
+            System.out.println("✅ Jeux initialisés (avant: " + initialGameCount + ", après: " + afterGameCount + ")");
             
             executeScript("mage_noir_rules_init.sql");
-            System.out.println("✅ Règles initialisées");
+            Integer afterRulesCount = safeCount("SELECT COUNT(*) FROM deckruleset");
+            System.out.println("✅ Règles initialisées (avant: " + initialRulesCount + ", après: " + afterRulesCount + ")");
             
             executeScript("mage_noir_card_init.sql");
-            System.out.println("✅ Cartes initialisées");
+            Integer afterCardCount = safeCount("SELECT COUNT(*) FROM card");
+            System.out.println("✅ Cartes initialisées (avant: " + initialCardCount + ", après: " + afterCardCount + ")");
 
             // Vérification finale avec gestion des erreurs
             Integer finalGameCount = safeCount("SELECT COUNT(*) FROM game");
@@ -67,24 +81,49 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     private void executeScript(String scriptName) throws Exception {
+        System.out.println("🔍 Debug - Exécution script: " + scriptName);
         ClassPathResource resource = new ClassPathResource(scriptName);
         String sql = resource.getContentAsString(StandardCharsets.UTF_8);
         
+        System.out.println("📄 Contenu script (" + sql.length() + " caractères)");
+        
         // Diviser le script en commandes individuelles
         String[] commands = sql.split(";");
+        System.out.println("📝 Nombre de commandes trouvées: " + commands.length);
         
-        for (String command : commands) {
-            String trimmedCommand = command.trim();
+        int executedCount = 0;
+        int errorCount = 0;
+        
+        for (int i = 0; i < commands.length; i++) {
+            String trimmedCommand = commands[i].trim();
             if (!trimmedCommand.isEmpty() && 
                 !trimmedCommand.startsWith("--") && 
                 !trimmedCommand.startsWith("/*")) {
+                
+                System.out.println("🔧 Exécution commande " + (i+1) + ": " + 
+                    (trimmedCommand.length() > 100 ? 
+                        trimmedCommand.substring(0, 100) + "..." : 
+                        trimmedCommand));
+                
                 try {
-                    jdbcTemplate.execute(trimmedCommand);
+                    int affectedRows = jdbcTemplate.update(trimmedCommand);
+                    System.out.println("✅ Succès - Lignes affectées: " + affectedRows);
+                    executedCount++;
                 } catch (Exception e) {
-                    // Log mais continue (pour gérer les contraintes et données existantes)
-                    System.out.println("⚠️ Warning: " + e.getMessage());
+                    System.out.println("❌ Erreur: " + e.getMessage());
+                    errorCount++;
                 }
+            } else if (!trimmedCommand.isEmpty()) {
+                System.out.println("⏭️ Commande ignorée (commentaire): " + 
+                    (trimmedCommand.length() > 50 ? 
+                        trimmedCommand.substring(0, 50) + "..." : 
+                        trimmedCommand));
             }
         }
+        
+        System.out.println("📊 Résumé " + scriptName + ":");
+        System.out.println("   - Commandes exécutées: " + executedCount);
+        System.out.println("   - Erreurs: " + errorCount);
+        System.out.println();
     }
 }
