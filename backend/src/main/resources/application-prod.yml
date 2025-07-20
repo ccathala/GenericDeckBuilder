@@ -44,18 +44,15 @@ app:
     secret: ${JWT_SECRET:defaultSecretKeyForDevelopmentOnlyNotForProduction}
     expiration: 86400000 # 24 heures
 
-# Configuration des logs (DEBUG pour diagnostiquer les assets)
+# Configuration des logs (production optimisée)
 logging:
   level:
-    "[com.suri.generic.deck.builder]": DEBUG
-    "[org.springframework.security]": DEBUG
-    "[org.springframework.web.servlet]": DEBUG
-    "[org.springframework.web.servlet.resource]": DEBUG
-    "[org.springframework.security.web]": DEBUG
-    "[org.springframework.boot.autoconfigure.security]": DEBUG
+    "[com.suri.generic.deck.builder]": INFO
+    "[org.springframework.security]": WARN
+    "[org.springframework.web.servlet]": WARN
     root: INFO
   pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 # Actuator pour le monitoring
 management:

@@ -26,14 +26,12 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final UserService userService;
-    private final SecurityDebugFilter securityDebugFilter;
     private final StaticResourceHeadersFilter staticResourceHeadersFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserService userService, SecurityDebugFilter securityDebugFilter, 
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService, 
                          StaticResourceHeadersFilter staticResourceHeadersFilter) {
         this.jwtFilter = jwtFilter;
         this.userService = userService;
-        this.securityDebugFilter = securityDebugFilter;
         this.staticResourceHeadersFilter = staticResourceHeadersFilter;
     }
 
@@ -64,7 +62,6 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(staticResourceHeadersFilter, org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
-                .addFilterBefore(securityDebugFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
