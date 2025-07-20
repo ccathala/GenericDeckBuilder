@@ -96,28 +96,43 @@ public class DatabaseInitializer implements CommandLineRunner {
         
         for (int i = 0; i < commands.length; i++) {
             String trimmedCommand = commands[i].trim();
-            if (!trimmedCommand.isEmpty() && 
-                !trimmedCommand.startsWith("--") && 
-                !trimmedCommand.startsWith("/*")) {
+            
+            if (!trimmedCommand.isEmpty()) {
+                // Nettoyer les commentaires du début de la commande
+                String[] lines = trimmedCommand.split("\\n");
+                StringBuilder cleanCommand = new StringBuilder();
+                boolean foundSQL = false;
                 
-                System.out.println("🔧 Exécution commande " + (i+1) + ": " + 
-                    (trimmedCommand.length() > 100 ? 
-                        trimmedCommand.substring(0, 100) + "..." : 
-                        trimmedCommand));
-                
-                try {
-                    int affectedRows = jdbcTemplate.update(trimmedCommand);
-                    System.out.println("✅ Succès - Lignes affectées: " + affectedRows);
-                    executedCount++;
-                } catch (Exception e) {
-                    System.out.println("❌ Erreur: " + e.getMessage());
-                    errorCount++;
+                for (String line : lines) {
+                    String trimmedLine = line.trim();
+                    if (!trimmedLine.startsWith("--") && !trimmedLine.startsWith("/*") && !trimmedLine.isEmpty()) {
+                        cleanCommand.append(line).append("\n");
+                        foundSQL = true;
+                    } else if (foundSQL) {
+                        // Si on a déjà trouvé du SQL, on garde même les lignes vides (pour les blocs multi-lignes)
+                        cleanCommand.append(line).append("\n");
+                    }
                 }
-            } else if (!trimmedCommand.isEmpty()) {
-                System.out.println("⏭️ Commande ignorée (commentaire): " + 
-                    (trimmedCommand.length() > 50 ? 
-                        trimmedCommand.substring(0, 50) + "..." : 
-                        trimmedCommand));
+                
+                String finalCommand = cleanCommand.toString().trim();
+                
+                if (!finalCommand.isEmpty()) {
+                    System.out.println("🔧 Exécution commande " + (i+1) + ": " + 
+                        (finalCommand.length() > 100 ? 
+                            finalCommand.substring(0, 100) + "..." : 
+                            finalCommand));
+                    
+                    try {
+                        int affectedRows = jdbcTemplate.update(finalCommand);
+                        System.out.println("✅ Succès - Lignes affectées: " + affectedRows);
+                        executedCount++;
+                    } catch (Exception e) {
+                        System.out.println("❌ Erreur: " + e.getMessage());
+                        errorCount++;
+                    }
+                } else {
+                    System.out.println("⏭️ Commande ignorée (commentaires uniquement)");
+                }
             }
         }
         
