@@ -2,7 +2,7 @@
 -- Ces règles seront utilisées pour valider les decks
 
 -- La colonne game_id fait référence à la clé primaire de la table game
-INSERT INTO deckruleset (min_cards, max_copies_per_card, game_id) 
+INSERT INTO deck_ruleset (min_cards, max_copies_per_card, game_id) 
 VALUES (40, 4, 'mage_noir')
 ON CONFLICT (game_id) DO UPDATE SET 
   min_cards = 40, 
