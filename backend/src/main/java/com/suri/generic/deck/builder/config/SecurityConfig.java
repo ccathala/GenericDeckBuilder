@@ -27,11 +27,14 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final UserService userService;
     private final SecurityDebugFilter securityDebugFilter;
+    private final StaticResourceHeadersFilter staticResourceHeadersFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserService userService, SecurityDebugFilter securityDebugFilter) {
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService, SecurityDebugFilter securityDebugFilter, 
+                         StaticResourceHeadersFilter staticResourceHeadersFilter) {
         this.jwtFilter = jwtFilter;
         this.userService = userService;
         this.securityDebugFilter = securityDebugFilter;
+        this.staticResourceHeadersFilter = staticResourceHeadersFilter;
     }
 
     @Bean
@@ -60,6 +63,7 @@ public class SecurityConfig {
                                 "/webjars/**")
                         .permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(staticResourceHeadersFilter, org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
                 .addFilterBefore(securityDebugFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

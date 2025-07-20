@@ -2,12 +2,15 @@ package com.suri.generic.deck.builder.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.CacheControl;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.time.Duration;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -22,28 +25,33 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(@NonNull CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173") // or "*" for dev only
+        // Configuration CORS simple pour API seulement
+        registry.addMapping("/api/**")
+                .allowedOrigins("https://mage-noir-deckbuilder.up.railway.app", "http://localhost:5173")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true); // required for JWT Authorization header
+                .allowCredentials(true);
     }
 
     @Override
     public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
-        // Servir les ressources statiques React (SANS CACHE pour debug)
+        // Assets statiques avec headers optimaux (JS, CSS, images)
         registry.addResourceHandler("/assets/**")
                 .addResourceLocations("classpath:/static/assets/")
-                .setCachePeriod(0);  // Pas de cache !
+                .setCacheControl(CacheControl.maxAge(Duration.ofDays(365))) // Cache 1 an
+                .resourceChain(true);
                 
-        registry.addResourceHandler("/static/**")
+        // Autres ressources statiques (favicon, robots.txt, etc.)
+        registry.addResourceHandler("/static/**", "/*.ico", "/*.svg", "/*.png", "/*.txt")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(0);  // Pas de cache !
+                .setCacheControl(CacheControl.maxAge(Duration.ofDays(7))) // Cache 1 semaine
+                .resourceChain(true);
                 
-        // Ajout de patterns supplémentaires pour couvrir tous les cas
+        // Fallback pour SPA - sans cache pour permettre les updates
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(0);
+                .setCacheControl(CacheControl.noCache())
+                .resourceChain(false);
     }
 
     @Override
