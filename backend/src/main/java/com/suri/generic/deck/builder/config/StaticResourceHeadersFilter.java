@@ -39,6 +39,14 @@ public class StaticResourceHeadersFilter extends OncePerRequestFilter {
             response.setHeader("Cache-Control", "public, max-age=604800"); // 1 semaine
             response.setHeader("Access-Control-Allow-Origin", "*");
             
+        } else if (requestURI.startsWith("/auth/") || requestURI.startsWith("/api/")) {
+            // Headers pour endpoints API et Auth (JSON responses)
+            response.setHeader("Content-Type", "application/json;charset=UTF-8");
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            response.setHeader("X-Content-Type-Options", "nosniff");
+            response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+            response.setHeader("X-Frame-Options", "DENY");
+            
         } else if (requestURI.equals("/") || requestURI.equals("/index.html")) {
             // Headers pour la page principale (pas de cache pour permettre updates)
             response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -51,8 +59,8 @@ public class StaticResourceHeadersFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        // Appliquer seulement aux ressources statiques, pas aux API
+        // Appliquer le filtre à tous les endpoints SAUF actuator (health check)
         String path = request.getRequestURI();
-        return path.startsWith("/api/") || path.startsWith("/actuator/");
+        return path.startsWith("/actuator/");
     }
 }
