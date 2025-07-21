@@ -1,4 +1,5 @@
 import React from "react";
+import UniversalImage from "./UniversalImage";
 
 const CardGallery = ({
   cards,
@@ -60,7 +61,7 @@ const CardGallery = ({
             } ${isSelected ? "ring-4 ring-blue-500" : ""}`}
             onClick={() => onCardClick && onCardClick(card)}
           >
-            <img
+            <UniversalImage
               src={card.imageUrl}
               alt={card.name}
               className="w-full h-auto object-cover"

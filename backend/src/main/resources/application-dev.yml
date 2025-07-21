@@ -28,7 +28,7 @@ spring:
     resources:
       static-locations:
         - "classpath:/static/"
-        - "file:images/" # Images locales en développement
+        - "file:../images/" # Images au niveau racine du projet (Spring Boot démarre depuis /backend)
       cache:
         cachecontrol:
           max-age: 3600 # 1 heure en dev pour faciliter les tests
