@@ -93,6 +93,9 @@ ENV LC_ALL=C.UTF-8
 # Copie de l'application buildée
 COPY --from=backend-build --chown=appuser:appuser /app/backend/target/*.jar app.jar
 
+# Création du répertoire pour le volume d'images (sera monté depuis Railway)
+RUN mkdir -p /app/images && chown -R appuser:appuser /app/images
+
 # Configuration JVM optimisée pour production
 ENV JAVA_OPTS="-server \
     -Xms512m -Xmx1024m \

@@ -28,8 +28,8 @@ public class SecurityConfig {
     private final UserService userService;
     private final StaticResourceHeadersFilter staticResourceHeadersFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserService userService, 
-                         StaticResourceHeadersFilter staticResourceHeadersFilter) {
+    public SecurityConfig(JwtFilter jwtFilter, UserService userService,
+            StaticResourceHeadersFilter staticResourceHeadersFilter) {
         this.jwtFilter = jwtFilter;
         this.userService = userService;
         this.staticResourceHeadersFilter = staticResourceHeadersFilter;
@@ -46,13 +46,16 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Frontend et assets en PREMIER (priorité maximale)
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js", "/*.svg", "/*.png", "/*.ico", "/*.txt").permitAll()
+                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js", "/*.svg", "/*.png", "/*.ico",
+                                "/*.txt")
+                        .permitAll()
                         // Routes SPA (pages frontend accessibles publiquement)
                         .requestMatchers("/cards", "/decks", "/profile", "/login", "/register").permitAll()
                         // API et services
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/images/**").permitAll() // Autoriser l'accès aux images
                         .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour Railway
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -63,7 +66,8 @@ public class SecurityConfig {
                                 "/webjars/**")
                         .permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(staticResourceHeadersFilter, org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
+                .addFilterBefore(staticResourceHeadersFilter,
+                        org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -95,10 +99,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Autoriser Railway ET développement local
         configuration.setAllowedOriginPatterns(Arrays.asList(
-            "https://mage-noir-deckbuilder.up.railway.app", 
-            "http://localhost:5173", 
-            "http://localhost:3000"
-        ));
+                "https://mage-noir-deckbuilder.up.railway.app",
+                "http://localhost:5173",
+                "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

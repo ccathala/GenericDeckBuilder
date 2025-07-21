@@ -1,18 +1,8 @@
 import axios from "axios";
-
-// Configuration automatique de l'URL backend selon l'environnement
-const getBaseURL = () => {
-  if (import.meta.env.PROD) {
-    // En production, utiliser la même origine que le frontend (Railway)
-    return window.location.origin;
-  } else {
-    // En développement, utiliser localhost
-    return "http://localhost:8080";
-  }
-};
+import { API_CONFIG } from "../config/api";
 
 const axiosInstance = axios.create({
-  baseURL: getBaseURL(),
+  baseURL: API_CONFIG.baseUrl, // URL dynamique selon l'environnement
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

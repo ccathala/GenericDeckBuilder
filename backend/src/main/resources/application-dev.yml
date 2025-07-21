@@ -1,0 +1,45 @@
+# Configuration pour l'environnement de développement
+server:
+  port: 8080
+
+spring:
+  # Configuration base de données développement
+  datasource:
+    url: jdbc:postgresql://localhost:5432/generic_deck_builder
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # JPA/Hibernate pour développement
+  jpa:
+    hibernate:
+      ddl-auto: update # Auto-création/mise à jour des tables en dev
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Configuration des ressources statiques pour DEV
+  web:
+    resources:
+      static-locations:
+        - "classpath:/static/"
+        - "file:../images/" # Images au niveau racine du projet (Spring Boot démarre depuis /backend)
+      cache:
+        cachecontrol:
+          max-age: 3600 # 1 heure en dev pour faciliter les tests
+
+# Configuration JWT
+jwt:
+  secret: ${JWT_SECRET:devSecretKeyForDevelopmentOnly}
+  expiration: 86400000 # 24 heures
+
+# Logs en mode debug pour le développement
+logging:
+  level:
+    "[com.suri.generic.deck.builder]": DEBUG
+    "[org.springframework.web.servlet.resource]": INFO
