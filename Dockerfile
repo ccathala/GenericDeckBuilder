@@ -30,6 +30,9 @@ RUN addgroup -g 1001 -S appuser && \
 # Copie de l'application
 COPY --from=backend-build --chown=appuser:appuser /app/backend/target/*.jar app.jar
 
+# Création du répertoire pour le volume d'images (sera monté depuis Railway)
+RUN mkdir -p /app/images && chown -R appuser:appuser /app/images
+
 # Configuration des variables d'environnement
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport"

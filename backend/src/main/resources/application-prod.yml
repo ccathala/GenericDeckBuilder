@@ -48,6 +48,16 @@ spring:
   cache:
     type: simple
 
+  # Configuration des ressources statiques pour PROD
+  web:
+    resources:
+      static-locations:
+        - "classpath:/static/"
+        - "file:/app/images/" # Images dans le volume Railway
+      cache:
+        cachecontrol:
+          max-age: 86400 # 24 heures en production
+
 # Configuration JWT personnalisée
 app:
   jwt:

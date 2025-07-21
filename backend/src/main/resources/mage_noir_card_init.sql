@@ -950,3 +950,27 @@ INSERT INTO public.card_localization
 VALUES
 ('flamme', E'Inflige 1 point de dégâts à n\'importe quelle cible.\nAprès que ce sort est utilisé comme composant, défaussez-le.', 'https://magenoir.com/cards/FR/Feu/Flamme.png', 'fr', 'Flamme'),
 ('flamme', E'Inflicts 1 damage to any target.\nAfter this spell is used as a component, discard it.', 'https://magenoir.com/cards/EN/fire/Flame.png', 'en', 'Flame');
+
+--======================================================================================================================
+-- Flamme draconique
+--======================================================================================================================
+INSERT INTO card (id, game_id, properties) VALUES
+('flamme draconique', 'mage_noir', '{
+  "type": "Sort",
+  "element": "Feu",
+  "manaCost": {
+    "total": 2,
+	"manaFeu": 2
+  },
+  "components" : ["flamme"],
+  "extension": "Jeu de base",
+  "artwork": "Charles Ouvrard"
+}');
+
+-- Localisations pour Flamme
+INSERT INTO public.card_localization
+(card_id, description, image_url, locale, "name")
+VALUES
+('flamme', E'Inflige 1 point de dégâts à n\'importe quelle cible.\nAprès que ce sort est utilisé comme composant, défaussez-le.', 'https://magenoir.com/cards/FR/Feu/Flamme.png', 'fr', 'Flamme'),
+('flamme', E'Inflicts 1 damage to any target.\nAfter this spell is used as a component, discard it.', 'https://magenoir.com/cards/EN/fire/Flame.png', 'en', 'Flame');
+
