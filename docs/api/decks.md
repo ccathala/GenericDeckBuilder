@@ -24,19 +24,11 @@ Authorization: Bearer <jwt-token>
 [
   {
     "id": "550e8400-e29b-41d4-a716-446655440001",
-    "name": "Deck Végétal",
-    "description": "Un deck axé sur les cartes végétales",
-    "gameId": "magenoir",
-    "cardCount": 42,
-    "createdAt": "2025-07-22T10:00:00Z"
+    "name": "Deck Végétal"
   },
   {
     "id": "550e8400-e29b-41d4-a716-446655440002",
-    "name": "Deck Feu",
-    "description": "Deck offensif avec des cartes de feu",
-    "gameId": "magenoir",
-    "cardCount": 38,
-    "createdAt": "2025-07-21T15:30:00Z"
+    "name": "Deck Feu"
   }
 ]
 ```
@@ -69,29 +61,14 @@ Authorization: Bearer <jwt-token>
   "name": "Deck Végétal",
   "description": "Un deck axé sur les cartes végétales",
   "gameId": "magenoir",
-  "createdAt": "2025-07-22T10:00:00Z",
   "cards": [
     {
-      "cardId": 1,
-      "quantity": 3,
-      "card": {
-        "id": 1,
-        "name": "Graine",
-        "element": "VEGETAL",
-        "language": "FRENCH",
-        "imagePath": "fr/vegetal/Graine.png"
-      }
+      "cardId": "seed",
+      "quantity": 3
     },
     {
-      "cardId": 2,
-      "quantity": 2,
-      "card": {
-        "id": 2,
-        "name": "Arbre Animé",
-        "element": "VEGETAL",
-        "language": "FRENCH",
-        "imagePath": "fr/vegetal/Arbre-anime.png"
-      }
+      "cardId": "tree_animated",
+      "quantity": 2
     }
   ]
 }
@@ -132,11 +109,11 @@ Content-Type: application/json
   "gameId": "magenoir",
   "cards": [
     {
-      "cardId": 1,
+      "cardId": "seed",
       "quantity": 3
     },
     {
-      "cardId": 5,
+      "cardId": "flame",
       "quantity": 2
     }
   ]
@@ -154,7 +131,7 @@ interface DeckRequestDTO {
 }
 
 interface DeckCardDTO {
-  cardId: number; // ID de la carte
+  cardId: string; // ID de la carte (ex: "seed", "flame")
   quantity: number; // Quantité (1-3 généralement)
 }
 ```
@@ -167,18 +144,10 @@ interface DeckCardDTO {
   "name": "Nouveau Deck",
   "description": "Description de mon nouveau deck",
   "gameId": "magenoir",
-  "createdAt": "2025-07-22T12:00:00Z",
   "cards": [
     {
-      "cardId": 1,
-      "quantity": 3,
-      "card": {
-        "id": 1,
-        "name": "Graine",
-        "element": "VEGETAL",
-        "language": "FRENCH",
-        "imagePath": "fr/vegetal/Graine.png"
-      }
+      "cardId": "seed",
+      "quantity": 3
     }
   ]
 }
@@ -203,11 +172,11 @@ Content-Type: application/json
   "gameId": "magenoir",
   "cards": [
     {
-      "cardId": 1,
+      "cardId": "seed",
       "quantity": 2
     },
     {
-      "cardId": 3,
+      "cardId": "oak_tree",
       "quantity": 3
     }
   ]
@@ -265,10 +234,6 @@ Authorization: Bearer <jwt-token>
 interface DeckSummaryResponseDTO {
   id: string; // UUID du deck
   name: string; // Nom du deck
-  description?: string; // Description
-  gameId: string; // ID du jeu
-  cardCount: number; // Nombre total de cartes
-  createdAt: string; // Date de création (ISO 8601)
 }
 ```
 
@@ -276,18 +241,16 @@ interface DeckSummaryResponseDTO {
 
 ```typescript
 interface DeckResponseDTO {
-  id: string;
-  name: string;
-  description?: string;
-  gameId: string;
-  createdAt: string;
-  cards: DeckCardResponseDTO[];
+  id: string; // UUID du deck
+  name: string; // Nom du deck
+  description: string; // Description du deck
+  gameId: string; // ID du jeu
+  cards: DeckCardResponseDTO[]; // Liste des cartes
 }
 
 interface DeckCardResponseDTO {
-  cardId: number;
-  quantity: number;
-  card: CardResponseDTO; // Détails de la carte
+  cardId: string; // ID de la carte (ex: "seed", "flame")
+  quantity: number; // Quantité de cette carte dans le deck
 }
 ```
 
@@ -337,8 +300,8 @@ const newDeck = await createDeck({
   description: "Deck pour tester l'API",
   gameId: "magenoir",
   cards: [
-    { cardId: 1, quantity: 3 },
-    { cardId: 2, quantity: 2 },
+    { cardId: "seed", quantity: 3 },
+    { cardId: "flame", quantity: 2 },
   ],
 });
 ```
@@ -426,7 +389,6 @@ const DeckManager = () => {
             onClick={() => handleDeckSelect(deck.id)}
           >
             <h3>{deck.name}</h3>
-            <p>{deck.cardCount} cartes</p>
           </div>
         ))}
       </div>
@@ -439,12 +401,8 @@ const DeckManager = () => {
           <div className="cards-list">
             {selectedDeck.cards.map((deckCard) => (
               <div key={deckCard.cardId} className="deck-card">
-                <img
-                  src={`/images/${deckCard.card.imagePath}`}
-                  alt={deckCard.card.name}
-                />
                 <span className="quantity">{deckCard.quantity}x</span>
-                <span className="name">{deckCard.card.name}</span>
+                <span className="card-id">{deckCard.cardId}</span>
               </div>
             ))}
           </div>

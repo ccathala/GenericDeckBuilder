@@ -33,18 +33,28 @@ GET /api/public/games/magenoir/cards?locale=fr
 ```json
 [
   {
-    "id": 1,
+    "id": "seed",
     "name": "Graine",
-    "element": "VEGETAL",
-    "language": "FRENCH",
-    "imagePath": "fr/vegetal/Graine.png"
+    "description": "Une graine qui peut pousser rapidement",
+    "imageUrl": "fr/vegetal/Graine.png",
+    "properties": {
+      "element": "VEGETAL",
+      "cost": 2,
+      "attack": 1,
+      "defense": 1
+    }
   },
   {
-    "id": 2,
+    "id": "flame",
     "name": "Flamme",
-    "element": "FEU",
-    "language": "FRENCH",
-    "imagePath": "fr/feu/Flamme.png"
+    "description": "Une flamme brûlante et destructrice",
+    "imageUrl": "fr/feu/Flamme.png",
+    "properties": {
+      "element": "FEU",
+      "cost": 3,
+      "attack": 2,
+      "defense": 0
+    }
   }
 ]
 ```
@@ -161,11 +171,18 @@ curl -X POST http://localhost:8080/api/games/magenoir/import \
 
 ```typescript
 interface CardResponseDTO {
-  id: number; // ID unique de la carte
-  name: string; // Nom localisé
-  element: string; // Élément (VEGETAL, FEU, EAU, etc.)
-  language: string; // Langue (FRENCH, ENGLISH)
-  imagePath: string; // Chemin relatif de l'image
+  id: string; // ID unique de la carte (ex: "seed", "flame")
+  name: string; // Nom localisé de la carte
+  description: string; // Description localisée
+  imageUrl: string; // URL/chemin de l'image
+  properties: {
+    // Propriétés dynamiques de la carte
+    element?: string; // Élément (VEGETAL, FEU, EAU, etc.)
+    cost?: number; // Coût de la carte
+    attack?: number; // Points d'attaque
+    defense?: number; // Points de défense
+    [key: string]: any; // Autres propriétés spécifiques au jeu
+  };
 }
 ```
 
@@ -184,19 +201,19 @@ Les éléments suivants sont supportés dans MageNoir :
 
 ## Images Management
 
-Les chemins d'images retournés sont relatifs et peuvent être utilisés avec :
+Les chemins d'images retournés dans `imageUrl` peuvent être utilisés avec :
 
 ### Option 1: Static Resource Handler
 
 ```javascript
-const imageUrl = `/images/${card.imagePath}`;
+const imageUrl = `/images/${card.imageUrl}`;
 // Résultat: /images/fr/vegetal/Graine.png
 ```
 
 ### Option 2: CDN Direct (si configuré)
 
 ```javascript
-const imageUrl = `https://magenoir.com/cards/FR/Vegetal/${card.name}.png`;
+const imageUrl = `https://magenoir.com/cards/${card.imageUrl}`;
 ```
 
 ---
@@ -221,6 +238,13 @@ const fetchCards = async (gameId, locale = "fr") => {
 // Usage
 const frenchCards = await fetchCards("magenoir", "fr");
 const englishCards = await fetchCards("magenoir", "en");
+
+// Accéder aux propriétés d'une carte
+frenchCards.forEach((card) => {
+  console.log(`${card.name}: ${card.description}`);
+  console.log(`Élément: ${card.properties.element || "N/A"}`);
+  console.log(`Coût: ${card.properties.cost || 0}`);
+});
 ```
 
 ### Import Cards (Admin)
@@ -276,9 +300,13 @@ const CardsList = ({ gameId, locale }) => {
     <div className="cards-grid">
       {cards.map((card) => (
         <div key={card.id} className="card">
-          <img src={`/images/${card.imagePath}`} alt={card.name} />
+          <img src={`/images/${card.imageUrl}`} alt={card.name} />
           <h3>{card.name}</h3>
-          <span className="element">{card.element}</span>
+          <p className="description">{card.description}</p>
+          <div className="properties">
+            <span className="element">{card.properties.element || "N/A"}</span>
+            <span className="cost">Coût: {card.properties.cost || 0}</span>
+          </div>
         </div>
       ))}
     </div>

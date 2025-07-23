@@ -25,14 +25,12 @@ Authorization: Bearer <jwt-token>
   {
     "id": "magenoir",
     "name": "Mage Noir",
-    "description": "Un jeu de cartes magique",
-    "createdAt": "2025-01-01T00:00:00Z"
+    "description": "Un jeu de cartes magique"
   },
   {
     "id": "othergame",
     "name": "Other Game",
-    "description": "Another card game",
-    "createdAt": "2025-01-02T00:00:00Z"
+    "description": "Another card game"
   }
 ]
 ```
@@ -63,8 +61,7 @@ Authorization: Bearer <jwt-token>
 {
   "id": "magenoir",
   "name": "Mage Noir",
-  "description": "Un jeu de cartes magique avec des éléments",
-  "createdAt": "2025-01-01T00:00:00Z"
+  "description": "Un jeu de cartes magique avec des éléments"
 }
 ```
 
@@ -110,8 +107,7 @@ Content-Type: application/json
 {
   "id": "newgame",
   "name": "New Game",
-  "description": "Description du nouveau jeu",
-  "createdAt": "2025-07-22T12:00:00Z"
+  "description": "Description du nouveau jeu"
 }
 ```
 
@@ -140,8 +136,7 @@ Content-Type: application/json
 {
   "id": "magenoir",
   "name": "Mage Noir - Édition Révisée",
-  "description": "Version mise à jour du jeu",
-  "createdAt": "2025-01-01T00:00:00Z"
+  "description": "Version mise à jour du jeu"
 }
 ```
 
@@ -219,8 +214,7 @@ Authorization: Bearer <jwt-token>
 interface Game {
   id: string; // Identifiant unique
   name: string; // Nom d'affichage
-  description?: string; // Description optionnelle
-  createdAt: string; // Date de création (ISO 8601)
+  description: string; // Description du jeu
 }
 ```
 

@@ -72,7 +72,7 @@ User Input → React Form → API /auth/login → JWT Token → LocalStorage
 ### 2. Gestion des Cartes
 
 ```
-Search Query → API /cards/search → PostgreSQL → JSON Response → React Components
+Game Selection → API /api/public/games/{gameId}/cards → PostgreSQL → JSON Response → React Components
 ```
 
 ### 3. Construction de Deck

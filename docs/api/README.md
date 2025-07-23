@@ -62,29 +62,32 @@ Authorization: Bearer <jwt-token>
 
 ### Réponse de Succès
 
+Les réponses de succès retournent directement les données :
+
 ```json
+// Pour un objet
 {
-  "data": { ... },
-  "message": "Operation successful",
-  "timestamp": "2025-07-21T21:30:00Z"
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "name": "Mon Deck",
+  "description": "Description du deck",
+  "gameId": "magenoir"
 }
+
+// Pour une liste
+[
+  {
+    "id": "seed",
+    "name": "Graine",
+    "description": "Une graine qui peut pousser"
+  }
+]
 ```
 
 ### Réponse d'Erreur
 
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input data",
-    "details": [
-      {
-        "field": "email",
-        "message": "Email is required"
-      }
-    ]
-  },
-  "timestamp": "2025-07-21T21:30:00Z"
+  "error": "Message d'erreur descriptif"
 }
 ```
 
@@ -138,11 +141,14 @@ curl -X GET "http://localhost:8080/api/public/games/magenoir/cards?locale=fr"
 # Response
 [
   {
-    "id": 1,
+    "id": "seed",
     "name": "Graine",
-    "element": "VEGETAL",
-    "language": "FRENCH",
-    "imagePath": "fr/vegetal/Graine.png"
+    "description": "Une graine qui peut pousser rapidement",
+    "imageUrl": "fr/vegetal/Graine.png",
+    "properties": {
+      "element": "VEGETAL",
+      "cost": 2
+    }
   }
 ]
 ```
@@ -178,9 +184,9 @@ X-XSS-Protection: 1; mode=block
 
 Les réponses suivent le format standard JSON :
 
-- **Succès** : Données directes ou dans un objet wrapper
+- **Succès** : Données directes (objet ou array)
 - **Erreur** : `{ "error": "message d'erreur" }`
-- **Listes** : Arrays directs ou avec pagination
+- **Listes** : Arrays directs sans pagination
 
 ### Ressources Statiques
 

@@ -78,27 +78,40 @@ Railway créé automatiquement :
 
 ### Initialisation des Données
 
-Au premier déploiement :
+Au premier déploiement, les données sont initialisées **manuellement** :
 
 ```sql
--- Railway exécute automatiquement les fichiers src/main/resources/*.sql
--- mageNoirInitGame.sql  : Structure des tables
--- mageNoirCardInit.sql  : Données initiales (410 cartes)
+-- Connexion via DBeaver ou client PostgreSQL
+-- Exécution manuelle des scripts dans l'ordre :
+-- 1. mageNoirInitGame.sql     : Structure des tables et jeu initial
+-- 2. mageNoirCardInit.sql     : Données initiales (410 cartes)
+-- 3. mage_noir_rules_init.sql : Règles de validation des decks
 ```
+
+**Processus manuel requis :**
+
+1. Se connecter à la base Railway via DBeaver
+2. Exécuter `mageNoirInitGame.sql`
+3. Exécuter `mageNoirCardInit.sql`
+4. Exécuter `mage_noir_rules_init.sql`
+5. Vérifier l'insertion des 410 cartes et des règles
 
 ### Monitoring Database
 
 ```bash
-# Via Railway CLI (optionnel)
+# Connexion manuelle via DBeaver recommandée
+# Utiliser DATABASE_URL de Railway pour la connexion
+
+# Ou via Railway CLI (optionnel)
 railway db connect
 
-# Ou via logs d'application
+# Vérification en logs d'application
 # Chercher: "HHH000204: Processing PersistenceUnitInfo"
 ```
 
 ## 🌐 Configuration Images & CDN
 
-### Mode CDN (Recommandé - Configuration Actuelle)
+### Mode CDN (Configuration Actuelle)
 
 ```properties
 app.cdn.base-url=https://magenoir.com/cards
@@ -112,22 +125,7 @@ app.cdn.enable-fallback=false
 - ✅ Bande passante illimitée
 - ✅ Images toujours à jour depuis la source
 
-### Mode Volume (Alternative)
-
-Si vous préférez stocker localement :
-
-1. **Créer Volume Railway :**
-
-   - Dashboard → Votre service → Settings → Volumes
-   - Mount Path : `/app/images`
-   - Size : 2GB
-
-2. **Configuration :**
-
-```properties
-app.cdn.base-url=file:/app/images
-app.cdn.enable-fallback=true
-```
+**Important :** Le projet n'utilise **pas** de volume Railway pour la persistance des images. Toutes les images sont servies directement depuis le CDN externe.
 
 ## 🔄 CI/CD Pipeline
 
@@ -170,8 +168,7 @@ server.error.include-stacktrace=never
 
 ### Components Profil-Spécifiques
 
-- **RailwayImageSetup :** `@Profile("prod")` - Setup images automatique
-- **DebugController :** `@Profile("prod")` - Debug endpoints en production
+Le profil production utilise la configuration standard Spring Boot sans composants spécifiques.
 
 ## 📊 Monitoring & Logs
 
@@ -190,9 +187,8 @@ Railway vérifie automatiquement :
 Dashboard → Votre service → Deploy Logs
 
 # Logs Spring Boot recherchés :
-# 🚀 Démarrage setup images Railway...
-# ✅ Images déjà présentes, skip setup
 # Started Application in X.XXX seconds
+# HikariPool-1 - Start completed
 ```
 
 ### Métriques Performance
@@ -218,11 +214,10 @@ Dashboard → Votre service → Deploy Logs
 #### 2. Images ne s'affichent pas
 
 ```bash
-# Vérifier configuration CDN
-curl -I https://votre-app.railway.app/api/images/config
-
 # Test direct CDN
 curl -I https://magenoir.com/cards/FR/Vegetal/Graine.png
+
+# Vérifier logs d'application pour erreurs CDN
 ```
 
 #### 3. Base de données inaccessible
@@ -235,10 +230,9 @@ curl -I https://magenoir.com/cards/FR/Vegetal/Graine.png
 ### Debug en Production
 
 ```bash
-# Endpoints de debug (disponibles en prod)
-GET /api/debug/volume/stats      # Statistiques stockage
-GET /api/images/config           # Configuration CDN
+# Endpoints disponibles :
 GET /actuator/health             # Health check général
+GET /actuator/info               # Informations application
 ```
 
 ## 🔒 Sécurité Production
@@ -288,9 +282,14 @@ GET /actuator/health             # Health check général
 ### Après Déploiement
 
 - [ ] Health check OK (`/actuator/health`)
-- [ ] API répond (`/api/cards` avec auth)
-- [ ] Images s'affichent (test manuel)
-- [ ] Database initialisée (410 cartes)
+- [ ] **Initialisation manuelle DB via DBeaver**
+- [ ] **Exécution mageNoirInitGame.sql**
+- [ ] **Exécution mageNoirCardInit.sql**
+- [ ] **Exécution mage_noir_rules_init.sql**
+- [ ] Vérification 410 cartes insérées
+- [ ] Vérification règles deck configurées (min 40 cartes, max 4 copies)
+- [ ] API répond (`/api/public/games/magenoir/cards`)
+- [ ] Images s'affichent depuis CDN externe
 - [ ] Logs sans erreurs critiques
 
 ### Monitoring Continu
