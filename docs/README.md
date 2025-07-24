@@ -31,6 +31,10 @@ Bienvenue dans la documentation complète du projet GenericDeckBuilder - un cons
 - [**Testing**](development/testing.md) - Tests unitaires et d'intégration
 - [**Debugging**](development/debugging.md) - Outils et techniques de debug
 
+## 📊 Scraping et Données
+
+- [**Mapping Manuel Mage Noir**](scraping/README_MAPPING_MANUAL.md) - Guide complet du système de mapping bilingue FR/EN
+
 ## 🎯 Guides Spécifiques
 
 ### Pour les Développeurs
