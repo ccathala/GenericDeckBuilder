@@ -11,7 +11,7 @@
     "myProfile": "Mon profil"
   },
   "common": {
-    "appName": "Generic Deck Builder",
+    "appName": "MNDB",
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
@@ -24,7 +24,7 @@
   },
   "pages": {
     "home": {
-      "welcome": "Bienvenue sur Generic Deck Builder",
+      "welcome": "Bienvenue sur MNDB",
       "description": "Créez, gérez et optimisez vos decks de cartes avec notre outil puissant et intuitif.",
       "welcomeBack": "Bienvenue, {{name}} !",
       "browseCards": "Parcourir les cartes",
@@ -49,7 +49,7 @@
   "auth": {
     "register": {
       "title": "Créer un compte",
-      "subtitle": "Rejoignez Generic Deck Builder",
+      "subtitle": "Rejoignez MNDB",
       "name": "Nom d'utilisateur",
       "namePlaceholder": "Votre nom d'utilisateur",
       "email": "Adresse email",
