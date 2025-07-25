@@ -26,6 +26,9 @@ class MageNoirSQLGeneratorV2:
         # Charger le mapping manuel des correspondances FR/EN
         self.manual_mapping = self.load_manual_mapping()
         
+        # NOUVEAU : Tracker des images déjà utilisées pour éviter les doublons
+        self.used_images = set()
+        
     def load_manual_mapping(self):
         """Charge le mapping manuel des correspondances FR/EN"""
         try:
@@ -196,6 +199,26 @@ class MageNoirSQLGeneratorV2:
         return ' '.join(word.capitalize() for word in name.split())
     
 
+    def levenshtein_distance(self, s1, s2):
+        """Calcule la distance de Levenshtein entre deux chaînes"""
+        if len(s1) < len(s2):
+            return self.levenshtein_distance(s2, s1)
+        
+        if len(s2) == 0:
+            return len(s1)
+        
+        previous_row = list(range(len(s2) + 1))
+        for i, c1 in enumerate(s1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous_row[j + 1] + 1
+                deletions = current_row[j] + 1
+                substitutions = previous_row[j] + (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+        
+        return previous_row[-1]
+
     def find_manual_match(self, french_card, english_cards):
         """Trouve la correspondance anglaise via le mapping manuel"""
         fr_name = french_card['card_name_normalized']
@@ -227,33 +250,260 @@ class MageNoirSQLGeneratorV2:
         return None, 0
     
     def find_matching_image_url(self, card_info, image_urls):
-        """Trouve l'URL de l'image correspondante"""
+        """Trouve l'URL de l'image correspondante avec vérification d'unicité et matching strict"""
         element_raw = card_info['element_raw']
         card_name_raw = card_info['card_name_raw']
         lang_code = card_info['language_code']
         
-        # Chercher une correspondance exacte ou approximative
+        # NOUVEAU : Conversion des éléments pour le matching d'images
+        element_for_image_matching = element_raw.lower()
+        if lang_code == 'FR':
+            # Convertir les éléments anglais vers français pour les images françaises
+            element_mapping = {
+                'fire': 'feu',
+                'water': 'eau', 
+                'air': 'air',
+                'mineral': 'mineral',
+                'vegetal': 'vegetal',
+                'arcane': 'arcane'
+            }
+            element_for_image_matching = element_mapping.get(element_raw.lower(), element_raw.lower())
+        elif lang_code == 'EN':
+            # Pour les images anglaises, garder les noms anglais
+            element_for_image_matching = element_raw.lower()
+        
+        def normalize_for_matching(name):
+            """Normalise un nom pour le matching d'images - VERSION ÉTENDUE"""
+            name = name.lower()
+            
+            # Supprimer les apostrophes et caractères spéciaux
+            name = re.sub(r"['\"`]", '', name)
+            
+            # Normaliser TOUS les caractères accentués
+            accents_map = {
+                'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+                'à': 'a', 'â': 'a', 'ä': 'a', 'á': 'a',
+                'ù': 'u', 'û': 'u', 'ü': 'u', 'ú': 'u',
+                'ï': 'i', 'î': 'i', 'í': 'i',
+                'ô': 'o', 'ö': 'o', 'ó': 'o',
+                'ç': 'c', 'ÿ': 'y',
+                'æ': 'ae', 'œ': 'oe'
+            }
+            
+            for accented, plain in accents_map.items():
+                name = name.replace(accented, plain)
+            
+            # Remplacer les espaces et caractères spéciaux par tirets
+            name = re.sub(r'[\s_]+', '-', name)
+            
+            # Supprimer les caractères non alphanumériques sauf tirets
+            name = re.sub(r'[^a-z0-9\-]', '', name)
+            
+            # Nettoyer les tirets multiples
+            name = re.sub(r'-+', '-', name).strip('-')
+            
+            return name
+
+        def is_high_quality_match(variant, url_name_normalized):
+            """Vérifie si le match est de haute qualité (exact ou très proche)"""
+            
+            # 1. Match exact (priorité absolue)
+            if variant == url_name_normalized:
+                return True, "EXACT"
+            
+            # 2. Match avec différence mineure (1-2 caractères max)
+            if len(variant) >= 5 and len(url_name_normalized) >= 5:
+                distance = self.levenshtein_distance(variant, url_name_normalized)
+                if distance <= 2:  # BEAUCOUP PLUS STRICT
+                    return True, "MINOR_DIFF"
+            
+            # 3. Match par inclusion TRÈS strict (longueur minimale et ratio strict)
+            if variant and url_name_normalized:
+                if len(variant) >= 8 and len(url_name_normalized) >= 8:  # LONGUEUR MINIMALE
+                    if variant in url_name_normalized or url_name_normalized in variant:
+                        ratio = max(len(variant), len(url_name_normalized)) / min(len(variant), len(url_name_normalized))
+                        if ratio <= 1.2:  # BEAUCOUP PLUS STRICT (était 1.8)
+                            return True, "INCLUSION_STRICT"
+            
+            # 4. Cas spéciaux pour les 4 cartes restantes
+            special_mappings = {
+                'epee-materialisee': ['epee', 'materiel', 'sword', 'materialized'],
+                'rock': ['rock', 'roche', 'stone'],
+                'flash-of-inspiration': ['flash', 'inspiration', 'eclat', 'brilliant'],
+                'eruption-de-magma': ['eruption', 'magma', 'volcanic']
+            }
+            
+            # Vérifier si la carte fait partie des cas spéciaux
+            for special_card, keywords in special_mappings.items():
+                if any(keyword in variant for keyword in keywords) and any(keyword in url_name_normalized for keyword in keywords):
+                    matching_keywords = [k for k in keywords if k in variant or k in url_name_normalized]
+                    if len(matching_keywords) >= 1:
+                        return True, "SPECIAL_CASE"
+            
+            return False, "NO_MATCH"
+        
+        # Normaliser le nom de la carte
+        normalized_card_name = normalize_for_matching(card_name_raw)
+        
+        # Créer des variants RESTREINTS (moins de variants pour éviter les faux positifs)
+        card_name_variants = [
+            normalized_card_name,
+            normalized_card_name.replace('-', '_'),
+            normalized_card_name.replace('_', '-'),
+            card_name_raw.lower(),
+            card_name_raw.lower().replace('_', '-'),
+            card_name_raw.lower().replace('-', '_'),
+        ]
+        
+        # Cas spéciaux SEULEMENT pour les vraies correspondances connues
+        special_cases = {
+            'connaissance': 'connaisance',
+            'guerisseuse': 'gueriseuse', 
+            'brinicle': 'brinicle',
+            'maelstrom': 'maelstrom',
+            'goutte-d-eau': 'goutte-d-eau',
+            'anneau-d-azur': 'anneau-d-azur',
+            
+            # NOUVEAUX cas spéciaux pour les 4 cartes restantes
+            'epee-materialisee': 'epee-materiel',
+            'materialisee': 'materiel',
+            'eruption-de-magma': 'eruption-magma',
+            'flash-of-inspiration': 'flash-inspiration',
+            'inspiration': 'brilliant-inspiration',
+        }
+        
+        # Appliquer les cas spéciaux
+        for original, replacement in special_cases.items():
+            if original in normalized_card_name:
+                variant_special = normalized_card_name.replace(original, replacement)
+                card_name_variants.append(variant_special)
+        
+        # Debug pour cartes problématiques
+        problematic_cards = [
+            'flamme', 'haute', 'fleche', 'catalyseur', 'brulure', 'boule', 'aube', 
+            'anneau', 'fouet', 'vague', 'ignition', 'tsunami', 'source', 'lame', 
+            'souffle', 'lumiere', 'robe', 'rituel', 'masque', 'ocean', 'minerai', 
+            'mur', 'meteore', 'pluie', 'maree', 'maelstrom', 'projectile', 'lances', 
+            'guerisseuse', 'rayon', 'infiltration', 'hiver', 'grandes', 'gouttelette', 
+            'goutte', 'flocon', 'soleil', 'ere', 'engloutissement', 'echarde', 
+            'vents', 'condensation', 'epee', 'brinicle', 'arbre', 'explosion', 
+            'eruption', 'eblouissement', 'fission', 'rock', 'flash', 'inspiration'
+        ]
+        
+        debug_mode = any(card in card_name_raw.lower() for card in problematic_cards)
+        
+        if debug_mode:
+            print(f"    DEBUG - Carte: {card_name_raw}")
+            print(f"    DEBUG - Élément: {element_raw} -> {element_for_image_matching}")
+            print(f"    DEBUG - Normalized: {normalized_card_name}")
+            print(f"    DEBUG - Variants: {card_name_variants}")
+        
+        # Chercher une correspondance avec vérification d'unicité
+        best_match = None
+        best_match_type = None
+        
         for image_url in image_urls:
+            # NOUVEAU : Vérifier si l'image n'est pas déjà utilisée
+            if image_url in self.used_images:
+                continue
+                
             if (lang_code in image_url and 
-                element_raw.lower() in image_url.lower()):
+                element_for_image_matching in image_url.lower()):
                 
-                # Vérifier le nom de la carte (avec variations)
-                url_name = image_url.split('/')[-1].replace('.png', '').lower()
-                card_name_variants = [
-                    card_name_raw.lower(),
-                    card_name_raw.lower().replace('_', '-'),
-                    card_name_raw.lower().replace('-', '_'),
-                    card_name_raw.lower().replace('_', '').replace('-', ''),
-                ]
+                url_name = image_url.split('/')[-1].replace('.png', '').replace('.jpg', '')
+                url_name_normalized = normalize_for_matching(url_name)
                 
+                if debug_mode:
+                    print(f"    DEBUG - Test image: {url_name} -> {url_name_normalized}")
+                
+                # Tester uniquement les matches de haute qualité
                 for variant in card_name_variants:
-                    if variant in url_name or url_name in variant:
-                        return image_url
+                    if not variant:
+                        continue
                         
-        return None
+                    is_match, match_type = is_high_quality_match(variant, url_name_normalized)
+                    
+                    if is_match:
+                        if debug_mode:
+                            print(f"    DEBUG - {match_type}: {variant} <-> {url_name_normalized}")
+                        
+                        # Prioriser les matches exacts
+                        if match_type == "EXACT":
+                            best_match = image_url
+                            best_match_type = match_type
+                            break
+                        elif match_type == "MINOR_DIFF" and best_match_type != "EXACT":
+                            best_match = image_url
+                            best_match_type = match_type
+                        elif match_type == "INCLUSION_STRICT" and best_match_type not in ["EXACT", "MINOR_DIFF"]:
+                            best_match = image_url
+                            best_match_type = match_type
+                
+                if best_match_type == "EXACT":
+                    break  # Arrêter si match exact trouvé
+        
+        # NOUVEAU : Mode de fallback pour les 4 cartes restantes problématiques
+        if not best_match and debug_mode:
+            print(f"    DEBUG - Recherche élargie pour carte problématique: {card_name_raw}")
+            
+            # Recherche élargie avec critères assouplis
+            for image_url in image_urls:
+                if image_url in self.used_images:
+                    continue
+                    
+                if (lang_code in image_url and element_for_image_matching in image_url.lower()):
+                    url_name = image_url.split('/')[-1].replace('.png', '').replace('.jpg', '')
+                    url_name_normalized = normalize_for_matching(url_name)
+                    
+                    if debug_mode:
+                        print(f"    DEBUG - Test fallback: {url_name} -> {url_name_normalized}")
+                    
+                    # Critères assouplis pour les cartes problématiques
+                    for variant in card_name_variants:
+                        if not variant:
+                            continue
+                        
+                        # Match par mots-clés pour les cas difficiles
+                        variant_words = set(variant.split('-'))
+                        url_words = set(url_name_normalized.split('-'))
+                        
+                        # Supprimer les mots trop courts pour éviter les faux positifs
+                        variant_words = {w for w in variant_words if len(w) >= 3}
+                        url_words = {w for w in url_words if len(w) >= 3}
+                        
+                        common_words = variant_words & url_words
+                        
+                        # Au moins 1 mot commun ET longueur similaire
+                        if (len(common_words) >= 1 and 
+                            len(variant_words) <= 3 and
+                            abs(len(variant) - len(url_name_normalized)) <= 5):
+                            
+                            best_match = image_url
+                            best_match_type = "FALLBACK_KEYWORD"
+                            if debug_mode:
+                                print(f"    DEBUG - FALLBACK_KEYWORD: {variant} <-> {url_name_normalized} (mots communs: {common_words})")
+                            break
+                    
+                    if best_match:
+                        break
+        
+        # NOUVEAU : Marquer l'image comme utilisée
+        if best_match:
+            self.used_images.add(best_match)
+            if debug_mode:
+                print(f"    DEBUG - Image assignée: {best_match}")
+        else:
+            if debug_mode:
+                print(f"    DEBUG - Aucune image trouvée pour: {card_name_raw}")
+        
+        return best_match
     
     def process_urls_data(self, urls_data):
         """Traite toutes les URLs et génère les données des cartes avec correspondance FR/EN"""
+        
+        # NOUVEAU : Réinitialiser le tracker d'images
+        self.used_images.clear()
+        
         french_cards = []
         english_cards = []
         
@@ -391,6 +641,33 @@ class MageNoirSQLGeneratorV2:
         
         return matched_cards
     
+    def validate_image_uniqueness(self, cards_data):
+        """Valide que chaque image n'est utilisée qu'une seule fois"""
+        image_usage = {}
+        duplicates = []
+        
+        for card in cards_data:
+            for locale in ['fr', 'en']:
+                if locale in card['localizations']:
+                    image_url = card['localizations'][locale].get('image_url', '')
+                    if image_url:
+                        if image_url in image_usage:
+                            duplicates.append({
+                                'image': image_url,
+                                'cards': [image_usage[image_url], card['card_id']]
+                            })
+                        else:
+                            image_usage[image_url] = card['card_id']
+        
+        if duplicates:
+            print(f"⚠️  ATTENTION: {len(duplicates)} images dupliquées détectées:")
+            for dup in duplicates:
+                print(f"   {dup['image']} utilisée par: {', '.join(dup['cards'])}")
+        else:
+            print("✅ Validation réussie - Toutes les images sont uniques")
+        
+        return len(duplicates) == 0
+    
     def generate_sql(self, cards_data):
         """Génère le script SQL complet"""
         sql_lines = []
@@ -426,9 +703,9 @@ class MageNoirSQLGeneratorV2:
             elements[element].append(card)
         
         for element, element_cards in sorted(elements.items()):
-            sql_lines.append("=" * 120)
+            sql_lines.append("--" + ("=" * 120))
             sql_lines.append(f"-- {element}")
-            sql_lines.append("=" * 120)
+            sql_lines.append("--" + ("=" * 120))
             sql_lines.append("")
             
             for card in sorted(element_cards, key=lambda x: x['card_id']):
@@ -462,9 +739,9 @@ class MageNoirSQLGeneratorV2:
         artwork = card.get('artwork', 'Artiste inconnu')
         
         # Commentaire de séparation
-        sql_lines.append("=" * 120)
+        sql_lines.append("--" + ("=" * 120))
         sql_lines.append(f"-- {display_name}")
-        sql_lines.append("=" * 120)
+        sql_lines.append("--" + ("=" * 120))
         
         # INSERT pour la carte principale
         sql_lines.append(f"INSERT INTO card (id, game_id, properties) VALUES")
@@ -554,6 +831,15 @@ def main():
     print("\nTraitement des URLs avec correspondance FR/EN...")
     cards_data = generator.process_urls_data(urls_data)
     print(f"{len(cards_data)} cartes traitees")
+    
+    # NOUVEAU : Valider l'unicité des images
+    print("\nValidation de l'unicite des images...")
+    is_valid = generator.validate_image_uniqueness(cards_data)
+    if not is_valid:
+        print("❌ Validation échouée - Images dupliquées détectées")
+        print("ℹ️  Le script continuera malgré les doublons")
+    else:
+        print("✅ Validation réussie - Toutes les images sont uniques")
     
     # Générer le SQL
     print("\nGeneration du script SQL...")
