@@ -32,7 +32,7 @@ class MageNoirSQLGeneratorV2:
             with open('card_mapping_fr_en_structure.json', 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"⚠️ Impossible de charger le mapping manuel: {e}")
+            print(f"Impossible de charger le mapping manuel: {e}")
             return {"mappings": {}, "reverse_mappings": {}}
         
     def load_urls_data(self, json_file):
@@ -43,7 +43,7 @@ class MageNoirSQLGeneratorV2:
     def extract_mana_cost_from_webpage(self, url):
         """Extrait toutes les informations de la carte depuis la page web"""
         try:
-            print(f"  🔍 Extraction données: {url}")
+            print(f"  Extraction donnees: {url}")
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
@@ -122,7 +122,7 @@ class MageNoirSQLGeneratorV2:
             card_data['total_cost'] = total_mana_cost
             
             # Extraire les composants requis (FR/EN)
-            component_match = re.search(r'(Composants requis|Required components)\s*:\s*(\d+)\s+(\w+)', text_content)
+            component_match = re.search(r'(Composants requis|Composants nécessaires|Required components)\s*:\s*(\d+)\s+(\w+)', text_content)
             if component_match:
                 component_count = int(component_match.group(2))
                 component_name = component_match.group(3)
@@ -135,7 +135,7 @@ class MageNoirSQLGeneratorV2:
             return card_data
             
         except Exception as e:
-            print(f"    ⚠️ Erreur extraction {url}: {e}")
+            print(f"    Erreur extraction {url}: {e}")
             # Retourner des valeurs par défaut en cas d'erreur
             return {
                 'total_cost': 0,
@@ -201,8 +201,19 @@ class MageNoirSQLGeneratorV2:
         fr_name = french_card['card_name_normalized']
         fr_element = french_card['element'].lower()
         
+        # Convertir l'élément français vers l'élément utilisé dans le mapping JSON
+        element_for_mapping = fr_element
+        if fr_element == 'feu':
+            element_for_mapping = 'fire'
+        elif fr_element == 'eau':
+            element_for_mapping = 'water'
+        elif fr_element == 'végétal':
+            element_for_mapping = 'vegetal'
+        elif fr_element == 'minéral':
+            element_for_mapping = 'mineral'
+        
         # Chercher dans le mapping manuel
-        element_mappings = self.manual_mapping.get('mappings', {}).get(fr_element, {})
+        element_mappings = self.manual_mapping.get('mappings', {}).get(element_for_mapping, {})
         expected_en_name = element_mappings.get(fr_name)
         
         # Vérifier que ce n'est pas un placeholder
@@ -210,7 +221,7 @@ class MageNoirSQLGeneratorV2:
             # Chercher la carte anglaise correspondante
             for en_card in english_cards:
                 if en_card['card_name_normalized'] == expected_en_name:
-                    print(f"    ✅ Correspondance manuelle trouvée: {fr_name} ↔ {expected_en_name}")
+                    print(f"    Correspondance manuelle trouvee: {fr_name} <-> {expected_en_name}")
                     return en_card, 1.0  # Score parfait pour les correspondances manuelles
         
         return None, 0
@@ -258,7 +269,7 @@ class MageNoirSQLGeneratorV2:
             if card_info:
                 english_cards.append(card_info)
         
-        print(f"🔄 Correspondance de {len(french_cards)} cartes françaises avec {len(english_cards)} cartes anglaises...")
+        print(f"Correspondance de {len(french_cards)} cartes francaises avec {len(english_cards)} cartes anglaises...")
         
         # Trier les cartes par élément et par ordre alphabétique pour faciliter la correspondance
         french_cards_sorted = sorted(french_cards, key=lambda x: (x['element'], x['card_name_normalized']))
@@ -288,7 +299,7 @@ class MageNoirSQLGeneratorV2:
             fr_cards_in_element = fr_by_element[element]
             en_cards_in_element = en_by_element.get(element, [])
             
-            print(f"  📊 {element}: {len(fr_cards_in_element)} FR, {len(en_cards_in_element)} EN")
+            print(f"  {element}: {len(fr_cards_in_element)} FR, {len(en_cards_in_element)} EN")
             
             # Créer une copie de la liste anglaise pour pouvoir enlever les cartes déjà matchées
             remaining_en_cards = en_cards_in_element.copy()
@@ -333,7 +344,7 @@ class MageNoirSQLGeneratorV2:
                 }
                 
                 # Extraire toutes les données depuis la page française
-                print(f"  🔍 Extraction données: {fr_card['card_name_display']}")
+                print(f"  Extraction donnees: {fr_card['card_name_display']}")
                 card_info = self.extract_mana_cost_from_webpage(fr_card['url'])
                 card_data['total_cost'] = card_info['total_cost']
                 card_data['mana_costs'] = card_info['mana_costs']
@@ -348,10 +359,8 @@ class MageNoirSQLGeneratorV2:
                 # Petite pause pour éviter de surcharger le serveur
                 time.sleep(0.5)
                 
-                # Ajouter la localisation anglaise si correspondance trouvée dans le mapping manuel
+                # Traiter SEULEMENT les cartes avec correspondance manuelle
                 if en_match:
-                    print(f"    🔗 Correspondance trouvée: {fr_card['card_name_display']} ↔ {en_match['card_name_display']} (score: {match_score:.2f})")
-                    
                     en_image = self.find_matching_image_url(en_match, urls_data['english_image_urls'])
                     card_data['localizations']['en'] = {
                         'name': en_match['card_name_display'],
@@ -361,7 +370,7 @@ class MageNoirSQLGeneratorV2:
                     }
                     
                     # Toujours extraire les données depuis la page anglaise pour la localisation
-                    print(f"  🔍 Extraction données (EN): {en_match['card_name_display']}")
+                    print(f"  Extraction donnees (EN): {en_match['card_name_display']}")
                     en_card_info = self.extract_mana_cost_from_webpage(en_match['url'])
                     
                     # Toujours utiliser la description anglaise pour la localisation EN
@@ -372,83 +381,13 @@ class MageNoirSQLGeneratorV2:
                     
                     # Petite pause pour éviter de surcharger le serveur
                     time.sleep(0.5)
+                    
+                    # Ajouter la carte SEULEMENT si correspondance manuelle trouvée
+                    matched_cards.append(card_data)
+                    card_counter += 1
                 else:
-                    print(f"    ⚠️ Aucune correspondance manuelle trouvée pour: {fr_card['card_name_display']}")
-                    # Ajouter une localisation anglaise par défaut
-                    card_data['localizations']['en'] = {
-                        'name': fr_card['card_name_display'],
-                        'image_url': '',
-                        'card_url': '',
-                        'description': 'Description to complete'
-                    }
-                
-                matched_cards.append(card_data)
-                card_counter += 1
-            
-            # Traiter les cartes anglaises restantes (qui n'ont pas de correspondance française)
-            for remaining_en_card in remaining_en_cards:
-                print(f"    ⚠️ Carte anglaise sans correspondance française: {remaining_en_card['card_name_display']}")
-                
-                # Générer un ID basé sur la carte anglaise
-                base_name = remaining_en_card['card_name_normalized']
-                card_id = base_name.lower().strip()
-                
-                # Construire la carte avec ses localisations
-                card_data = {
-                    'card_id': card_id,
-                    'element': remaining_en_card['element'],
-                    'localizations': {},
-                    'match_score': 0.5,
-                    'total_cost': 0,
-                    'mana_costs': {
-                        'manaVegetal': 0,
-                        'manaFeu': 0,
-                        'manaAir': 0,
-                        'manaEau': 0,
-                        'manaMineral': 0,
-                        'manaArcane': 0
-                    },
-                    'component_costs': [],
-                    'type': 'Sort',
-                    'extension': 'Jeu de base',
-                    'artwork': 'Artiste inconnu'
-                }
-                
-                # Ajouter une localisation française par défaut
-                card_data['localizations']['fr'] = {
-                    'name': remaining_en_card['card_name_display'],
-                    'image_url': '',
-                    'card_url': '',
-                    'description': 'Description à compléter'
-                }
-                
-                # Ajouter la localisation anglaise et extraire les données
-                en_image = self.find_matching_image_url(remaining_en_card, urls_data['english_image_urls'])
-                card_data['localizations']['en'] = {
-                    'name': remaining_en_card['card_name_display'],
-                    'image_url': en_image or '',
-                    'card_url': remaining_en_card['url'],
-                    'description': ''  # Sera rempli après extraction
-                }
-                
-                # Extraire toutes les données depuis la page anglaise
-                print(f"  🔍 Extraction données (EN seul): {remaining_en_card['card_name_display']}")
-                en_card_info = self.extract_mana_cost_from_webpage(remaining_en_card['url'])
-                card_data['total_cost'] = en_card_info['total_cost']
-                card_data['mana_costs'] = en_card_info['mana_costs']
-                card_data['component_costs'] = en_card_info['component_costs']
-                card_data['type'] = en_card_info['type']
-                card_data['extension'] = en_card_info['extension']
-                card_data['artwork'] = en_card_info['artwork']
-                
-                # Ajouter la description anglaise
-                card_data['localizations']['en']['description'] = en_card_info['description']
-                
-                # Petite pause pour éviter de surcharger le serveur
-                time.sleep(0.5)
-                
-                matched_cards.append(card_data)
-                card_counter += 1
+                    print(f"    IGNORE - Aucune correspondance manuelle trouvee pour: {fr_card['card_name_display']}")
+                    # Ne pas ajouter la carte sans correspondance manuelle
         
         return matched_cards
     
@@ -601,23 +540,23 @@ class MageNoirSQLGeneratorV2:
 
 def main():
     """Fonction principale"""
-    print("🚀 GÉNÉRATION DU SCRIPT SQL MAGE NOIR V2 (avec correspondance FR/EN)")
+    print("GENERATION DU SCRIPT SQL MAGE NOIR V2 (avec correspondance FR/EN)")
     print("=" * 80)
     
     generator = MageNoirSQLGeneratorV2()
     
     # Charger les données des URLs
-    print("📂 Chargement des données des URLs...")
+    print("Chargement des donnees des URLs...")
     urls_data = generator.load_urls_data('exact_410_card_urls_and_images_fr_en.json')
-    print(f"✅ {urls_data['cards_total_count']} cartes et {urls_data['images_total_count']} images chargées")
+    print(f"{urls_data['cards_total_count']} cartes et {urls_data['images_total_count']} images chargees")
     
     # Traiter les URLs avec correspondance FR/EN
-    print("\n🔄 Traitement des URLs avec correspondance FR/EN...")
+    print("\nTraitement des URLs avec correspondance FR/EN...")
     cards_data = generator.process_urls_data(urls_data)
-    print(f"✅ {len(cards_data)} cartes traitées")
+    print(f"{len(cards_data)} cartes traitees")
     
     # Générer le SQL
-    print("\n📝 Génération du script SQL...")
+    print("\nGeneration du script SQL...")
     sql_content = generator.generate_sql(cards_data)
     
     # Sauvegarder le fichier SQL
