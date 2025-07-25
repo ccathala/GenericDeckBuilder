@@ -19,7 +19,7 @@ public class PublicCardController {
     }
 
 
-    @Operation(summary = "Récupère toutes les cartes localisées pour un jeu donné")
+    @Operation(summary = "Récupère toutes les cartes localisées pour un jeu donné, triées par élément (Végétal, Feu, Air, Eau, Minéral, Arcane), extension (Jeu de base en premier) et coût mana croissant")
     @GetMapping("/{gameId}/cards")
     public ResponseEntity<List<CardResponseDTO>> getCardsByGameAndLocale(
             @PathVariable String gameId,
