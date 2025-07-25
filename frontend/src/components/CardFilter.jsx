@@ -12,9 +12,9 @@ const CardFilter = ({
   const elements = [
     { key: "Végétal", color: "bg-green-600 hover:bg-green-700" },
     { key: "Feu", color: "bg-red-600 hover:bg-red-700" },
-    { key: "Eau", color: "bg-blue-600 hover:bg-blue-700" },
     { key: "Air", color: "bg-cyan-600 hover:bg-cyan-700" },
-    { key: "Mineral", color: "bg-gray-600 hover:bg-gray-700" },
+    { key: "Eau", color: "bg-blue-600 hover:bg-blue-700" },
+    { key: "Minéral", color: "bg-gray-600 hover:bg-gray-700" },
     { key: "Arcane", color: "bg-purple-600 hover:bg-purple-700" },
   ];
 

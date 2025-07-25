@@ -81,8 +81,8 @@ class CardServiceImplTest {
         String gameId = "mage-noir";
         String locale = "fr";
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.of(testGame));
-        when(cardRepository.findByGame(testGame)).thenReturn(List.of(testCard));
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(List.of(testCard));
 
         // When
         List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
@@ -98,8 +98,7 @@ class CardServiceImplTest {
         assertThat(dto.getProperties()).containsEntry("power", 3);
         assertThat(dto.getProperties()).containsEntry("type", "creature");
 
-        verify(gameRepository).findById(gameId);
-        verify(cardRepository).findByGame(testGame);
+        verify(cardRepository).findByGameIdOrderedByElementExtensionAndManaCost(gameId);
     }
 
     @Test
@@ -108,8 +107,8 @@ class CardServiceImplTest {
         String gameId = "mage-noir";
         String locale = "en";
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.of(testGame));
-        when(cardRepository.findByGame(testGame)).thenReturn(List.of(testCard));
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(List.of(testCard));
 
         // When
         List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
@@ -129,8 +128,8 @@ class CardServiceImplTest {
         String gameId = "mage-noir";
         String locale = "es"; // Non existant
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.of(testGame));
-        when(cardRepository.findByGame(testGame)).thenReturn(List.of(testCard));
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(List.of(testCard));
 
         // When
         List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
@@ -156,8 +155,8 @@ class CardServiceImplTest {
         cardWithInvalidJson.setProperties("invalid json"); // JSON invalide
         cardWithInvalidJson.setLocalizations(List.of(frenchLocalization));
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.of(testGame));
-        when(cardRepository.findByGame(testGame)).thenReturn(List.of(cardWithInvalidJson));
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(List.of(cardWithInvalidJson));
 
         // When
         List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
@@ -169,17 +168,20 @@ class CardServiceImplTest {
     }
 
     @Test
-    void testGetCardsByLocale_GameNotFound_ThrowsException() {
+    void testGetCardsByLocale_GameNotFound_ReturnsEmptyList() {
         // Given
         String gameId = "unknown-game";
         String locale = "fr";
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(Collections.emptyList());
 
-        // When & Then
-        assertThatThrownBy(() -> cardService.getCardsByLocale(gameId, locale))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Jeu introuvable : unknown-game");
+        // When
+        List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
+
+        // Then
+        assertThat(result).isEmpty();
+        verify(cardRepository).findByGameIdOrderedByElementExtensionAndManaCost(gameId);
     }
 
     @Test
@@ -491,5 +493,72 @@ class CardServiceImplTest {
 
         // Then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void testGetCardsByLocale_shouldReturnCardsInCorrectOrder() {
+        // Given
+        String gameId = "mage_noir";
+        String locale = "fr";
+
+        // Create mock cards in the expected order (already sorted by repository)
+        Card card1 = createMockCardWithProperties("card1", "Végétal", "Jeu de base", 1);
+        Card card2 = createMockCardWithProperties("card2", "Feu", "Jeu de base", 2);
+        Card card3 = createMockCardWithProperties("card3", "Air", "Extension 1", 1);
+
+        List<Card> sortedCards = List.of(card1, card2, card3);
+
+        when(cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId))
+                .thenReturn(sortedCards);
+
+        // When
+        List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
+
+        // Then
+        assertThat(result).hasSize(3);
+        
+        // Verify the order is preserved
+        assertThat(result.get(0).getId()).isEqualTo("card1");
+        assertThat(result.get(1).getId()).isEqualTo("card2");
+        assertThat(result.get(2).getId()).isEqualTo("card3");
+
+        // Verify properties are correctly mapped
+        Map<String, Object> props1 = result.get(0).getProperties();
+        assertThat(props1.get("element")).isEqualTo("Végétal");
+        assertThat(props1.get("extension")).isEqualTo("Jeu de base");
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> manaCost1 = (Map<String, Object>) props1.get("manaCost");
+        assertThat(manaCost1.get("total")).isEqualTo(1);
+    }
+
+    private Card createMockCardWithProperties(String id, String element, String extension, int manaCost) {
+        Card card = new Card();
+        card.setId(id);
+
+        // Create a mock localization
+        CardLocalization localization = new CardLocalization();
+        CardLocalizationId locId = new CardLocalizationId(id, "fr");
+        localization.setId(locId);
+        localization.setName("Test Card " + id);
+        localization.setDescription("Test description");
+        localization.setImageUrl("http://example.com/image.png");
+        localization.setCard(card);
+
+        card.setLocalizations(List.of(localization));
+
+        // Set properties JSON
+        String properties = String.format("""
+            {
+                "element": "%s",
+                "extension": "%s",
+                "manaCost": {
+                    "total": %d
+                }
+            }
+            """, element, extension, manaCost);
+
+        card.setProperties(properties);
+        return card;
     }
 }

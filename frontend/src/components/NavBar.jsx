@@ -25,8 +25,8 @@ const NavBar = () => {
 
   const navigationItems = [
     { key: "home", label: t("nav.home"), href: "/" },
-    { key: "myDecks", label: t("nav.myDecks"), href: "/decks" },
     { key: "cardGallery", label: t("nav.cardGallery"), href: "/cards" },
+    { key: "myDecks", label: t("nav.myDecks"), href: "/decks" },
     { key: "profile", label: t("nav.profile"), href: "/profile" },
   ];
 

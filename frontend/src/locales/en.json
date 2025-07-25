@@ -2,7 +2,7 @@
   "nav": {
     "home": "Home",
     "myDecks": "My Decks",
-    "cardGallery": "Card Gallery",
+    "cardGallery": "Collection",
     "profile": "Profile",
     "login": "Login",
     "register": "Register",
@@ -11,7 +11,7 @@
     "myProfile": "My Profile"
   },
   "common": {
-    "appName": "Generic Deck Builder",
+    "appName": "MNDB",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -24,7 +24,7 @@
   },
   "pages": {
     "home": {
-      "welcome": "Welcome to Generic Deck Builder",
+      "welcome": "Welcome to MNDB",
       "description": "Create, manage and optimize your card decks with our powerful and intuitive tool.",
       "welcomeBack": "Welcome back, {{name}}!",
       "browseCards": "Browse Cards",
@@ -49,7 +49,7 @@
   "auth": {
     "register": {
       "title": "Create Account",
-      "subtitle": "Join Generic Deck Builder",
+      "subtitle": "Join MNDB",
       "name": "Username",
       "namePlaceholder": "Your username",
       "email": "Email Address",
@@ -124,7 +124,7 @@
       "Feu": "Fire",
       "Eau": "Water",
       "Air": "Air",
-      "Mineral": "Mineral",
+      "Minéral": "Mineral",
       "Arcane": "Arcane"
     },
     "gallery": {

@@ -36,10 +36,8 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public List<CardResponseDTO> getCardsByLocale(String gameId, String locale) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable : " + gameId));
-
-        List<Card> cards = cardRepository.findByGame(game);
+        // Use the new ordered method to get cards sorted by element, extension and mana cost
+        List<Card> cards = cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId);
         List<CardResponseDTO> result = new ArrayList<>();
 
         for (Card card : cards) {
