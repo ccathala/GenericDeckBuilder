@@ -99,9 +99,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Autoriser Railway ET développement local
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "https://mage-noir-deckbuilder.up.railway.app",
-                "http://localhost:5173",
-                "http://localhost:3000"));
+                "https://mndb.up.railway.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
