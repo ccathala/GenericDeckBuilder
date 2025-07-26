@@ -1,5 +1,6 @@
 import React from "react";
 import { useLanguage } from "../contexts/LanguageContext";
+import styles from "./CardFilter.module.css";
 
 const CardFilter = ({
   searchTerm,
@@ -10,12 +11,12 @@ const CardFilter = ({
   const { t } = useLanguage();
 
   const elements = [
-    { key: "Végétal", color: "bg-green-600 hover:bg-green-700" },
-    { key: "Feu", color: "bg-red-600 hover:bg-red-700" },
-    { key: "Air", color: "bg-cyan-600 hover:bg-cyan-700" },
-    { key: "Eau", color: "bg-blue-600 hover:bg-blue-700" },
-    { key: "Minéral", color: "bg-gray-600 hover:bg-gray-700" },
-    { key: "Arcane", color: "bg-purple-600 hover:bg-purple-700" },
+    { key: "Végétal", cssClass: "vegetal" },
+    { key: "Feu", cssClass: "feu" },
+    { key: "Air", cssClass: "air" },
+    { key: "Eau", cssClass: "eau" },
+    { key: "Minéral", cssClass: "mineral" },
+    { key: "Arcane", cssClass: "arcane" },
   ];
 
   return (
@@ -35,12 +36,11 @@ const CardFilter = ({
             <button
               key={element.key}
               onClick={() => onElementToggle(element.key)}
-              className={`px-3 py-2 rounded-md text-white text-sm font-medium transition-colors
-                ${
-                  selectedElements.includes(element.key)
-                    ? element.color
-                    : "bg-mage-dark-700 hover:bg-mage-dark-600"
-                }`}
+              className={`${styles.elementButton} ${
+                selectedElements.includes(element.key)
+                  ? styles[element.cssClass]
+                  : styles.inactive
+              }`}
             >
               {t(`cards.elements.${element.key}`)}
             </button>
