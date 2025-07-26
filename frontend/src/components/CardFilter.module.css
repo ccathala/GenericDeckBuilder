@@ -9,6 +9,18 @@
   transition: background-color 0.2s ease;
   border: none;
   cursor: pointer;
+  outline: none; /* Supprime l'outline par défaut */
+}
+
+/* Focus visible uniquement pour la navigation clavier */
+.elementButton:focus-visible {
+  outline: 2px solid #9c469a; /* Couleur arcane du thème */
+  outline-offset: 2px;
+}
+
+/* Pas de focus visible pour les clics souris */
+.elementButton:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* État inactif (non sélectionné) */
