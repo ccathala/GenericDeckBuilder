@@ -32,9 +32,9 @@ const NavBar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-mage-bg-900 shadow-lg border-b border-mage-dark-600 w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="grid grid-cols-3 items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center justify-start">
             <div className="flex-shrink-0 flex items-center">
               <div className="text-2xl mr-2">🎴</div>
               <h1 className="text-xl font-bold text-white">
@@ -44,7 +44,7 @@ const NavBar = () => {
           </div>
 
           {/* Navigation desktop */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex justify-center">
             <div className="flex items-center space-x-4">
               {navigationItems.map((item) => (
                 <Link
@@ -61,7 +61,7 @@ const NavBar = () => {
           </div>
 
           {/* Actions desktop */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center justify-end space-x-4">
             <LanguageToggle />
 
             {isAuthenticated ? (
