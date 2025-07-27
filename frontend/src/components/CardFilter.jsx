@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import styles from "./CardFilter.module.css";
 
@@ -7,9 +7,13 @@ const CardFilter = ({
   onSearchChange,
   selectedElements,
   onElementToggle,
+  selectedComponents,
+  onComponentToggle,
+  availableComponents,
   onResetFilters,
 }) => {
   const { t } = useLanguage();
+  const [isComponentDropdownOpen, setIsComponentDropdownOpen] = useState(false);
 
   const elements = [
     { key: "Végétal", cssClass: "vegetal" },
@@ -19,6 +23,71 @@ const CardFilter = ({
     { key: "Minéral", cssClass: "mineral" },
     { key: "Arcane", cssClass: "arcane" },
   ];
+
+  const ComponentDropdown = () => (
+    <div className="relative">
+      <button
+        onClick={() => setIsComponentDropdownOpen(!isComponentDropdownOpen)}
+        className="px-4 py-2 bg-mage-dark-700 border border-mage-dark-600 
+                 rounded-md text-white text-sm font-medium
+                 hover:bg-mage-dark-600 transition-colors duration-200
+                 flex items-center gap-2"
+        disabled={availableComponents.length === 0}
+      >
+        <span>
+          {availableComponents.length === 0
+            ? t("cards.filters.componentsLoading")
+            : selectedComponents.length === 0
+            ? t("cards.filters.componentsPlaceholder")
+            : `${selectedComponents.length} ${t(
+                "cards.filters.componentsSelected"
+              )}`}
+        </span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isComponentDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+          />
+        </svg>
+      </button>
+
+      {isComponentDropdownOpen && (
+        <div
+          className="absolute top-full left-0 mt-1 w-64 bg-mage-bg-800 
+                      border border-mage-dark-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
+        >
+          {availableComponents.length === 0 ? (
+            <div className="px-4 py-3 text-gray-400 text-sm">
+              {t("cards.filters.componentsLoading")}
+            </div>
+          ) : (
+            availableComponents.map((component) => (
+              <label
+                key={component}
+                className="flex items-center px-4 py-2 hover:bg-mage-dark-700 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedComponents.includes(component)}
+                  onChange={() => onComponentToggle(component)}
+                  className="mr-3 text-mage-primary-500 rounded border-mage-dark-500 
+                           focus:ring-mage-primary-500 focus:ring-2"
+                />
+                <span className="text-white text-sm">{component}</span>
+              </label>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="w-full mb-6">
@@ -47,6 +116,9 @@ const CardFilter = ({
             </button>
           ))}
         </div>
+
+        <ComponentDropdown />
+
         <button
           onClick={onResetFilters}
           className="ml-2 p-2 text-gray-400 hover:text-white hover:bg-mage-dark-700 

@@ -118,7 +118,11 @@
       "allCosts": "Tous les coûts",
       "rarity": "Rareté",
       "allRarities": "Toutes les raretés",
-      "resetFilters": "Réinitialiser les filtres"
+      "resetFilters": "Réinitialiser les filtres",
+      "componentsPlaceholder": "Composants requis",
+      "componentsSelected": "composant(s)",
+      "componentsLoading": "Chargement...",
+      "noComponentsAvailable": "Aucun composant disponible"
     },
     "elements": {
       "Végétal": "Végétal",

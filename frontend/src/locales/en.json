@@ -118,7 +118,11 @@
       "allCosts": "All costs",
       "rarity": "Rarity",
       "allRarities": "All rarities",
-      "resetFilters": "Reset filters"
+      "resetFilters": "Reset filters",
+      "componentsPlaceholder": "Required components",
+      "componentsSelected": "component(s)",
+      "componentsLoading": "Loading...",
+      "noComponentsAvailable": "No components available"
     },
     "elements": {
       "Végétal": "Vegetal",

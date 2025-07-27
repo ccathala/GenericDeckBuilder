@@ -27,11 +27,42 @@ const CardBrowser = ({
   const [filteredCards, setFilteredCards] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
+  const [selectedComponents, setSelectedComponents] = useState([]);
+  const [availableComponents, setAvailableComponents] = useState([]);
 
   // Utiliser les cartes passées en props ou charger les cartes localement
   const cardsToUse = cards !== null ? cards : localCards;
   const loadingState = cards !== null ? loading : localLoading;
   const errorState = cards !== null ? error : localError;
+
+  // Fonction pour extraire les composants uniques
+  const extractUniqueComponents = useCallback((cards) => {
+    console.log(
+      "🔍 extractUniqueComponents appelé avec",
+      cards.length,
+      "cartes"
+    );
+
+    const componentSet = new Set();
+
+    cards.forEach((card) => {
+      if (
+        card.properties &&
+        card.properties.componentCost &&
+        Array.isArray(card.properties.componentCost)
+      ) {
+        card.properties.componentCost.forEach((component) => {
+          if (component.componentName) {
+            componentSet.add(component.componentName);
+          }
+        });
+      }
+    });
+
+    const result = Array.from(componentSet).sort();
+    console.log("✅ Composants extraits:", result);
+    return result;
+  }, []);
 
   // Fonction pour charger les cartes
   const fetchCards = useCallback(async () => {
@@ -46,7 +77,13 @@ const CardBrowser = ({
         currentGameId,
         currentLanguage
       );
+
+      // Calculer les composants AVANT de mettre à jour les états
+      const components = extractUniqueComponents(data);
+
+      // Mise à jour synchronisée des deux états
       setLocalCards(data);
+      setAvailableComponents(components);
 
       // Notify parent component about loaded cards
       if (onCardsLoaded) {
@@ -58,7 +95,7 @@ const CardBrowser = ({
     } finally {
       setLocalLoading(false);
     }
-  }, [gameId, currentLanguage, onCardsLoaded]);
+  }, [gameId, currentLanguage, onCardsLoaded, extractUniqueComponents]);
 
   // Charger les cartes si pas fournies en props
   useEffect(() => {
@@ -66,6 +103,14 @@ const CardBrowser = ({
       fetchCards();
     }
   }, [cards, fetchCards]);
+
+  // useEffect pour extraire les composants quand cards change (fourni en props)
+  useEffect(() => {
+    if (cards !== null && cards.length > 0) {
+      const components = extractUniqueComponents(cards);
+      setAvailableComponents(components);
+    }
+  }, [cards, extractUniqueComponents]);
 
   // Fonction pour normaliser les chaînes (supprime les accents)
   const normalizeString = (str) => {
@@ -77,7 +122,11 @@ const CardBrowser = ({
   };
 
   useEffect(() => {
-    if (searchTerm || selectedElements.length > 0) {
+    if (
+      searchTerm ||
+      selectedElements.length > 0 ||
+      selectedComponents.length > 0
+    ) {
       const filtered = cardsToUse.filter((card) => {
         // Filtrage par texte (insensible aux accents)
         const normalizedSearchTerm = normalizeString(searchTerm);
@@ -99,13 +148,25 @@ const CardBrowser = ({
             card.properties.element &&
             selectedElements.includes(card.properties.element.toString()));
 
-        return matchesSearch && matchesElement;
+        // Filtrage par composants (logique OU)
+        const matchesComponent =
+          selectedComponents.length === 0 ||
+          (card.properties &&
+            card.properties.componentCost &&
+            Array.isArray(card.properties.componentCost) &&
+            selectedComponents.some((selectedComp) =>
+              card.properties.componentCost.some(
+                (cardComp) => cardComp.componentName === selectedComp
+              )
+            ));
+
+        return matchesSearch && matchesElement && matchesComponent;
       });
       setFilteredCards(filtered);
     } else {
       setFilteredCards(cardsToUse);
     }
-  }, [searchTerm, selectedElements, cardsToUse]);
+  }, [searchTerm, selectedElements, selectedComponents, cardsToUse]);
 
   const handleSearchChange = (term) => {
     setSearchTerm(term);
@@ -119,9 +180,18 @@ const CardBrowser = ({
     );
   };
 
+  const handleComponentToggle = (component) => {
+    setSelectedComponents((prev) =>
+      prev.includes(component)
+        ? prev.filter((c) => c !== component)
+        : [...prev, component]
+    );
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setSelectedElements([]);
+    setSelectedComponents([]);
   };
 
   const handleCardClick = (card) => {
@@ -155,6 +225,9 @@ const CardBrowser = ({
           onSearchChange={handleSearchChange}
           selectedElements={selectedElements}
           onElementToggle={handleElementToggle}
+          selectedComponents={selectedComponents}
+          onComponentToggle={handleComponentToggle}
+          availableComponents={availableComponents}
           onResetFilters={handleResetFilters}
         />
       </div>
