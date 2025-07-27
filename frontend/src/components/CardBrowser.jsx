@@ -29,6 +29,7 @@ const CardBrowser = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
   const [selectedComponents, setSelectedComponents] = useState([]);
+  const [selectedType, setSelectedType] = useState("");
   const [availableComponents, setAvailableComponents] = useState([]);
 
   // Hook pour les traductions des composants
@@ -133,7 +134,8 @@ const CardBrowser = ({
     if (
       searchTerm ||
       selectedElements.length > 0 ||
-      selectedComponents.length > 0
+      selectedComponents.length > 0 ||
+      selectedType
     ) {
       const filtered = cardsToUse.filter((card) => {
         // Filtrage par texte (insensible aux accents)
@@ -168,13 +170,31 @@ const CardBrowser = ({
               )
             ));
 
-        return matchesSearch && matchesElement && matchesComponent;
+        // Filtrage par type
+        const matchesType =
+          !selectedType ||
+          selectedType === "" ||
+          (card.properties &&
+            card.properties.type &&
+            card.properties.type
+              .toLowerCase()
+              .includes(selectedType.toLowerCase()));
+
+        return (
+          matchesSearch && matchesElement && matchesComponent && matchesType
+        );
       });
       setFilteredCards(filtered);
     } else {
       setFilteredCards(cardsToUse);
     }
-  }, [searchTerm, selectedElements, selectedComponents, cardsToUse]);
+  }, [
+    searchTerm,
+    selectedElements,
+    selectedComponents,
+    selectedType,
+    cardsToUse,
+  ]);
 
   const handleSearchChange = (term) => {
     setSearchTerm(term);
@@ -196,10 +216,15 @@ const CardBrowser = ({
     );
   };
 
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setSelectedElements([]);
     setSelectedComponents([]);
+    setSelectedType("");
   };
 
   const handleCardClick = (card) => {
@@ -237,6 +262,8 @@ const CardBrowser = ({
           onComponentToggle={handleComponentToggle}
           availableComponents={availableComponents}
           translateComponent={translateComponent}
+          selectedType={selectedType}
+          onTypeChange={handleTypeChange}
           onResetFilters={handleResetFilters}
         />
       </div>

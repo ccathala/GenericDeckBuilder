@@ -122,7 +122,15 @@
       "componentsPlaceholder": "Composants requis",
       "componentsSelected": "composant(s)",
       "componentsLoading": "Chargement...",
-      "noComponentsAvailable": "Aucun composant disponible"
+      "noComponentsAvailable": "Aucun composant disponible",
+      "typePlaceholder": "Type de carte",
+      "typeAll": "Tous les types"
+    },
+    "types": {
+      "Sort": "Sort",
+      "Permanent": "Permanent",
+      "Équipement": "Equipement",
+      "Rituel": "Rituel"
     },
     "elements": {
       "Végétal": "Végétal",

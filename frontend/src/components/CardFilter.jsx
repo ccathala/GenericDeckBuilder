@@ -11,10 +11,15 @@ const CardFilter = ({
   onComponentToggle,
   availableComponents,
   translateComponent,
+  selectedType,
+  onTypeChange,
   onResetFilters,
 }) => {
   const { t } = useLanguage();
   const [isComponentDropdownOpen, setIsComponentDropdownOpen] = useState(false);
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+
+  const cardTypes = ["Sort", "Permanent", "Équipement", "Rituel"];
 
   const elements = [
     { key: "Végétal", cssClass: "vegetal" },
@@ -94,6 +99,70 @@ const CardFilter = ({
     </div>
   );
 
+  const TypeDropdown = () => (
+    <div className="relative">
+      <button
+        onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+        className="px-4 py-2 bg-mage-dark-700 border border-mage-dark-600 
+                 rounded-md text-white text-sm font-medium
+                 hover:bg-mage-dark-600 transition-colors duration-200
+                 flex items-center gap-2 min-w-[140px]"
+      >
+        <span>
+          {selectedType === "" || selectedType === null
+            ? t("cards.filters.typePlaceholder")
+            : t(`cards.types.${selectedType}`)}
+        </span>
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={isTypeDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+          />
+        </svg>
+      </button>
+
+      {isTypeDropdownOpen && (
+        <div
+          className="absolute top-full left-0 mt-1 w-full bg-mage-bg-800 
+                      border border-mage-dark-600 rounded-md shadow-lg z-50"
+        >
+          <button
+            onClick={() => {
+              onTypeChange("");
+              setIsTypeDropdownOpen(false);
+            }}
+            className="w-full text-left px-4 py-2 hover:bg-mage-dark-700 
+                     text-white text-sm border-b border-mage-dark-600"
+          >
+            {t("cards.filters.typeAll")}
+          </button>
+          {cardTypes.map((type) => (
+            <button
+              key={type}
+              onClick={() => {
+                onTypeChange(type);
+                setIsTypeDropdownOpen(false);
+              }}
+              className={`w-full text-left px-4 py-2 hover:bg-mage-dark-700 
+                        text-white text-sm ${
+                          selectedType === type ? "bg-mage-primary-500" : ""
+                        }`}
+            >
+              {t(`cards.types.${type}`)}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="w-full mb-6">
       <div className="flex justify-center items-center gap-4">
@@ -123,6 +192,8 @@ const CardFilter = ({
         </div>
 
         <ComponentDropdown />
+
+        <TypeDropdown />
 
         <button
           onClick={onResetFilters}

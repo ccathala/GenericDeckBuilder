@@ -122,7 +122,15 @@
       "componentsPlaceholder": "Required components",
       "componentsSelected": "component(s)",
       "componentsLoading": "Loading...",
-      "noComponentsAvailable": "No components available"
+      "noComponentsAvailable": "No components available",
+      "typePlaceholder": "Card type",
+      "typeAll": "All types"
+    },
+    "types": {
+      "Sort": "Spell",
+      "Permanent": "Permanent",
+      "Équipement": "Equipment",
+      "Rituel": "Ritual"
     },
     "elements": {
       "Végétal": "Vegetal",
