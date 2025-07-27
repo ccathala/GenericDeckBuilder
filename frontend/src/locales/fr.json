@@ -117,7 +117,8 @@
       "cost": "Coût",
       "allCosts": "Tous les coûts",
       "rarity": "Rareté",
-      "allRarities": "Toutes les raretés"
+      "allRarities": "Toutes les raretés",
+      "resetFilters": "Réinitialiser les filtres"
     },
     "elements": {
       "Végétal": "Végétal",

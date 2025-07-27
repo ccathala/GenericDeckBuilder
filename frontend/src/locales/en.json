@@ -117,7 +117,8 @@
       "cost": "Cost",
       "allCosts": "All costs",
       "rarity": "Rarity",
-      "allRarities": "All rarities"
+      "allRarities": "All rarities",
+      "resetFilters": "Reset filters"
     },
     "elements": {
       "Végétal": "Vegetal",

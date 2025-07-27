@@ -119,6 +119,11 @@ const CardBrowser = ({
     );
   };
 
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedElements([]);
+  };
+
   const handleCardClick = (card) => {
     if (onCardSelection) {
       const isCurrentlySelected = selectedCards.has(card.id);
@@ -150,6 +155,7 @@ const CardBrowser = ({
           onSearchChange={handleSearchChange}
           selectedElements={selectedElements}
           onElementToggle={handleElementToggle}
+          onResetFilters={handleResetFilters}
         />
       </div>
 
