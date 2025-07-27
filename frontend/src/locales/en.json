@@ -25,7 +25,7 @@
   "pages": {
     "home": {
       "welcome": "Welcome to MNDB",
-      "description": "Create, manage and optimize your card decks with our powerful and intuitive tool.",
+      "description": "Create, manage and optimize your card decks.",
       "welcomeBack": "Welcome back, {{name}}!",
       "browseCards": "Browse Cards",
       "myDecks": "My Decks",
@@ -187,5 +187,10 @@
       "backToDecks": "Back to decks",
       "loginMessage": "Login to view deck details."
     }
+  },
+  "footer": {
+    "mageNoirCopyright": "Unofficial fan application - not affiliated with the publisher.",
+    "mageNoirLink": "Discover Mage Noir",
+    "mageNoirCredits": "© Mage Noir - Double Combo Games. All rights reserved."
   }
 }
