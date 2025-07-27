@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useComponentTranslations } from "../hooks/useComponentTranslations";
 import CardFilter from "./CardFilter";
 import CardGallery from "./CardGallery";
 import cardService from "../services/cardService";
@@ -29,6 +30,13 @@ const CardBrowser = ({
   const [selectedElements, setSelectedElements] = useState([]);
   const [selectedComponents, setSelectedComponents] = useState([]);
   const [availableComponents, setAvailableComponents] = useState([]);
+
+  // Hook pour les traductions des composants
+  const {
+    translateComponent,
+    loading: translationsLoading,
+    isReady: translationsReady,
+  } = useComponentTranslations(gameId || "mage_noir");
 
   // Utiliser les cartes passées en props ou charger les cartes localement
   const cardsToUse = cards !== null ? cards : localCards;
@@ -228,6 +236,7 @@ const CardBrowser = ({
           selectedComponents={selectedComponents}
           onComponentToggle={handleComponentToggle}
           availableComponents={availableComponents}
+          translateComponent={translateComponent}
           onResetFilters={handleResetFilters}
         />
       </div>

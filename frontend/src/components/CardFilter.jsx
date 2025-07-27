@@ -10,6 +10,7 @@ const CardFilter = ({
   selectedComponents,
   onComponentToggle,
   availableComponents,
+  translateComponent,
   onResetFilters,
 }) => {
   const { t } = useLanguage();
@@ -80,7 +81,11 @@ const CardFilter = ({
                   className="mr-3 text-mage-primary-500 rounded border-mage-dark-500 
                            focus:ring-mage-primary-500 focus:ring-2"
                 />
-                <span className="text-white text-sm">{component}</span>
+                <span className="text-white text-sm">
+                  {translateComponent
+                    ? translateComponent(component)
+                    : component}
+                </span>
               </label>
             ))
           )}

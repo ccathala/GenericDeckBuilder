@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/images/**").permitAll() // Autoriser l'accès aux images
+                        .requestMatchers("/api/components/translations").permitAll() // Autoriser l'accès aux traductions de composants
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
