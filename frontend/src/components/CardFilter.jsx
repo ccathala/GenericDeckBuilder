@@ -66,7 +66,7 @@ const CardFilter = ({
 
       {isComponentDropdownOpen && (
         <div
-          className="absolute top-full left-0 mt-1 w-64 bg-mage-bg-800 
+          className="absolute top-full left-0 mt-1 px-4 bg-mage-bg-800 
                       border border-mage-dark-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
         >
           {availableComponents.length === 0 ? (
@@ -103,7 +103,7 @@ const CardFilter = ({
     <div className="relative">
       <button
         onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-        className="w-64 px-4 py-2 bg-mage-dark-700 border border-mage-dark-600 
+        className="px-5 py-2 bg-mage-dark-700 border border-mage-dark-600 
                  rounded-md text-white text-sm font-medium
                  hover:bg-mage-dark-600 transition-colors duration-200
                  flex items-center gap-2"
@@ -130,7 +130,7 @@ const CardFilter = ({
 
       {isTypeDropdownOpen && (
         <div
-          className="absolute top-full left-0 mt-1 w-64 bg-mage-bg-800 
+          className="absolute top-full left-0 mt-1 w-40 bg-mage-bg-800 
                       border border-mage-dark-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
         >
           <label

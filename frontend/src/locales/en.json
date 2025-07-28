@@ -123,7 +123,7 @@
       "componentsSelected": "component(s)",
       "componentsLoading": "Loading...",
       "noComponentsAvailable": "No components available",
-      "typePlaceholder": "Card type",
+      "typePlaceholder": "Type",
       "typeAll": "All types"
     },
     "types": {
