@@ -1,5 +1,5 @@
 -- Fichier SQL généré automatiquement pour les cartes Mage Noir
--- Généré le : 2025-07-25 18:40:17
+-- Généré le : 2025-07-28 14:58:27
 -- Nombre de cartes : 205
 -- Cartes avec correspondance FR/EN : 205
 
@@ -451,7 +451,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Étincelle1", "quantity": 1}
+    {"componentName": "Étincelle", "quantity": 1},
+    {"componentName": "Minerai", "quantity": 1}
   ],
   "extension": "Électrique",
   "artwork": "Luca Siméone"
@@ -716,7 +717,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Infiltration1", "quantity": 1}
+    {"componentName": "Infiltration", "quantity": 1},
+    {"componentName": "Glace", "quantity": 1}
   ],
   "extension": "Glace",
   "artwork": "Aurelien Segeat"
@@ -838,7 +840,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Vent", "quantity": 1}
+    {"componentName": "Vent", "quantity": 1},
+    {"componentName": "Vague", "quantity": 1}
   ],
   "extension": "Jeu de base",
   "artwork": "Jeffrey Jeanson"
@@ -2127,7 +2130,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Maelström", "quantity": 1}
+    {"componentName": "Maelström", "quantity": 1},
+    {"componentName": "Glace", "quantity": 1}
   ],
   "extension": "Glace",
   "artwork": "Aurelien Segeat"
@@ -2247,7 +2251,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Glace1", "quantity": 2}
+    {"componentName": "Glace", "quantity": 2},
+    {"componentName": "Temps", "quantity": 1}
   ],
   "extension": "Glace",
   "artwork": "Geoffrey Amesse"
@@ -2924,7 +2929,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Océan", "quantity": 1}
+    {"componentName": "Océan", "quantity": 1},
+    {"componentName": "Séisme", "quantity": 1}
   ],
   "extension": "Voie du Guerrier-Mage",
   "artwork": "Camille Fourcade"
@@ -3323,7 +3329,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Soleil1", "quantity": 1}
+    {"componentName": "Soleil", "quantity": 1},
+    {"componentName": "Fission", "quantity": 1}
   ],
   "extension": "Soleil",
   "artwork": "Victor Fayen"
@@ -4097,7 +4104,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Armure", "quantity": 1}
+    {"componentName": "Armure", "quantity": 1},
+    {"componentName": "Minerai", "quantity": 1}
   ],
   "extension": "Voie du Guerrier-Mage",
   "artwork": "Charles Ouvrard"
@@ -4190,7 +4198,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Roche", "quantity": 1}
+    {"componentName": "Roche", "quantity": 1},
+    {"componentName": "Flamme", "quantity": 1}
   ],
   "extension": "Voie du Guerrier-Mage",
   "artwork": "Johann Goutard"
@@ -4221,7 +4230,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Désert1", "quantity": 1}
+    {"componentName": "Désert", "quantity": 1},
+    {"componentName": "Soleil", "quantity": 1}
   ],
   "extension": "Sable",
   "artwork": "Jessica Heran"
@@ -4339,7 +4349,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Lame", "quantity": 1}
+    {"componentName": "Lame", "quantity": 1},
+    {"componentName": "Minerai", "quantity": 1}
   ],
   "extension": "Voie du Guerrier-Mage",
   "artwork": "Jessica Heran"
@@ -4581,7 +4592,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Magma", "quantity": 1}
+    {"componentName": "Magma", "quantity": 1},
+    {"componentName": "Séisme", "quantity": 1}
   ],
   "extension": "Voie du Guerrier-Mage",
   "artwork": "Charles Ouvrard"
@@ -4674,7 +4686,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Désert", "quantity": 1}
+    {"componentName": "Désert", "quantity": 1},
+    {"componentName": "Source", "quantity": 1}
   ],
   "extension": "Sable",
   "artwork": "Victor Fayen"
@@ -5210,7 +5223,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Arbre", "quantity": 1}
+    {"componentName": "Arbre", "quantity": 1},
+    {"componentName": "Flamme", "quantity": 1}
   ],
   "extension": "Jeu de base",
   "artwork": "Nicolas Camiade"
@@ -5481,7 +5495,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Graine1", "quantity": 1}
+    {"componentName": "Graine", "quantity": 1},
+    {"componentName": "Fleur", "quantity": 1}
   ],
   "extension": "Fleurs",
   "artwork": "Aurelien Segeat"
@@ -5810,7 +5825,8 @@ INSERT INTO card (id, game_id, properties) VALUES
   },
   "components": [],
   "componentCost": [
-    {"componentName": "Fleur1", "quantity": 1}
+    {"componentName": "Fleur", "quantity": 1},
+    {"componentName": "Goutte", "quantity": 1}
   ],
   "extension": "Fleurs",
   "artwork": "Aurelien Segeat"
