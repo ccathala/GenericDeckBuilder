@@ -103,10 +103,10 @@ const CardFilter = ({
     <div className="relative">
       <button
         onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-        className="px-4 py-2 bg-mage-dark-700 border border-mage-dark-600 
+        className="w-64 px-4 py-2 bg-mage-dark-700 border border-mage-dark-600 
                  rounded-md text-white text-sm font-medium
                  hover:bg-mage-dark-600 transition-colors duration-200
-                 flex items-center gap-2 min-w-[140px]"
+                 flex items-center gap-2"
       >
         <span>
           {selectedType === "" || selectedType === null
@@ -130,33 +130,35 @@ const CardFilter = ({
 
       {isTypeDropdownOpen && (
         <div
-          className="absolute top-full left-0 mt-1 w-full bg-mage-bg-800 
-                      border border-mage-dark-600 rounded-md shadow-lg z-50"
+          className="absolute top-full left-0 mt-1 w-64 bg-mage-bg-800 
+                      border border-mage-dark-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto"
         >
-          <button
+          <label
             onClick={() => {
               onTypeChange("");
               setIsTypeDropdownOpen(false);
             }}
-            className="w-full text-left px-4 py-2 hover:bg-mage-dark-700 
-                     text-white text-sm border-b border-mage-dark-600"
+            className="flex items-center px-4 py-2 hover:bg-mage-dark-700 cursor-pointer border-b border-mage-dark-600"
           >
-            {t("cards.filters.typeAll")}
-          </button>
+            <span className="text-white text-sm">
+              {t("cards.filters.typeAll")}
+            </span>
+          </label>
           {cardTypes.map((type) => (
-            <button
+            <label
               key={type}
               onClick={() => {
                 onTypeChange(type);
                 setIsTypeDropdownOpen(false);
               }}
-              className={`w-full text-left px-4 py-2 hover:bg-mage-dark-700 
-                        text-white text-sm ${
-                          selectedType === type ? "bg-mage-primary-500" : ""
-                        }`}
+              className={`flex items-center px-4 py-2 hover:bg-mage-dark-700 cursor-pointer ${
+                selectedType === type ? "bg-mage-primary-500" : ""
+              }`}
             >
-              {t(`cards.types.${type}`)}
-            </button>
+              <span className="text-white text-sm">
+                {t(`cards.types.${type}`)}
+              </span>
+            </label>
           ))}
         </div>
       )}
