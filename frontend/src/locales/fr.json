@@ -25,7 +25,7 @@
   "pages": {
     "home": {
       "welcome": "Bienvenue sur MNDB",
-      "description": "Créez, gérez et optimisez vos decks de cartes avec notre outil puissant et intuitif.",
+      "description": "Créez, gérez et optimisez vos decks.",
       "welcomeBack": "Bienvenue, {{name}} !",
       "browseCards": "Parcourir les cartes",
       "myDecks": "Mes decks",
@@ -41,7 +41,7 @@
       }
     },
     "cards": {
-      "title": "Galerie de cartes",
+      "title": "Collection",
       "description": "Explorez toutes les cartes disponibles et ajoutez-les à vos decks",
       "cardsFound": "cartes trouvées"
     }
@@ -117,7 +117,20 @@
       "cost": "Coût",
       "allCosts": "Tous les coûts",
       "rarity": "Rareté",
-      "allRarities": "Toutes les raretés"
+      "allRarities": "Toutes les raretés",
+      "resetFilters": "Réinitialiser les filtres",
+      "componentsPlaceholder": "Composants requis",
+      "componentsSelected": "composant(s)",
+      "componentsLoading": "Chargement...",
+      "noComponentsAvailable": "Aucun composant disponible",
+      "typePlaceholder": "Type",
+      "typeAll": "Tous les types"
+    },
+    "types": {
+      "Sort": "Sort",
+      "Permanent": "Permanent",
+      "Équipement": "Equipement",
+      "Rituel": "Rituel"
     },
     "elements": {
       "Végétal": "Végétal",
@@ -187,5 +200,10 @@
       "backToDecks": "Retour aux decks",
       "loginMessage": "Connectez-vous pour voir les détails du deck."
     }
+  },
+  "footer": {
+    "mageNoirCopyright": "Application de fan non officielle - non affiliée à l'éditeur.",
+    "mageNoirLink": "Découvrir Mage Noir",
+    "mageNoirCredits": "© Mage Noir - Double Combo Games. Tous droits réservés."
   }
 }

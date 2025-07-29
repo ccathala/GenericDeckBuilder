@@ -25,7 +25,7 @@
   "pages": {
     "home": {
       "welcome": "Welcome to MNDB",
-      "description": "Create, manage and optimize your card decks with our powerful and intuitive tool.",
+      "description": "Create, manage and optimize your card decks.",
       "welcomeBack": "Welcome back, {{name}}!",
       "browseCards": "Browse Cards",
       "myDecks": "My Decks",
@@ -41,7 +41,7 @@
       }
     },
     "cards": {
-      "title": "Card Gallery",
+      "title": "Collection",
       "description": "Explore all available cards and add them to your decks",
       "cardsFound": "cards found"
     }
@@ -117,7 +117,20 @@
       "cost": "Cost",
       "allCosts": "All costs",
       "rarity": "Rarity",
-      "allRarities": "All rarities"
+      "allRarities": "All rarities",
+      "resetFilters": "Reset filters",
+      "componentsPlaceholder": "Required components",
+      "componentsSelected": "component(s)",
+      "componentsLoading": "Loading...",
+      "noComponentsAvailable": "No components available",
+      "typePlaceholder": "Type",
+      "typeAll": "All types"
+    },
+    "types": {
+      "Sort": "Spell",
+      "Permanent": "Permanent",
+      "Équipement": "Equipment",
+      "Rituel": "Ritual"
     },
     "elements": {
       "Végétal": "Vegetal",
@@ -187,5 +200,10 @@
       "backToDecks": "Back to decks",
       "loginMessage": "Login to view deck details."
     }
+  },
+  "footer": {
+    "mageNoirCopyright": "Unofficial fan application - not affiliated with the publisher.",
+    "mageNoirLink": "Discover Mage Noir",
+    "mageNoirCredits": "© Mage Noir - Double Combo Games. All rights reserved."
   }
 }

@@ -124,16 +124,8 @@ class MageNoirSQLGeneratorV2:
             
             card_data['total_cost'] = total_mana_cost
             
-            # Extraire les composants requis (FR/EN)
-            component_match = re.search(r'(Composants requis|Composants nécessaires|Required components)\s*:\s*(\d+)\s+(\w+)', text_content)
-            if component_match:
-                component_count = int(component_match.group(2))
-                component_name = component_match.group(3)
-                
-                card_data['component_costs'].append({
-                    'componentName': component_name,
-                    'quantity': component_count
-                })
+            # Extraire les composants requis (FR/EN) avec parsing HTML amélioré
+            card_data['component_costs'] = self.extract_component_costs_improved(text_content, soup)
             
             return card_data
             
@@ -157,6 +149,87 @@ class MageNoirSQLGeneratorV2:
                 'description': 'Description à compléter',
                 'effects': ''
             }
+    
+    def extract_component_costs_improved(self, text_content, soup=None):
+        """Version améliorée de l'extraction des coûts de composants avec parsing HTML"""
+        
+        component_costs = []
+        
+        # Si on a accès au soup HTML, utiliser le parsing HTML d'abord
+        if soup:
+            try:
+                # Chercher la row des composants requis
+                component_rows = soup.find_all('td', class_='row-title')
+                for row in component_rows:
+                    if 'Composants requis' in row.get_text() or 'Required components' in row.get_text():
+                        # Trouver la cellule suivante avec la liste
+                        next_td = row.find_next_sibling('td')
+                        if next_td:
+                            # Extraire tous les <li>
+                            li_elements = next_td.find_all('li')
+                            for li in li_elements:
+                                li_text = li.get_text().strip()
+                                # Parser le texte: "1 Glace" -> quantity=1, componentName="Glace"
+                                match = re.match(r'(\d+)\s+(.+)', li_text)
+                                if match:
+                                    quantity = int(match.group(1))
+                                    component_name = match.group(2).strip()
+                                    component_costs.append({
+                                        'componentName': component_name,
+                                        'quantity': quantity
+                                    })
+                                    print(f"    HTML - Composant trouvé: {component_name} (quantité: {quantity})")
+                            
+                            if component_costs:
+                                return component_costs
+            except Exception as e:
+                print(f"    Erreur parsing HTML composants: {e}")
+        
+        # Fallback: méthode textuelle existante
+        component_match = re.search(r'(Composants requis|Composants nécessaires|Required components)\s*:\s*(\d+)\s+([^\n\r]+)', text_content)
+        
+        if component_match:
+            component_count = int(component_match.group(2))
+            component_text = component_match.group(3).strip()
+            
+            print(f"    DEBUG - Texte composant brut: '{component_text}'")
+            
+            # Extraire tous les mots qui ressemblent à des composants
+            component_words = re.findall(r'([A-Za-zÀ-ÿ]+)', component_text)
+            
+            # Dictionnaire des composants connus (ajout d'infiltration)
+            known_components = {
+                'etincelle', 'étincelle', 'cristal', 'essence', 'minerai', 'flamme', 
+                'souffle', 'vent', 'vague', 'goutte', 'roche', 'glace', 'soleil', 
+                'temps', 'inspiration', 'lumiere', 'lumière', 'foudre', 'sable', 
+                'desert', 'désert', 'graine', 'mur', 'lame', 'armure', 'infiltration'
+            }
+            
+            # Chercher le premier composant connu
+            for word in component_words:
+                word_lower = word.lower()
+                if word_lower in known_components:
+                    component_name = word.capitalize()
+                    print(f"    DEBUG - Composant trouvé: '{component_name}'")
+                    component_costs.append({
+                        'componentName': component_name,
+                        'quantity': component_count
+                    })
+                    break  # Prendre seulement le premier composant trouvé
+            
+            # Si aucun composant connu trouvé, prendre le premier mot
+            if not component_costs and component_words:
+                component_name = component_words[0].capitalize()
+                # Nettoyer les chiffres
+                component_name = re.sub(r'\d+', '', component_name)
+                if component_name:
+                    print(f"    DEBUG - Composant par défaut: '{component_name}'")
+                    component_costs.append({
+                        'componentName': component_name,
+                        'quantity': component_count
+                    })
+        
+        return component_costs
 
     def extract_card_info_from_url(self, url):
         """Extrait les informations de la carte depuis l'URL"""

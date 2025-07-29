@@ -57,6 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/images/**").permitAll() // Autoriser l'accès aux images
                         .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour Railway
+                        .requestMatchers("/api/components/translations").permitAll() // Autoriser l'accès aux
+                                                                                     // traductions de composants
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

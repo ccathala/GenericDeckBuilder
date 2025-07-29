@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useComponentTranslations } from "../hooks/useComponentTranslations";
 import CardFilter from "./CardFilter";
 import CardGallery from "./CardGallery";
 import cardService from "../services/cardService";
@@ -27,11 +28,50 @@ const CardBrowser = ({
   const [filteredCards, setFilteredCards] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedElements, setSelectedElements] = useState([]);
+  const [selectedComponents, setSelectedComponents] = useState([]);
+  const [selectedType, setSelectedType] = useState("");
+  const [availableComponents, setAvailableComponents] = useState([]);
+
+  // Hook pour les traductions des composants
+  const {
+    translateComponent,
+    loading: translationsLoading,
+    isReady: translationsReady,
+  } = useComponentTranslations(gameId || "mage_noir");
 
   // Utiliser les cartes passées en props ou charger les cartes localement
   const cardsToUse = cards !== null ? cards : localCards;
   const loadingState = cards !== null ? loading : localLoading;
   const errorState = cards !== null ? error : localError;
+
+  // Fonction pour extraire les composants uniques
+  const extractUniqueComponents = useCallback((cards) => {
+    console.log(
+      "🔍 extractUniqueComponents appelé avec",
+      cards.length,
+      "cartes"
+    );
+
+    const componentSet = new Set();
+
+    cards.forEach((card) => {
+      if (
+        card.properties &&
+        card.properties.componentCost &&
+        Array.isArray(card.properties.componentCost)
+      ) {
+        card.properties.componentCost.forEach((component) => {
+          if (component.componentName) {
+            componentSet.add(component.componentName);
+          }
+        });
+      }
+    });
+
+    const result = Array.from(componentSet).sort();
+    console.log("✅ Composants extraits:", result);
+    return result;
+  }, []);
 
   // Fonction pour charger les cartes
   const fetchCards = useCallback(async () => {
@@ -46,7 +86,13 @@ const CardBrowser = ({
         currentGameId,
         currentLanguage
       );
+
+      // Calculer les composants AVANT de mettre à jour les états
+      const components = extractUniqueComponents(data);
+
+      // Mise à jour synchronisée des deux états
       setLocalCards(data);
+      setAvailableComponents(components);
 
       // Notify parent component about loaded cards
       if (onCardsLoaded) {
@@ -58,7 +104,7 @@ const CardBrowser = ({
     } finally {
       setLocalLoading(false);
     }
-  }, [gameId, currentLanguage, onCardsLoaded]);
+  }, [gameId, currentLanguage, onCardsLoaded, extractUniqueComponents]);
 
   // Charger les cartes si pas fournies en props
   useEffect(() => {
@@ -66,6 +112,14 @@ const CardBrowser = ({
       fetchCards();
     }
   }, [cards, fetchCards]);
+
+  // useEffect pour extraire les composants quand cards change (fourni en props)
+  useEffect(() => {
+    if (cards !== null && cards.length > 0) {
+      const components = extractUniqueComponents(cards);
+      setAvailableComponents(components);
+    }
+  }, [cards, extractUniqueComponents]);
 
   // Fonction pour normaliser les chaînes (supprime les accents)
   const normalizeString = (str) => {
@@ -77,7 +131,12 @@ const CardBrowser = ({
   };
 
   useEffect(() => {
-    if (searchTerm || selectedElements.length > 0) {
+    if (
+      searchTerm ||
+      selectedElements.length > 0 ||
+      selectedComponents.length > 0 ||
+      selectedType
+    ) {
       const filtered = cardsToUse.filter((card) => {
         // Filtrage par texte (insensible aux accents)
         const normalizedSearchTerm = normalizeString(searchTerm);
@@ -99,13 +158,43 @@ const CardBrowser = ({
             card.properties.element &&
             selectedElements.includes(card.properties.element.toString()));
 
-        return matchesSearch && matchesElement;
+        // Filtrage par composants (logique OU)
+        const matchesComponent =
+          selectedComponents.length === 0 ||
+          (card.properties &&
+            card.properties.componentCost &&
+            Array.isArray(card.properties.componentCost) &&
+            selectedComponents.some((selectedComp) =>
+              card.properties.componentCost.some(
+                (cardComp) => cardComp.componentName === selectedComp
+              )
+            ));
+
+        // Filtrage par type
+        const matchesType =
+          !selectedType ||
+          selectedType === "" ||
+          (card.properties &&
+            card.properties.type &&
+            card.properties.type
+              .toLowerCase()
+              .includes(selectedType.toLowerCase()));
+
+        return (
+          matchesSearch && matchesElement && matchesComponent && matchesType
+        );
       });
       setFilteredCards(filtered);
     } else {
       setFilteredCards(cardsToUse);
     }
-  }, [searchTerm, selectedElements, cardsToUse]);
+  }, [
+    searchTerm,
+    selectedElements,
+    selectedComponents,
+    selectedType,
+    cardsToUse,
+  ]);
 
   const handleSearchChange = (term) => {
     setSearchTerm(term);
@@ -117,6 +206,25 @@ const CardBrowser = ({
         ? prev.filter((e) => e !== element)
         : [...prev, element]
     );
+  };
+
+  const handleComponentToggle = (component) => {
+    setSelectedComponents((prev) =>
+      prev.includes(component)
+        ? prev.filter((c) => c !== component)
+        : [...prev, component]
+    );
+  };
+
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedElements([]);
+    setSelectedComponents([]);
+    setSelectedType("");
   };
 
   const handleCardClick = (card) => {
@@ -150,6 +258,13 @@ const CardBrowser = ({
           onSearchChange={handleSearchChange}
           selectedElements={selectedElements}
           onElementToggle={handleElementToggle}
+          selectedComponents={selectedComponents}
+          onComponentToggle={handleComponentToggle}
+          availableComponents={availableComponents}
+          translateComponent={translateComponent}
+          selectedType={selectedType}
+          onTypeChange={handleTypeChange}
+          onResetFilters={handleResetFilters}
         />
       </div>
 

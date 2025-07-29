@@ -364,7 +364,7 @@ const DeckForm = ({ isEdit = false }) => {
           {/* Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
             {/* Zone 3: Sélection de cartes (gauche - 3/4 = 75%) */}
-            <div className="lg:col-span-3 bg-mage-dark-800 rounded-lg p-6 flex flex-col min-h-0">
+            <div className="lg:col-span-3 bg-mage-bg-800 rounded-lg p-6 border border-mage-dark-600 flex flex-col min-h-0">
               <div className="flex-1 overflow-hidden">
                 <CardBrowser
                   onCardSelection={handleCardSelectionChange}
@@ -373,14 +373,14 @@ const DeckForm = ({ isEdit = false }) => {
                   gameId={deck.gameId}
                   showTitle={false}
                   className="h-full"
-                  maxColumns={4}
+                  maxColumns={5}
                   onCardsLoaded={setBrowserCards}
                 />
               </div>
             </div>
 
             {/* Zone 2: Deck actuel (droite - 1/4 = 25%) */}
-            <div className="lg:col-span-1 bg-mage-dark-800 rounded-lg p-6 flex flex-col min-h-0">
+            <div className="lg:col-span-1 bg-mage-bg-800 rounded-lg p-6 border border-mage-dark-600 flex flex-col min-h-0">
               <div className="mb-4 flex-shrink-0">
                 {/* Nom du deck éditable */}
                 <div className="mb-3 relative">

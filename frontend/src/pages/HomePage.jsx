@@ -2,14 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
+import MageNoirFooter from "../components/MageNoirFooter";
 
 const HomePage = () => {
   const { t } = useLanguage();
   const { isAuthenticated, user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-mage-bg-900 w-full">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-mage-bg-900 w-full flex flex-col">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         <div className="text-center">
           <div className="text-6xl mb-6">🎴</div>
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -44,10 +45,10 @@ const HomePage = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-4 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
               <Link
                 to="/register"
-                className="block w-full bg-mage-dark-600 hover:bg-mage-dark-500 
+                className="flex-1 text-center bg-mage-dark-600 hover:bg-mage-dark-500 
                          text-white font-medium py-3 px-4 rounded-md 
                          transition-colors duration-200"
               >
@@ -55,7 +56,7 @@ const HomePage = () => {
               </Link>
               <Link
                 to="/login"
-                className="block w-full border border-mage-dark-600 hover:bg-mage-dark-700 
+                className="flex-1 text-center border border-mage-dark-600 hover:bg-mage-dark-700 
                          text-white font-medium py-3 px-4 rounded-md 
                          transition-colors duration-200"
               >
@@ -96,6 +97,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+      <MageNoirFooter />
     </div>
   );
 };
