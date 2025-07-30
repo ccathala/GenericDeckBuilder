@@ -16,7 +16,7 @@ spring:
   # JPA/Hibernate pour production
   jpa:
     hibernate:
-      ddl-auto: update # Permet la création des tables au premier déploiement
+      ddl-auto: validate # Permet la création des tables au premier déploiement
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: false
