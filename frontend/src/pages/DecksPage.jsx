@@ -270,71 +270,73 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
         {deck.totalCards || 0} {t("decks.cardsCount")}
       </div>
 
-      {/* Image de la carte d'affichage */}
-      <div className="flex justify-center mb-4">
-        {deck.displayImageUrl ? (
-          <img
-            src={deck.displayImageUrl}
-            alt={deck.name}
-            className="w-40 h-52 object-cover rounded-md border border-mage-dark-600"
-            onError={(e) => {
-              e.target.style.display = "none";
-              e.target.nextSibling.style.display = "flex";
-            }}
-          />
-        ) : null}
-        <div
-          className="w-40 h-52 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
-          style={{ display: deck.displayImageUrl ? "none" : "flex" }}
-        >
-          <svg
-            className="w-10 h-10 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+      {/* Image de la carte d'affichage avec boutons superposés */}
+      <div className="relative flex justify-center mb-2">
+        <div className="relative">
+          {deck.displayImageUrl ? (
+            <img
+              src={deck.displayImageUrl}
+              alt={deck.name}
+              className="w-48 h-64 object-cover rounded-md border border-mage-dark-600"
+              onError={(e) => {
+                e.target.style.display = "none";
+                e.target.nextSibling.style.display = "flex";
+              }}
             />
-          </svg>
+          ) : null}
+          <div
+            className="w-48 h-64 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
+            style={{ display: deck.displayImageUrl ? "none" : "flex" }}
+          >
+            <svg
+              className="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+
+          {/* Boutons d'action superposés */}
+          <div className="absolute bottom-2 right-2 flex space-x-1 bg-black/50 backdrop-blur-sm rounded-md p-1">
+            <span
+              className="p-1.5 text-gray-400 rounded cursor-not-allowed opacity-40"
+              title={t("decks.view")}
+            >
+              <Eye size={14} />
+            </span>
+
+            <Link
+              to={`/decks/${deck.id}/edit`}
+              className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+              title={t("decks.edit")}
+            >
+              <Pencil size={14} />
+            </Link>
+
+            <button
+              onClick={onExport}
+              className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+              title={t("decks.export")}
+            >
+              <Download size={14} />
+            </button>
+
+            <button
+              onClick={onDelete}
+              className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+              title={t("decks.delete")}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
-      </div>
-
-      {/* Boutons d'action en ligne */}
-      <div className="flex space-x-2 justify-center">
-        <span
-          className="p-2 text-gray-400 rounded-md cursor-not-allowed opacity-40"
-          title={t("decks.view")}
-        >
-          <Eye size={16} />
-        </span>
-
-        <Link
-          to={`/decks/${deck.id}/edit`}
-          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-          title={t("decks.edit")}
-        >
-          <Pencil size={16} />
-        </Link>
-
-        <button
-          onClick={onExport}
-          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
-          title={t("decks.export")}
-        >
-          <Download size={16} />
-        </button>
-
-        <button
-          onClick={onDelete}
-          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
-          title={t("decks.delete")}
-        >
-          <Trash2 size={16} />
-        </button>
       </div>
     </div>
   );
