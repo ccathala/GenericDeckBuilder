@@ -12,4 +12,6 @@ import lombok.Setter;
 public class DeckSummaryResponseDTO {
     private String id;
     private String name;
+    private Integer totalCards;
+    private String displayImageUrl;
 }

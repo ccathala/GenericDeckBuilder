@@ -4,6 +4,9 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import deckService from "../services/deckService";
 import DeckImportModal from "../components/DeckImportModal";
+import DeckExportModal from "../components/DeckExportModal";
+import NotificationToast from "../components/NotificationToast";
+import { Eye, Pencil, Download, Trash2, CreditCard } from "lucide-react";
 
 const DecksPage = () => {
   const { t } = useLanguage();
@@ -12,6 +15,15 @@ const DecksPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  // États pour l'export
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedDeckForExport, setSelectedDeckForExport] = useState(null);
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: "",
+    type: "",
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -57,6 +69,20 @@ const DecksPage = () => {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Fonctions pour l'export
+  const handleExportDeck = (deck) => {
+    setSelectedDeckForExport(deck);
+    setIsExportModalOpen(true);
+  };
+
+  const showNotification = (message, type) => {
+    setNotification({ isVisible: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ ...notification, isVisible: false });
   };
 
   if (!isAuthenticated) {
@@ -182,6 +208,7 @@ const DecksPage = () => {
                 key={deck.id}
                 deck={deck}
                 onDelete={() => handleDeleteDeck(deck.id)}
+                onExport={() => handleExportDeck(deck)}
               />
             ))}
           </div>
@@ -194,42 +221,54 @@ const DecksPage = () => {
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleImportSuccess}
       />
+
+      {/* Modal d'export */}
+      <DeckExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        deck={selectedDeckForExport}
+        onCopySuccess={(message) => showNotification(message, "success")}
+        onCopyError={(message) => showNotification(message, "error")}
+      />
+
+      {/* Toast de notification */}
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
     </div>
   );
 };
 
-const DeckCard = ({ deck, onDelete }) => {
+const DeckCard = ({ deck, onDelete, onExport }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="bg-mage-dark-800 rounded-lg p-6 hover:bg-mage-dark-700 transition-colors duration-200">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white mb-2">{deck.name}</h3>
-          <p className="text-gray-400 text-sm mb-2">
-            {deck.description || t("decks.noDescription")}
-          </p>
-          <div className="flex items-center text-sm text-gray-500">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            {deck.cards?.length || 0} {t("decks.cardsCount")}
-          </div>
-        </div>
+    <div className="bg-mage-dark-800 rounded-lg p-4 hover:bg-mage-dark-700 transition-colors duration-200">
+      {/* Image de la carte d'affichage avec boutons superposés */}
+      <div className="relative flex justify-center mb-3">
         <div className="relative">
-          <button className="text-gray-400 hover:text-white">
+          {deck.displayImageUrl ? (
+            <div className="overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative hover:scale-105">
+              <img
+                src={deck.displayImageUrl}
+                alt={deck.name}
+                className="w-full h-auto object-cover"
+                onError={(e) => {
+                  e.target.parentElement.style.display = "none";
+                  e.target.parentElement.nextSibling.style.display = "flex";
+                }}
+              />
+            </div>
+          ) : null}
+          <div
+            className="w-64 h-80 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
+            style={{ display: deck.displayImageUrl ? "none" : "flex" }}
+          >
             <svg
-              className="w-5 h-5"
+              className="w-16 h-16 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -238,30 +277,57 @@ const DeckCard = ({ deck, onDelete }) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-          </button>
+          </div>
+
+          {/* Boutons d'action superposés */}
+          <div className="absolute bottom-2 right-2 flex space-x-1 bg-black/50 backdrop-blur-sm rounded-md p-1">
+            {/* Compteur de cartes */}
+            <div className="p-1.5 bg-gray-600 text-white rounded flex items-center space-x-1 text-xs font-medium">
+              <CreditCard size={12} />
+              <span>{deck.totalCards || 0}</span>
+            </div>
+
+            <span
+              className="p-1.5 text-gray-400 rounded cursor-not-allowed opacity-40"
+              title={t("decks.view")}
+            >
+              <Eye size={14} />
+            </span>
+
+            <Link
+              to={`/decks/${deck.id}/edit`}
+              className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+              title={t("decks.edit")}
+            >
+              <Pencil size={14} />
+            </Link>
+
+            <button
+              onClick={onExport}
+              className="p-1.5 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+              title={t("decks.export")}
+            >
+              <Download size={14} />
+            </button>
+
+            <button
+              onClick={onDelete}
+              className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+              title={t("decks.delete")}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="flex space-x-2">
-        <span className="flex-1 bg-mage-dark-600 text-white text-sm font-medium py-2 px-3 rounded-md text-center cursor-not-allowed opacity-40">
-          {t("decks.view")}
-        </span>
-        <Link
-          to={`/decks/${deck.id}/edit`}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 text-center"
-        >
-          {t("decks.edit")}
-        </Link>
-        <button
-          onClick={onDelete}
-          className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
-        >
-          {t("decks.delete")}
-        </button>
-      </div>
+      {/* Titre du deck */}
+      <h3 className="text-lg font-semibold text-white text-center">
+        {deck.name}
+      </h3>
     </div>
   );
 };

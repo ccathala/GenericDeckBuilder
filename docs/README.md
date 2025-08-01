@@ -29,6 +29,7 @@ Bienvenue dans la documentation complète du projet GenericDeckBuilder - un cons
 - [**Setup Local**](development/setup.md) - Installation et configuration locale
 - [**Conventions**](development/conventions.md) - Standards de code et nommage
 - [**Testing**](development/testing.md) - Tests unitaires et d'intégration
+- [**Tests Contrôleurs**](development/controller-testing.md) - Guide complet des tests de contrôleurs Spring Boot
 - [**Debugging**](development/debugging.md) - Outils et techniques de debug
 
 ## 📊 Scraping et Données
@@ -42,6 +43,7 @@ Bienvenue dans la documentation complète du projet GenericDeckBuilder - un cons
 - [Setup Environnement de Développement](development/setup.md)
 - [Architecture des Composants](architecture/frontend.md)
 - [Guide des APIs](api/README.md)
+- [Tests de Contrôleurs](development/controller-testing.md)
 
 ### Pour les Administrateurs
 

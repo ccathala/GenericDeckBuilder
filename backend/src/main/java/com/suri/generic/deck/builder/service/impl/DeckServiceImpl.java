@@ -149,6 +149,53 @@ public class DeckServiceImpl implements DeckService {
     public DeckSummaryResponseDTO toSummaryDto(Deck deck) {
         return new DeckSummaryResponseDTO(
                 deck.getId().toString(),
-                deck.getName());
+                deck.getName(),
+                calculateTotalCards(deck),
+                getDisplayImageUrl(deck));
+    }
+
+    @Override
+    public Integer calculateTotalCards(Deck deck) {
+        if (deck.getCards() == null) {
+            return 0;
+        }
+        return deck.getCards().stream()
+                .mapToInt(DeckCard::getQuantity)
+                .sum();
+    }
+
+    @Override
+    public String getDisplayImageUrl(Deck deck) {
+        // Si une carte d'affichage est définie, utiliser son image
+        if (deck.getDisplayCard() != null) {
+            return getCardImageUrl(deck.getDisplayCard());
+        }
+
+        // Sinon, utiliser la première carte du deck s'il y en a
+        return getDefaultDisplayCard(deck);
+    }
+
+    @Override
+    public String getDefaultDisplayCard(Deck deck) {
+        if (deck.getCards() != null && !deck.getCards().isEmpty()) {
+            return getCardImageUrl(deck.getCards().get(0).getCard());
+        }
+
+        // Retourner null si aucune carte n'est disponible
+        return null;
+    }
+
+    private String getCardImageUrl(Card card) {
+        if (card.getLocalizations() == null || card.getLocalizations().isEmpty()) {
+            return null;
+        }
+
+        // Essayer d'abord avec la locale "fr", puis avec la première disponible
+        return card.getLocalizations().stream()
+                .filter(l -> "fr".equalsIgnoreCase(l.getId().getLocale()))
+                .findFirst()
+                .map(CardLocalization::getImageUrl)
+                .orElse(
+                        card.getLocalizations().get(0).getImageUrl());
     }
 }
