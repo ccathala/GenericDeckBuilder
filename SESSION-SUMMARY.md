@@ -1,12 +1,19 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
 **Date:** 1er Août 2025  
-**Branche:** `fix/import-modal`  
-**Statut:** Fonctionnalité d'import de deck ✅ Complétée
+**Branche:** `fix/junit`  
+**Statut:** Tests de contrôleurs ✅ Corrigés + Documentation créée
 
 ## 🎯 Fonctionnalités implémentées
 
-### ✅ Import de Deck (Complet)
+### ✅ Correction Tests de Contrôleurs (Complet)
+
+- **Fichier:** `DeckControllerExportTest.java` - 8 tests unitaires corrigés
+- **Problèmes résolus:** Configuration Spring, authentification JWT, gestion des exceptions
+- **Tests:** 100% de succès, tous les codes d'erreur HTTP corrects
+- **Documentation:** Guide complet de tests de contrôleurs créé
+
+### ✅ Import de Deck (Complet - Session précédente)
 
 - **Interface utilisateur:** Modal d'import dans la page "Mes Decks"
 - **Format d'import:** `quantité nom_de_carte` (ex: `4 anneau d'azur`)
@@ -31,6 +38,17 @@
 ## 🏗️ Architecture technique
 
 ### Backend (Spring Boot)
+
+**Tests de contrôleurs corrigés:**
+
+```
+📁 backend/src/test/java/com/suri/generic/deck/builder/
+├── 🔧 controller/DeckControllerExportTest.java    # 8 tests corrigés
+├── 🔧 exception/GlobalExceptionHandler.java      # Gestionnaires d'exception ajoutés
+└── 🆕 docs/development/controller-testing.md     # Guide complet créé
+```
+
+**Architecture existante:**
 
 ```
 📁 backend/src/main/java/com/suri/generic/deck/builder/
@@ -85,6 +103,14 @@
 - **Coverage:** Tests unitaires + intégration
 - **Mocking:** `@Mock`, `@InjectMocks`, `ArgumentCaptor`
 - **Assertions:** Messages descriptifs avec `assertTrue(condition, message)`
+- **Tests contrôleurs:** `@WebMvcTest`, authentification manuelle, `@MockBean` pour services
+
+### Tests de Contrôleurs (Nouvelles bonnes pratiques)
+
+- **Configuration:** `@WebMvcTest` avec mocks des services de sécurité requis
+- **Authentification:** `SecurityContextHolder` manuel au lieu de `@WithMockUser`
+- **Exceptions:** `GlobalExceptionHandler` pour codes HTTP corrects
+- **Structure:** Given-When-Then, `@DisplayName` descriptif
 
 ### API REST
 
@@ -111,11 +137,15 @@
 
 ### Backend
 
+### Backend
+
 ```bash
+✅ DeckControllerExportTest: 8/8 tests passent (CORRIGÉ)
 ✅ DeckImportServiceTest: 15/15 tests passent
 ✅ TextNormalizerTest: 17/17 tests passent
 ✅ TextNormalizationIntegrationTest: 2/2 tests passent
 ✅ Compilation: aucune erreur
+✅ Documentation tests: Guide complet créé
 ```
 
 ### Frontend
@@ -150,6 +180,13 @@
 
 ## 💡 Notes techniques importantes
 
+### Correction des Tests de Contrôleurs
+
+- **Problème @MockBean:** Deprecated mais fonctionnel dans Spring Boot 3.4+
+- **Authentification JWT:** Requires manual SecurityContextHolder configuration
+- **Exception Handling:** GlobalExceptionHandler pour codes HTTP corrects (404, 403, 400)
+- **Documentation:** Guide complet dans `docs/development/controller-testing.md`
+
 ### Normalisation
 
 - **TextNormalizer:** Gère Unicode NFD pour accents
@@ -175,13 +212,14 @@
 ### Context minimal à fournir
 
 1. **Projet:** GenericDeckBuilder (Spring Boot + React)
-2. **État:** Export de deck ✅ fonctionnel
+2. **État:** Tests de contrôleurs ✅ corrigés + Documentation créée
 3. **Objectif:** [Nouvelle fonctionnalité à définir]
 
 ### Fichiers de référence
 
 - `SESSION-SUMMARY.md` (ce fichier)
 - `README.md` (documentation générale)
+- `docs/development/controller-testing.md` (guide des tests de contrôleurs)
 - Tests pour exemples d'usage
 
 ### Commandes de vérification
@@ -194,4 +232,4 @@ cd backend && ./mvnw test
 cd frontend && npm run build
 ```
 
-**🎉 Session terminée avec succès - Import de deck fully operational!**
+**🎉 Session terminée avec succès - Tests de contrôleurs corrigés + Documentation créée!**

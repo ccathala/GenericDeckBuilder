@@ -1,5 +1,7 @@
 package com.suri.generic.deck.builder.controller;
 
+import com.suri.generic.deck.builder.exception.DeckNotFoundException;
+import com.suri.generic.deck.builder.exception.UnauthorizedAccessException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 
@@ -35,6 +38,37 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleEntityNotFound(EntityNotFoundException ex) {
         log.warn("Entity not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
+     * Gère les DeckNotFoundException
+     * (ex: deck non trouvé par ID)
+     */
+    @ExceptionHandler(DeckNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleDeckNotFound(DeckNotFoundException ex) {
+        log.warn("Deck not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
+     * Gère les UnauthorizedAccessException
+     * (ex: utilisateur non autorisé à accéder à une ressource)
+     */
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Map<String, String>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        log.warn("Unauthorized access: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
+     * Gère les MethodArgumentTypeMismatchException
+     * (ex: UUID invalide dans les paramètres d'URL)
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("Type mismatch error: {}", ex.getMessage());
+        String errorMessage = "Paramètre invalide: " + ex.getName();
+        return ResponseEntity.badRequest().body(Map.of("error", errorMessage));
     }
 
     /**
