@@ -25,4 +25,8 @@ public interface DeckService {
     DeckSummaryResponseDTO toSummaryDto(Deck deck);
 
     Integer calculateTotalCards(Deck deck);
+
+    String getDisplayImageUrl(Deck deck);
+
+    String getDefaultDisplayCard(Deck deck);
 }

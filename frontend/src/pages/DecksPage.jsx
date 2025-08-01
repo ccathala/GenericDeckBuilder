@@ -247,29 +247,64 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
 
   return (
     <div className="bg-mage-dark-800 rounded-lg p-6 hover:bg-mage-dark-700 transition-colors duration-200">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white mb-2">{deck.name}</h3>
-          <div className="flex items-center text-sm text-white">
-            <svg
-              className="w-4 h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            {deck.totalCards || 0} {t("decks.cardsCount")}
-          </div>
+      {/* Titre du deck */}
+      <h3 className="text-lg font-semibold text-white mb-2 text-center">
+        {deck.name}
+      </h3>
+
+      {/* Nombre de cartes */}
+      <div className="flex items-center justify-center text-sm text-white mb-4">
+        <svg
+          className="w-4 h-4 mr-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+        {deck.totalCards || 0} {t("decks.cardsCount")}
+      </div>
+
+      {/* Image de la carte d'affichage */}
+      <div className="flex justify-center mb-4">
+        {deck.displayImageUrl ? (
+          <img
+            src={deck.displayImageUrl}
+            alt={deck.name}
+            className="w-40 h-52 object-cover rounded-md border border-mage-dark-600"
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "flex";
+            }}
+          />
+        ) : null}
+        <div
+          className="w-40 h-52 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
+          style={{ display: deck.displayImageUrl ? "none" : "flex" }}
+        >
+          <svg
+            className="w-10 h-10 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
         </div>
       </div>
 
-      <div className="flex space-x-2 justify-end">
+      {/* Boutons d'action en ligne */}
+      <div className="flex space-x-2 justify-center">
         <span
           className="p-2 text-gray-400 rounded-md cursor-not-allowed opacity-40"
           title={t("decks.view")}
