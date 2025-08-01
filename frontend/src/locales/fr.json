@@ -168,8 +168,9 @@
     "exportTitle": "Export du deck",
     "exportSuccess": "Deck copié dans le presse-papier !",
     "exportError": "Erreur lors de la copie",
-    "copyToClipboard": "Copier dans le presse-papier",
+    "copyToClipboard": "Copier",
     "loading": "Chargement...",
+    "exportInstructions": "Voici le contenu de votre deck au format texte. Utilisez le bouton ci-dessous pour le copier dans le presse-papier.",
     "import": {
       "title": "Importer un deck",
       "deckTitle": "Titre du deck",

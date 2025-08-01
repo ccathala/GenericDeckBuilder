@@ -168,8 +168,9 @@
     "exportTitle": "Deck Export",
     "exportSuccess": "Deck copied to clipboard!",
     "exportError": "Error copying to clipboard",
-    "copyToClipboard": "Copy to clipboard",
+    "copyToClipboard": "Copy",
     "loading": "Loading...",
+    "exportInstructions": "Here is your deck content in text format. Use the button below to copy it to the clipboard.",
     "import": {
       "title": "Import Deck",
       "deckTitle": "Deck Title",

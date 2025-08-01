@@ -126,7 +126,7 @@ const DeckExportModal = ({
               {/* Instructions */}
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
-                  Voici le contenu de votre deck au format texte. Utilisez le bouton ci-dessous pour le copier dans le presse-papier.
+                  {t("decks.exportInstructions", "Voici le contenu de votre deck au format texte. Utilisez le bouton ci-dessous pour le copier dans le presse-papier.")}
                 </p>
               </div>
 
@@ -136,7 +136,7 @@ const DeckExportModal = ({
                   id="export-textarea"
                   value={exportedContent}
                   readOnly
-                  className="flex-1 w-full p-4 border border-gray-300 rounded-md resize-none font-mono text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-1 w-full p-4 border border-gray-300 rounded-md resize-none font-mono text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   style={{ minHeight: '300px' }}
                   onClick={handleSelectAll}
                 />
@@ -144,7 +144,7 @@ const DeckExportModal = ({
 
               {/* Actions */}
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-600">
                   {exportedContent.split('\n').length} cartes • Cliquez dans la zone de texte pour tout sélectionner
                 </div>
                 <div className="flex space-x-3">
