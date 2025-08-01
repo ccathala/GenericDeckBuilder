@@ -149,6 +149,17 @@ public class DeckServiceImpl implements DeckService {
     public DeckSummaryResponseDTO toSummaryDto(Deck deck) {
         return new DeckSummaryResponseDTO(
                 deck.getId().toString(),
-                deck.getName());
+                deck.getName(),
+                calculateTotalCards(deck));
+    }
+
+    @Override
+    public Integer calculateTotalCards(Deck deck) {
+        if (deck.getCards() == null) {
+            return 0;
+        }
+        return deck.getCards().stream()
+                .mapToInt(DeckCard::getQuantity)
+                .sum();
     }
 }

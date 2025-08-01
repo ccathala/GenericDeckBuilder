@@ -6,6 +6,7 @@ import deckService from "../services/deckService";
 import DeckImportModal from "../components/DeckImportModal";
 import DeckExportModal from "../components/DeckExportModal";
 import NotificationToast from "../components/NotificationToast";
+import { Eye, Pencil, Download, Trash2 } from "lucide-react";
 
 const DecksPage = () => {
   const { t } = useLanguage();
@@ -14,14 +15,14 @@ const DecksPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  
+
   // États pour l'export
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [selectedDeckForExport, setSelectedDeckForExport] = useState(null);
   const [notification, setNotification] = useState({
     isVisible: false,
     message: "",
-    type: ""
+    type: "",
   });
 
   useEffect(() => {
@@ -226,8 +227,8 @@ const DecksPage = () => {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         deck={selectedDeckForExport}
-        onCopySuccess={(message) => showNotification(message, 'success')}
-        onCopyError={(message) => showNotification(message, 'error')}
+        onCopySuccess={(message) => showNotification(message, "success")}
+        onCopyError={(message) => showNotification(message, "error")}
       />
 
       {/* Toast de notification */}
@@ -249,10 +250,7 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-white mb-2">{deck.name}</h3>
-          <p className="text-gray-400 text-sm mb-2">
-            {deck.description || t("decks.noDescription")}
-          </p>
-          <div className="flex items-center text-sm text-gray-500">
+          <div className="flex items-center text-sm text-white">
             <svg
               className="w-4 h-4 mr-1"
               fill="none"
@@ -266,52 +264,41 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
               />
             </svg>
-            {deck.cards?.length || 0} {t("decks.cardsCount")}
+            {deck.totalCards || 0} {t("decks.cardsCount")}
           </div>
-        </div>
-        <div className="relative">
-          <button className="text-gray-400 hover:text-white">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-              />
-            </svg>
-          </button>
         </div>
       </div>
 
-      <div className="flex space-x-2">
-        <span className="flex-1 bg-mage-dark-600 text-white text-sm font-medium py-2 px-3 rounded-md text-center cursor-not-allowed opacity-40">
-          {t("decks.view")}
+      <div className="flex space-x-2 justify-end">
+        <span
+          className="p-2 text-gray-400 rounded-md cursor-not-allowed opacity-40"
+          title={t("decks.view")}
+        >
+          <Eye size={16} />
         </span>
+
         <Link
           to={`/decks/${deck.id}/edit`}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 text-center"
+          className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+          title={t("decks.edit")}
         >
-          {t("decks.edit")}
+          <Pencil size={16} />
         </Link>
+
         <button
           onClick={onExport}
-          className="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center"
+          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
           title={t("decks.export")}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
+          <Download size={16} />
         </button>
+
         <button
           onClick={onDelete}
-          className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"
+          className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+          title={t("decks.delete")}
         >
-          {t("decks.delete")}
+          <Trash2 size={16} />
         </button>
       </div>
     </div>

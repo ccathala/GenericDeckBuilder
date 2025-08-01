@@ -23,4 +23,6 @@ public interface DeckService {
     DeckResponseDTO toResponseDto(Deck deck);
 
     DeckSummaryResponseDTO toSummaryDto(Deck deck);
+
+    Integer calculateTotalCards(Deck deck);
 }
