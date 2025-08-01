@@ -6,7 +6,7 @@ import deckService from "../services/deckService";
 import DeckImportModal from "../components/DeckImportModal";
 import DeckExportModal from "../components/DeckExportModal";
 import NotificationToast from "../components/NotificationToast";
-import { Eye, Pencil, Download, Trash2 } from "lucide-react";
+import { Eye, Pencil, Download, Trash2, CreditCard } from "lucide-react";
 
 const DecksPage = () => {
   const { t } = useLanguage();
@@ -246,50 +246,29 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
   const { t } = useLanguage();
 
   return (
-    <div className="bg-mage-dark-800 rounded-lg p-6 hover:bg-mage-dark-700 transition-colors duration-200">
-      {/* Titre du deck */}
-      <h3 className="text-lg font-semibold text-white mb-2 text-center">
-        {deck.name}
-      </h3>
-
-      {/* Nombre de cartes */}
-      <div className="flex items-center justify-center text-sm text-white mb-4">
-        <svg
-          className="w-4 h-4 mr-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-        {deck.totalCards || 0} {t("decks.cardsCount")}
-      </div>
-
+    <div className="bg-mage-dark-800 rounded-lg p-4 hover:bg-mage-dark-700 transition-colors duration-200">
       {/* Image de la carte d'affichage avec boutons superposés */}
-      <div className="relative flex justify-center mb-2">
+      <div className="relative flex justify-center mb-3">
         <div className="relative">
           {deck.displayImageUrl ? (
-            <img
-              src={deck.displayImageUrl}
-              alt={deck.name}
-              className="w-48 h-64 object-cover rounded-md border border-mage-dark-600"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextSibling.style.display = "flex";
-              }}
-            />
+            <div className="overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative hover:scale-105">
+              <img
+                src={deck.displayImageUrl}
+                alt={deck.name}
+                className="w-full h-auto object-cover"
+                onError={(e) => {
+                  e.target.parentElement.style.display = "none";
+                  e.target.parentElement.nextSibling.style.display = "flex";
+                }}
+              />
+            </div>
           ) : null}
           <div
-            className="w-48 h-64 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
+            className="w-64 h-80 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
             style={{ display: deck.displayImageUrl ? "none" : "flex" }}
           >
             <svg
-              className="w-12 h-12 text-gray-400"
+              className="w-16 h-16 text-gray-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -305,6 +284,12 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
 
           {/* Boutons d'action superposés */}
           <div className="absolute bottom-2 right-2 flex space-x-1 bg-black/50 backdrop-blur-sm rounded-md p-1">
+            {/* Compteur de cartes */}
+            <div className="p-1.5 bg-gray-600 text-white rounded flex items-center space-x-1 text-xs font-medium">
+              <CreditCard size={12} />
+              <span>{deck.totalCards || 0}</span>
+            </div>
+
             <span
               className="p-1.5 text-gray-400 rounded cursor-not-allowed opacity-40"
               title={t("decks.view")}
@@ -338,6 +323,11 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
           </div>
         </div>
       </div>
+
+      {/* Titre du deck */}
+      <h3 className="text-lg font-semibold text-white text-center">
+        {deck.name}
+      </h3>
     </div>
   );
 };
