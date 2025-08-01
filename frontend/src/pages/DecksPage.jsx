@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import deckService from "../services/deckService";
+import DeckImportModal from "../components/DeckImportModal";
 
 const DecksPage = () => {
   const { t } = useLanguage();
@@ -10,6 +11,7 @@ const DecksPage = () => {
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,6 +35,11 @@ const DecksPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImportSuccess = (importedDeck) => {
+    setDecks((prevDecks) => [importedDeck, ...prevDecks]);
+    // Vous pouvez ajouter un message de succès ici si nécessaire
   };
 
   const handleDeleteDeck = async (deckId) => {
@@ -91,25 +98,46 @@ const DecksPage = () => {
             <h1 className="text-3xl font-bold mb-2">{t("decks.title")}</h1>
             <p className="text-gray-400">{t("decks.subtitle")}</p>
           </div>
-          <Link
-            to="/decks/new"
-            className="bg-mage-dark-600 hover:bg-mage-dark-500 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center"
-          >
-            <svg
-              className="w-5 h-5 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {t("decks.createNew")}
-          </Link>
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                />
+              </svg>
+              {t("decks.importDeck")}
+            </button>
+            <Link
+              to="/decks/new"
+              className="bg-mage-dark-600 hover:bg-mage-dark-500 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              {t("decks.createNew")}
+            </Link>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -159,6 +187,13 @@ const DecksPage = () => {
           </div>
         )}
       </div>
+
+      {/* Modal d'importation */}
+      <DeckImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 };
