@@ -1,16 +1,21 @@
 package com.suri.generic.deck.builder.controller;
 
+import com.suri.generic.deck.builder.dto.request.DeckImportRequestDTO;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckSummaryResponseDTO;
+import com.suri.generic.deck.builder.exception.DeckImportException;
 import com.suri.generic.deck.builder.model.User;
+import com.suri.generic.deck.builder.service.DeckImportService;
 import com.suri.generic.deck.builder.service.DeckService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +27,7 @@ import java.util.UUID;
 public class DeckController {
 
     private final DeckService deckService;
+    private final DeckImportService deckImportService;
 
     @PostMapping
     public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestDTO deckDTO,
@@ -52,5 +58,23 @@ public class DeckController {
             @AuthenticationPrincipal User user) {
         deckService.deleteDeck(id, user);
         return ResponseEntity.ok(Map.of("message", "Deck supprimé avec succès"));
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<?> importDeck(
+            @Valid @RequestBody DeckImportRequestDTO importRequest,
+            @AuthenticationPrincipal User user) {
+
+        try {
+            DeckResponseDTO importedDeck = deckImportService.importDeck(importRequest, user);
+            return ResponseEntity.ok(importedDeck);
+
+        } catch (DeckImportException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("errors", e.getErrors());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        }
     }
 }
