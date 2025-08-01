@@ -59,7 +59,7 @@ const DeckImportModal = ({ isOpen, onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, title: e.target.value }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-400 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder={t(
                 "decks.import.titlePlaceholder",
                 "Mon nouveau deck"
@@ -82,14 +82,14 @@ const DeckImportModal = ({ isOpen, onClose, onSuccess }) => {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, cardsList: e.target.value }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-48"
+              className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-400 rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-48 font-mono text-sm"
               placeholder={t(
                 "decks.import.cardsPlaceholder",
-                "4 anneau d'azur\\n2 épée de lumière\\n..."
+                "4 anneau d'azur\n2 épée de lumière\n..."
               )}
               required
             />
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               {t(
                 "decks.import.formatHelp",
                 "Format : quantité + espace + nom de la carte (une par ligne)"
@@ -135,7 +135,7 @@ const DeckImportModal = ({ isOpen, onClose, onSuccess }) => {
             >
               {isLoading
                 ? t("decks.import.importing", "Importation...")
-                : t("decks.import.import", "Importer")}
+                : t("decks.import.importButton", "Importer")}
             </button>
           </div>
         </form>

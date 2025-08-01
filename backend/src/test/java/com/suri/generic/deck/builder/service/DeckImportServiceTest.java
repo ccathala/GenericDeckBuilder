@@ -171,8 +171,8 @@ class DeckImportServiceTest {
         assertEquals(1, exception.getErrors().size());
         String errorMessage = exception.getErrors().get(0);
         assertTrue(errorMessage.contains("1"), "L'erreur devrait mentionner la ligne 1");
-        assertTrue(errorMessage.toLowerCase().contains("format") || errorMessage.contains("quantité"), 
-                   "L'erreur devrait mentionner le format incorrect ou la quantité");
+        assertTrue(errorMessage.toLowerCase().contains("format") || errorMessage.contains("quantité"),
+                "L'erreur devrait mentionner le format incorrect ou la quantité");
     }
 
     @Test
@@ -188,8 +188,8 @@ class DeckImportServiceTest {
         assertEquals(1, exception.getErrors().size());
         String errorMessage = exception.getErrors().get(0);
         assertTrue(errorMessage.contains("1"), "L'erreur devrait mentionner la ligne 1");
-        assertTrue(errorMessage.contains("positive") || errorMessage.contains("quantité"), 
-                   "L'erreur devrait mentionner la quantité positive");
+        assertTrue(errorMessage.contains("positive") || errorMessage.contains("quantité"),
+                "L'erreur devrait mentionner la quantité positive");
     }
 
     @Test
