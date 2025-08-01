@@ -4,6 +4,8 @@ import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
 import deckService from "../services/deckService";
 import DeckImportModal from "../components/DeckImportModal";
+import DeckExportModal from "../components/DeckExportModal";
+import NotificationToast from "../components/NotificationToast";
 
 const DecksPage = () => {
   const { t } = useLanguage();
@@ -12,6 +14,15 @@ const DecksPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  
+  // États pour l'export
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [selectedDeckForExport, setSelectedDeckForExport] = useState(null);
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: "",
+    type: ""
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -57,6 +68,20 @@ const DecksPage = () => {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  // Fonctions pour l'export
+  const handleExportDeck = (deck) => {
+    setSelectedDeckForExport(deck);
+    setIsExportModalOpen(true);
+  };
+
+  const showNotification = (message, type) => {
+    setNotification({ isVisible: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ ...notification, isVisible: false });
   };
 
   if (!isAuthenticated) {
@@ -182,6 +207,7 @@ const DecksPage = () => {
                 key={deck.id}
                 deck={deck}
                 onDelete={() => handleDeleteDeck(deck.id)}
+                onExport={() => handleExportDeck(deck)}
               />
             ))}
           </div>
@@ -194,11 +220,28 @@ const DecksPage = () => {
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleImportSuccess}
       />
+
+      {/* Modal d'export */}
+      <DeckExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        deck={selectedDeckForExport}
+        onCopySuccess={(message) => showNotification(message, 'success')}
+        onCopyError={(message) => showNotification(message, 'error')}
+      />
+
+      {/* Toast de notification */}
+      <NotificationToast
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={hideNotification}
+      />
     </div>
   );
 };
 
-const DeckCard = ({ deck, onDelete }) => {
+const DeckCard = ({ deck, onDelete, onExport }) => {
   const { t } = useLanguage();
 
   return (
@@ -255,6 +298,15 @@ const DeckCard = ({ deck, onDelete }) => {
         >
           {t("decks.edit")}
         </Link>
+        <button
+          onClick={onExport}
+          className="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center"
+          title={t("decks.export")}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
         <button
           onClick={onDelete}
           className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200"

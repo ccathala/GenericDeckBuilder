@@ -2,10 +2,12 @@ package com.suri.generic.deck.builder.controller;
 
 import com.suri.generic.deck.builder.dto.request.DeckImportRequestDTO;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
+import com.suri.generic.deck.builder.dto.response.DeckExportResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckSummaryResponseDTO;
 import com.suri.generic.deck.builder.exception.DeckImportException;
 import com.suri.generic.deck.builder.model.User;
+import com.suri.generic.deck.builder.service.DeckExportService;
 import com.suri.generic.deck.builder.service.DeckImportService;
 import com.suri.generic.deck.builder.service.DeckService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/decks")
@@ -28,6 +31,7 @@ public class DeckController {
 
     private final DeckService deckService;
     private final DeckImportService deckImportService;
+    private final DeckExportService deckExportService;
 
     @PostMapping
     public ResponseEntity<DeckResponseDTO> createDeck(@RequestBody DeckRequestDTO deckDTO,
@@ -76,5 +80,13 @@ public class DeckController {
             return ResponseEntity.badRequest().body(errorResponse);
 
         }
+    }
+
+    @GetMapping("/{id}/export")
+    public ResponseEntity<DeckExportResponseDTO> exportDeck(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "fr") String locale,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(deckExportService.exportDeck(id, locale, user));
     }
 }
