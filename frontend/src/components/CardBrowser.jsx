@@ -48,9 +48,18 @@ const CardBrowser = ({
   const extractUniqueComponents = useCallback((cards) => {
     console.log(
       "🔍 extractUniqueComponents appelé avec",
-      cards.length,
+      cards?.length || 0,
       "cartes"
     );
+
+    // Vérification de sécurité : s'assurer que cards est un tableau
+    if (!Array.isArray(cards)) {
+      console.error(
+        "❌ extractUniqueComponents: cards n'est pas un tableau",
+        cards
+      );
+      return [];
+    }
 
     const componentSet = new Set();
 
