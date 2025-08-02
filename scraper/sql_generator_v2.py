@@ -265,11 +265,135 @@ class MageNoirSQLGeneratorV2:
         return name
     
     def clean_card_name(self, card_name_raw):
-        """Nettoie le nom de la carte pour l'affichage"""
+        """Nettoie le nom de la carte pour l'affichage EN CONSERVANT les accents et apostrophes"""
         name = card_name_raw.replace('_', ' ').replace('-', ' ')
         name = re.sub(r'\s+', ' ', name).strip()
-        # Capitaliser proprement
+        # Capitaliser proprement SANS supprimer les accents/apostrophes
         return ' '.join(word.capitalize() for word in name.split())
+
+    def extract_card_name_from_webpage(self, url):
+        """Extrait le vrai nom de la carte depuis la page web avec accents et apostrophes"""
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            response.encoding = 'utf-8'
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Chercher le titre de la carte (plusieurs patterns possibles)
+            title_patterns = [
+                soup.find('h1'),  # Titre principal
+                soup.find('title'),  # Balise title
+                soup.find('h2'),  # Titre secondaire
+            ]
+            
+            for title_element in title_patterns:
+                if title_element:
+                    title_text = title_element.get_text().strip()
+                    # Nettoyer le titre (supprimer "Mage Noir", etc.)
+                    title_text = re.sub(r'(Mage Noir|Black Mage|\s*-\s*.*$)', '', title_text).strip()
+                    if title_text and len(title_text) > 2:
+                        return title_text
+            
+            # Fallback: utiliser le nom depuis l'URL
+            return None
+            
+        except Exception as e:
+            print(f"    Erreur extraction nom: {e}")
+            return None
+
+    def extract_card_description_from_webpage(self, url):
+        """Extrait la description complète depuis la page web"""
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            response.encoding = 'utf-8'
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            text_content = soup.get_text()
+            
+            # Patterns de recherche pour la description/effets
+            patterns = [
+                r'(Effets|Effects|Effect)\s*:\s*(.*?)(?=Illustration|Artwork|Texte d\'ambiance|Flavor text|Extension|Notes|$)',
+                r'(Description)\s*:\s*(.*?)(?=Illustration|Artwork|Texte d\'ambiance|Flavor text|Extension|Notes|$)',
+                r'(Texte)\s*:\s*(.*?)(?=Illustration|Artwork|Texte d\'ambiance|Flavor text|Extension|Notes|$)'
+            ]
+            
+            for pattern in patterns:
+                match = re.search(pattern, text_content, re.DOTALL | re.IGNORECASE)
+                if match:
+                    description = match.group(2).strip()
+                    # Nettoyer le texte
+                    description = re.sub(r'\s+', ' ', description)
+                    description = re.sub(r'(Notes|Notes)\s*:.*$', '', description).strip()
+                    description = re.sub(r'(Illustration|Artwork)\s*:.*$', '', description).strip()
+                    
+                    if description and len(description) > 10:
+                        return description
+            
+            # Fallback: chercher dans des balises spécifiques
+            description_selectors = [
+                'div.card-description',
+                'div.description', 
+                'p.effect',
+                'div#description',
+                '.card-text',
+                '.effect-text'
+            ]
+            
+            for selector in description_selectors:
+                element = soup.select_one(selector)
+                if element:
+                    description = element.get_text().strip()
+                    if description and len(description) > 10:
+                        return description
+            
+            return None
+            
+        except Exception as e:
+            print(f"    Erreur extraction description: {e}")
+            return None
+
+    def normalize_image_url(self, image_url):
+        """Remplace le préfixe des URLs d'images par le CDN GitHub"""
+        if image_url and image_url.startswith('https://magenoir.com'):
+            # Remplacer le domaine par le CDN GitHub
+            return image_url.replace('https://magenoir.com', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main')
+        return image_url
+
+    def validate_card_data(self, card_data):
+        """Valide la cohérence des données extraites"""
+        issues = []
+        
+        # Vérifier descriptions non vides
+        for locale in ['fr', 'en']:
+            if locale in card_data['localizations']:
+                desc = card_data['localizations'][locale].get('description', '')
+                if not desc or len(desc) < 10:
+                    issues.append(f"Description {locale} trop courte ou vide")
+                elif "Déphase 0" in desc:
+                    issues.append(f"Description {locale} contient 'Déphase 0' suspect")
+                elif desc.count('.') == 0 and len(desc) > 20:
+                    issues.append(f"Description {locale} sans ponctuation")
+        
+        # Vérifier correspondance des noms
+        if 'fr' in card_data['localizations'] and 'en' in card_data['localizations']:
+            fr_name = card_data['localizations']['fr'].get('name', '')
+            en_name = card_data['localizations']['en'].get('name', '')
+            if not fr_name or not en_name:
+                issues.append("Nom manquant dans une localisation")
+            elif fr_name == en_name and len(fr_name) > 5:
+                issues.append("Noms FR/EN identiques (suspect)")
+        
+        return issues
     
 
     def levenshtein_distance(self, s1, s2):
@@ -345,8 +469,8 @@ class MageNoirSQLGeneratorV2:
             # Pour les images anglaises, garder les noms anglais
             element_for_image_matching = element_raw.lower()
         
-        def normalize_for_matching(name):
-            """Normalise un nom pour le matching d'images - VERSION ÉTENDUE"""
+        def normalize_for_matching_only(name):
+            """Normalise un nom UNIQUEMENT pour le matching d'images - pas pour l'affichage"""
             name = name.lower()
             
             # Supprimer les apostrophes et caractères spéciaux
@@ -416,7 +540,7 @@ class MageNoirSQLGeneratorV2:
             return False, "NO_MATCH"
         
         # Normaliser le nom de la carte
-        normalized_card_name = normalize_for_matching(card_name_raw)
+        normalized_card_name = normalize_for_matching_only(card_name_raw)
         
         # Créer des variants RESTREINTS (moins de variants pour éviter les faux positifs)
         card_name_variants = [
@@ -484,7 +608,7 @@ class MageNoirSQLGeneratorV2:
                 element_for_image_matching in image_url.lower()):
                 
                 url_name = image_url.split('/')[-1].replace('.png', '').replace('.jpg', '')
-                url_name_normalized = normalize_for_matching(url_name)
+                url_name_normalized = normalize_for_matching_only(url_name)
                 
                 if debug_mode:
                     print(f"    DEBUG - Test image: {url_name} -> {url_name_normalized}")
@@ -526,7 +650,7 @@ class MageNoirSQLGeneratorV2:
                     
                 if (lang_code in image_url and element_for_image_matching in image_url.lower()):
                     url_name = image_url.split('/')[-1].replace('.png', '').replace('.jpg', '')
-                    url_name_normalized = normalize_for_matching(url_name)
+                    url_name_normalized = normalize_for_matching_only(url_name)
                     
                     if debug_mode:
                         print(f"    DEBUG - Test fallback: {url_name} -> {url_name_normalized}")
@@ -584,12 +708,36 @@ class MageNoirSQLGeneratorV2:
         for fr_url in urls_data['french_card_urls']:
             card_info = self.extract_card_info_from_url(fr_url)
             if card_info:
+                # NOUVEAU : Extraire le vrai nom depuis la page web
+                real_name = self.extract_card_name_from_webpage(fr_url)
+                if real_name:
+                    card_info['card_name_display'] = real_name
+                    print(f"  Nom réel extrait (FR): {real_name}")
+                
+                # NOUVEAU : Extraire la description complète
+                real_description = self.extract_card_description_from_webpage(fr_url)
+                if real_description:
+                    card_info['real_description'] = real_description
+                    print(f"  Description extraite (FR): {real_description[:50]}...")
+                
                 french_cards.append(card_info)
         
         # Extraire les informations des cartes anglaises
         for en_url in urls_data['english_card_urls']:
             card_info = self.extract_card_info_from_url(en_url)
             if card_info:
+                # NOUVEAU : Extraire le vrai nom depuis la page web
+                real_name = self.extract_card_name_from_webpage(en_url)
+                if real_name:
+                    card_info['card_name_display'] = real_name
+                    print(f"  Nom réel extrait (EN): {real_name}")
+                
+                # NOUVEAU : Extraire la description complète
+                real_description = self.extract_card_description_from_webpage(en_url)
+                if real_description:
+                    card_info['real_description'] = real_description
+                    print(f"  Description extraite (EN): {real_description[:50]}...")
+                
                 english_cards.append(card_info)
         
         print(f"Correspondance de {len(french_cards)} cartes francaises avec {len(english_cards)} cartes anglaises...")
@@ -660,14 +808,14 @@ class MageNoirSQLGeneratorV2:
                 # Ajouter la localisation française et extraire les coûts depuis la page FR
                 fr_image = self.find_matching_image_url(fr_card, urls_data['french_image_urls'])
                 card_data['localizations']['fr'] = {
-                    'name': fr_card['card_name_display'],
-                    'image_url': fr_image or '',
+                    'name': fr_card.get('card_name_display', fr_card['card_name_display']),
+                    'image_url': self.normalize_image_url(fr_image) if fr_image else '',
                     'card_url': fr_card['url'],
-                    'description': ''  # Sera rempli après extraction
+                    'description': fr_card.get('real_description', '')  # Utiliser la vraie description
                 }
                 
                 # Extraire toutes les données depuis la page française
-                print(f"  Extraction donnees: {fr_card['card_name_display']}")
+                print(f"  Extraction donnees: {fr_card.get('card_name_display', fr_card['card_name_display'])}")
                 card_info = self.extract_mana_cost_from_webpage(fr_card['url'])
                 card_data['total_cost'] = card_info['total_cost']
                 card_data['mana_costs'] = card_info['mana_costs']
@@ -676,8 +824,9 @@ class MageNoirSQLGeneratorV2:
                 card_data['extension'] = card_info['extension']
                 card_data['artwork'] = card_info['artwork']
                 
-                # Ajouter la description française
-                card_data['localizations']['fr']['description'] = card_info['description']
+                # Utiliser la description extraite plutôt que celle de extract_mana_cost_from_webpage
+                if not card_data['localizations']['fr']['description']:
+                    card_data['localizations']['fr']['description'] = card_info.get('description', 'Description à compléter')
                 
                 # Petite pause pour éviter de surcharger le serveur
                 time.sleep(0.5)
@@ -686,18 +835,19 @@ class MageNoirSQLGeneratorV2:
                 if en_match:
                     en_image = self.find_matching_image_url(en_match, urls_data['english_image_urls'])
                     card_data['localizations']['en'] = {
-                        'name': en_match['card_name_display'],
-                        'image_url': en_image or '',
+                        'name': en_match.get('card_name_display', en_match['card_name_display']),
+                        'image_url': self.normalize_image_url(en_image) if en_image else '',
                         'card_url': en_match['url'],
-                        'description': ''  # Sera rempli après extraction
+                        'description': en_match.get('real_description', '')  # Utiliser la vraie description
                     }
                     
                     # Toujours extraire les données depuis la page anglaise pour la localisation
-                    print(f"  Extraction donnees (EN): {en_match['card_name_display']}")
+                    print(f"  Extraction donnees (EN): {en_match.get('card_name_display', en_match['card_name_display'])}")
                     en_card_info = self.extract_mana_cost_from_webpage(en_match['url'])
                     
-                    # Toujours utiliser la description anglaise pour la localisation EN
-                    card_data['localizations']['en']['description'] = en_card_info['description']
+                    # Utiliser la description extraite plutôt que celle de extract_mana_cost_from_webpage
+                    if not card_data['localizations']['en']['description']:
+                        card_data['localizations']['en']['description'] = en_card_info.get('description', 'Description to complete')
                     
                     # Retirer la carte anglaise de la liste des cartes disponibles
                     remaining_en_cards.remove(en_match)
@@ -708,8 +858,13 @@ class MageNoirSQLGeneratorV2:
                     # Ajouter la carte SEULEMENT si correspondance manuelle trouvée
                     matched_cards.append(card_data)
                     card_counter += 1
+                    
+                    # NOUVEAU : Validation des données de la carte
+                    issues = self.validate_card_data(card_data)
+                    if issues:
+                        print(f"    ⚠️  Problèmes détectés: {', '.join(issues)}")
                 else:
-                    print(f"    IGNORE - Aucune correspondance manuelle trouvee pour: {fr_card['card_name_display']}")
+                    print(f"    IGNORE - Aucune correspondance manuelle trouvee pour: {fr_card.get('card_name_display', fr_card['card_name_display'])}")
                     # Ne pas ajouter la carte sans correspondance manuelle
         
         return matched_cards
@@ -865,9 +1020,19 @@ class MageNoirSQLGeneratorV2:
             fr_name = fr_loc.get('name', card_id)
             fr_image = fr_loc.get('image_url', '')
             fr_description = fr_loc.get('description', 'Description à compléter')
+            
+            # Validation et nettoyage de la description française
+            if not fr_description or fr_description.strip() == '':
+                fr_description = 'Description à compléter'
+            elif len(fr_description) < 10:
+                fr_description = 'Description à compléter'
+            elif "Déphase 0" in fr_description:
+                print(f"    ⚠️  Description FR suspecte pour {card_id}: contient 'Déphase 0'")
+            
             # Échapper les apostrophes pour PostgreSQL
             fr_description_escaped = fr_description.replace("'", "''")
-            localizations.append(f"('{card_id}', E'{fr_description_escaped}', '{fr_image}', 'fr', '{fr_name}')")
+            fr_name_escaped = fr_name.replace("'", "''")
+            localizations.append(f"('{card_id}', E'{fr_description_escaped}', '{fr_image}', 'fr', '{fr_name_escaped}')")
         else:
             # Si pas de français, utiliser un placeholder
             localizations.append(f"('{card_id}', E'Description à compléter', '', 'fr', '{display_name}')")
@@ -878,9 +1043,25 @@ class MageNoirSQLGeneratorV2:
             en_name = en_loc.get('name', card_id)
             en_image = en_loc.get('image_url', '')
             en_description = en_loc.get('description', 'Description to complete')
+            
+            # Validation et nettoyage de la description anglaise
+            if not en_description or en_description.strip() == '':
+                en_description = 'Description to complete'
+            elif len(en_description) < 10:
+                en_description = 'Description to complete'
+            elif "Déphase 0" in en_description:
+                print(f"    ⚠️  Description EN suspecte pour {card_id}: contient 'Déphase 0'")
+            
+            # Vérifier si le nom anglais n'est pas identique au nom français
+            if 'fr' in card['localizations']:
+                fr_name = card['localizations']['fr'].get('name', '')
+                if en_name == fr_name and len(en_name) > 5:
+                    print(f"    ⚠️  Noms FR/EN identiques pour {card_id}: {en_name}")
+            
             # Échapper les apostrophes pour PostgreSQL
             en_description_escaped = en_description.replace("'", "''")
-            localizations.append(f"('{card_id}', E'{en_description_escaped}', '{en_image}', 'en', '{en_name}')")
+            en_name_escaped = en_name.replace("'", "''")
+            localizations.append(f"('{card_id}', E'{en_description_escaped}', '{en_image}', 'en', '{en_name_escaped}')")
         else:
             # Si pas d'anglais, utiliser un placeholder
             localizations.append(f"('{card_id}', E'Description to complete', '', 'en', '{display_name}')")
