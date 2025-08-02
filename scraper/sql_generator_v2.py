@@ -265,11 +265,32 @@ class MageNoirSQLGeneratorV2:
         return name
     
     def clean_card_name(self, card_name_raw):
-        """Nettoie le nom de la carte pour l'affichage EN CONSERVANT les accents et apostrophes"""
-        name = card_name_raw.replace('_', ' ').replace('-', ' ')
+        """Nettoie le nom de la carte pour l'affichage EN CONSERVANT les accents, apostrophes ET tirets appropriés"""
+        # Remplacer les underscores par des espaces
+        name = card_name_raw.replace('_', ' ')
+        
+        # Gérer les tirets de façon intelligente
+        # Garder les tirets dans les noms composés (ex: "yuki-onna" → "Yuki-Onna")
+        # Mais remplacer les tirets multiples ou isolés par des espaces
+        name = re.sub(r'-{2,}', ' ', name)  # Remplacer les tirets multiples par un espace
+        name = re.sub(r'\s+-\s+', ' ', name)  # Remplacer les tirets entourés d'espaces par un espace
+        
+        # Nettoyer les espaces multiples
         name = re.sub(r'\s+', ' ', name).strip()
+        
         # Capitaliser proprement SANS supprimer les accents/apostrophes
-        return ' '.join(word.capitalize() for word in name.split())
+        # et en gardant les tirets pour les noms composés
+        words = []
+        for word in name.split():
+            if '-' in word:
+                # Pour les mots avec tirets, capitaliser chaque partie
+                parts = word.split('-')
+                capitalized_parts = [part.capitalize() for part in parts if part]
+                words.append('-'.join(capitalized_parts))
+            else:
+                words.append(word.capitalize())
+        
+        return ' '.join(words)
 
     def extract_card_name_from_webpage(self, url):
         """Extrait le vrai nom de la carte depuis la page web avec accents et apostrophes"""
@@ -294,8 +315,11 @@ class MageNoirSQLGeneratorV2:
             for title_element in title_patterns:
                 if title_element:
                     title_text = title_element.get_text().strip()
-                    # Nettoyer le titre (supprimer "Mage Noir", etc.)
-                    title_text = re.sub(r'(Mage Noir|Black Mage|\s*-\s*.*$)', '', title_text).strip()
+                    # Nettoyer le titre en supprimant seulement les suffixes indésirables
+                    # mais en gardant les tirets dans les noms de cartes
+                    title_text = re.sub(r'\s*[-–—]\s*(Mage Noir|Black Mage|Card|Carte).*$', '', title_text, flags=re.IGNORECASE)
+                    title_text = re.sub(r'\s*\|\s*.*$', '', title_text)  # Supprimer après |
+                    title_text = title_text.strip()
                     if title_text and len(title_text) > 2:
                         return title_text
             

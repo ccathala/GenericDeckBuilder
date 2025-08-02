@@ -1,5 +1,5 @@
 -- Fichier SQL généré automatiquement pour les cartes Mage Noir
--- Généré le : 2025-08-02 16:57:07
+-- Généré le : 2025-08-02 17:14:41
 -- Nombre de cartes : 205
 -- Cartes avec correspondance FR/EN : 205
 
@@ -2500,7 +2500,7 @@ VALUES
 ('infiltration glaciale', E'Slowcast (This spell can''t be activated on the turn it was prepared) This turn, damage from Water spells you control is reduced by 1.This damage can''t be ignored, reduced or redirected this turn.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/water/icy_infiltration.png', 'en', 'Icy infiltration');
 
 --========================================================================================================================
--- Infiltration
+-- Infiltration-subtile
 --========================================================================================================================
 INSERT INTO card (id, game_id, properties) VALUES
 ('infiltration subtile', 'mage_noir', '{
@@ -2521,11 +2521,11 @@ INSERT INTO card (id, game_id, properties) VALUES
   "artwork": "Geoffrey Amesse"
 }');
 
--- Localisations pour Infiltration
+-- Localisations pour Infiltration-subtile
 INSERT INTO public.card_localization
 (card_id, description, image_url, locale, "name")
 VALUES
-('infiltration subtile', E'A chaque fois que vous échangez de la Mana Eau avec l''Ether Disponible, inflige 1 point de dégâts à l''adversaire, puis libère 1 Mana verrouillée par ce sort. Dès qu''il ne verrouille plus de Mana, détruisez ce sort, puis vous pouvez prendre jusqu''à 2 Mana Eau dans l''Ether disponible.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Eau/Infiltration-subtile.png', 'fr', 'Infiltration'),
+('infiltration subtile', E'A chaque fois que vous échangez de la Mana Eau avec l''Ether Disponible, inflige 1 point de dégâts à l''adversaire, puis libère 1 Mana verrouillée par ce sort. Dès qu''il ne verrouille plus de Mana, détruisez ce sort, puis vous pouvez prendre jusqu''à 2 Mana Eau dans l''Ether disponible.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Eau/Infiltration-subtile.png', 'fr', 'Infiltration-subtile'),
 ('infiltration subtile', E'Every time you trade Water Mana with the Available Ether, inflict 1 damage to the opponent and release 1 Mana locked under this spell. Discard this Permanent as soon as there''s no Mana locked under it, then you may take up to 2 Water Mana from the Available Ether.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/water/Subtle-infiltration.png', 'en', 'Subtle infiltration');
 
 --========================================================================================================================
@@ -2796,7 +2796,7 @@ VALUES
 ('rituel du zero absolu', E'You become a Mage Noir.ALL spells gain: "Slowcast". (You cannot activate these spells on the same turn they were prepared)ALL spells can be prepared for 1 additional Water Mana so that they don''t have Slowcast.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/water/ritual_of_absolute_zero.png', 'en', 'Ritual of absolute zero');
 
 --========================================================================================================================
--- Robe de Yuki
+-- Robe de Yuki-Onna
 --========================================================================================================================
 INSERT INTO card (id, game_id, properties) VALUES
 ('robe de yuki onna', 'mage_noir', '{
@@ -2817,12 +2817,12 @@ INSERT INTO card (id, game_id, properties) VALUES
   "artwork": "Jessica Heran"
 }');
 
--- Localisations pour Robe de Yuki
+-- Localisations pour Robe de Yuki-Onna
 INSERT INTO public.card_localization
 (card_id, description, image_url, locale, "name")
 VALUES
-('robe de yuki onna', E'Pour chaque carte que votre adversaire pioche, il paye 1 Mana.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Eau/robe_de_yuki_onna.png', 'fr', 'Robe de Yuki'),
-('robe de yuki onna', E'Each time the opponent draws a card, they pay 1 Mana.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/water/yuki_onna_s_robe.png', 'en', 'Yuki');
+('robe de yuki onna', E'Pour chaque carte que votre adversaire pioche, il paye 1 Mana.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Eau/robe_de_yuki_onna.png', 'fr', 'Robe de Yuki-Onna'),
+('robe de yuki onna', E'Each time the opponent draws a card, they pay 1 Mana.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/water/yuki_onna_s_robe.png', 'en', 'Yuki-Onna''s robe');
 
 --========================================================================================================================
 -- Souffle brume
@@ -4819,7 +4819,7 @@ VALUES
 ('rituel d exuviation', E'You become a Mage Noir.Your spells cost 1 less Mineral Mana to prepare.Damage inflicted to you is increased by 1.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/mineral/ecdysis_ritual.png', 'en', 'Ecdysis ritual');
 
 --========================================================================================================================
--- Rituel du guerrier
+-- Rituel du guerrier-mage
 --========================================================================================================================
 INSERT INTO card (id, game_id, properties) VALUES
 ('rituel du guerrier mage', 'mage_noir', '{
@@ -4840,12 +4840,12 @@ INSERT INTO card (id, game_id, properties) VALUES
   "artwork": "Johann Goutard"
 }');
 
--- Localisations pour Rituel du guerrier
+-- Localisations pour Rituel du guerrier-mage
 INSERT INTO public.card_localization
 (card_id, description, image_url, locale, "name")
 VALUES
-('rituel du guerrier mage', E'Vous passez Mage Noir. A la fin de votre tour, détruisez tous les Équipements que vous avez joué ce tour-ci. Les dégâts infligés par vos Équipements sont augmentés de 1. A tout moment vous pouvez défausser 1 carte de votre main pour que l''Équipement ciblé soit indestructible ce tour-ci.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Mineral/Rituel-du-guerrier-mage.png', 'fr', 'Rituel du guerrier'),
-('rituel du guerrier mage', E'You become a Mage Noir. At the end of your turn, destroy all Equipment you played this turn. Damage inflicted by your Equipment is increased by 1. At any time, you may discard 1 card to make target Equipment you control indestructible until the end of the turn.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/mineral/Warrior-mage-ritual.png', 'en', 'Warrior');
+('rituel du guerrier mage', E'Vous passez Mage Noir. A la fin de votre tour, détruisez tous les Équipements que vous avez joué ce tour-ci. Les dégâts infligés par vos Équipements sont augmentés de 1. A tout moment vous pouvez défausser 1 carte de votre main pour que l''Équipement ciblé soit indestructible ce tour-ci.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/FR/Mineral/Rituel-du-guerrier-mage.png', 'fr', 'Rituel du guerrier-mage'),
+('rituel du guerrier mage', E'You become a Mage Noir. At the end of your turn, destroy all Equipment you played this turn. Damage inflicted by your Equipment is increased by 1. At any time, you may discard 1 card to make target Equipment you control indestructible until the end of the turn.', 'https://cdn.jsdelivr.net/gh/ccathala/mndb-images@main/cards/EN/mineral/Warrior-mage-ritual.png', 'en', 'Warrior-mage ritual');
 
 --========================================================================================================================
 -- Roche
