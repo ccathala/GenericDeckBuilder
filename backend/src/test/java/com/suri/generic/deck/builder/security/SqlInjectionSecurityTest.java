@@ -54,11 +54,11 @@ class SqlInjectionSecurityTest {
     void shouldRejectSqlInjectionInGameId() {
         // Given - Tentatives d'injection SQL communes
         String[] maliciousGameIds = {
-            "'; DROP TABLE card; --",
-            "1' OR '1'='1",
-            "1'; UPDATE user SET password='hacked'; --",
-            "1' UNION SELECT * FROM user; --",
-            "mage-noir'; INSERT INTO admin VALUES('hacker'); --"
+                "'; DROP TABLE card; --",
+                "1' OR '1'='1",
+                "1'; UPDATE user SET password='hacked'; --",
+                "1' UNION SELECT * FROM user; --",
+                "mage-noir'; INSERT INTO admin VALUES('hacker'); --"
         };
 
         for (String maliciousGameId : maliciousGameIds) {
@@ -73,9 +73,9 @@ class SqlInjectionSecurityTest {
             });
 
             assertTrue(exception.getMessage().contains("Paramètres invalides"),
-                "Doit rejeter gameId malveillant: " + maliciousGameId);
+                    "Doit rejeter gameId malveillant: " + maliciousGameId);
             assertTrue(exception.getErrors().get(0).contains("caractères non autorisés"),
-                "Doit mentionner les caractères non autorisés pour: " + maliciousGameId);
+                    "Doit mentionner les caractères non autorisés pour: " + maliciousGameId);
         }
     }
 
@@ -84,12 +84,12 @@ class SqlInjectionSecurityTest {
     void shouldAcceptValidGameIds() {
         // Given - gameId valides
         String[] validGameIds = {
-            "mage-noir",
-            "pokemon_tcg",
-            "magic-the-gathering",
-            "hearthstone123",
-            "game_1",
-            "test-game"
+                "mage-noir",
+                "pokemon_tcg",
+                "magic-the-gathering",
+                "hearthstone123",
+                "game_1",
+                "test-game"
         };
 
         when(cardLocalizationRepository.findByGameId(anyString())).thenReturn(Collections.emptyList());
@@ -101,7 +101,8 @@ class SqlInjectionSecurityTest {
             request.setCardsList("4 carte inexistante");
 
             // When & Then - Ne doit pas lever d'exception de validation pour gameId
-            // (peut lever DeckImportException pour cartes non trouvées, mais pas pour gameId)
+            // (peut lever DeckImportException pour cartes non trouvées, mais pas pour
+            // gameId)
             Exception exception = assertThrows(Exception.class, () -> {
                 deckImportService.importDeck(request, testUser);
             });
@@ -110,7 +111,7 @@ class SqlInjectionSecurityTest {
             if (exception instanceof DeckImportException) {
                 DeckImportException deckException = (DeckImportException) exception;
                 assertFalse(deckException.getMessage().contains("Paramètres invalides"),
-                    "Ne doit pas rejeter gameId valide: " + validGameId);
+                        "Ne doit pas rejeter gameId valide: " + validGameId);
             }
         }
     }
@@ -120,12 +121,12 @@ class SqlInjectionSecurityTest {
     void shouldRejectNullOrEmptyParameters() {
         // Given - Paramètres invalides
         DeckImportRequestDTO[] invalidRequests = {
-            null,  // Requête nulle
-            createRequest(null, "Test", "4 carte"),      // gameId null
-            createRequest("", "Test", "4 carte"),        // gameId vide
-            createRequest("mage-noir", null, "4 carte"), // title null
-            createRequest("mage-noir", "", "4 carte"),   // title vide
-            createRequest("mage-noir", "Test", null)     // cardsList null (vide autorisé pour les tests existants)
+                null, // Requête nulle
+                createRequest(null, "Test", "4 carte"), // gameId null
+                createRequest("", "Test", "4 carte"), // gameId vide
+                createRequest("mage-noir", null, "4 carte"), // title null
+                createRequest("mage-noir", "", "4 carte"), // title vide
+                createRequest("mage-noir", "Test", null) // cardsList null (vide autorisé pour les tests existants)
         };
 
         for (DeckImportRequestDTO request : invalidRequests) {
@@ -135,7 +136,7 @@ class SqlInjectionSecurityTest {
             });
 
             assertTrue(exception.getMessage().contains("Paramètres invalides"),
-                "Doit rejeter les paramètres invalides");
+                    "Doit rejeter les paramètres invalides");
         }
     }
 
@@ -143,8 +144,8 @@ class SqlInjectionSecurityTest {
     @DisplayName("🛡️ Doit rejeter les paramètres trop longs (protection DoS)")
     void shouldRejectOversizedParameters() {
         // Given - Paramètres trop longs
-        String longTitle = "a".repeat(101);  // > 100 caractères
-        String longCardsList = "4 carte test\n".repeat(1000);  // > 10000 caractères
+        String longTitle = "a".repeat(101); // > 100 caractères
+        String longCardsList = "4 carte test\n".repeat(1000); // > 10000 caractères
 
         DeckImportRequestDTO requestWithLongTitle = createRequest("mage-noir", longTitle, "4 carte");
         DeckImportRequestDTO requestWithLongCardsList = createRequest("mage-noir", "Test", longCardsList);
@@ -154,14 +155,14 @@ class SqlInjectionSecurityTest {
             deckImportService.importDeck(requestWithLongTitle, testUser);
         });
         assertTrue(titleException.getErrors().get(0).contains("100 caractères"),
-            "Doit rejeter les titres trop longs");
+                "Doit rejeter les titres trop longs");
 
         // When & Then - CardsList trop longue
         DeckImportException cardsException = assertThrows(DeckImportException.class, () -> {
             deckImportService.importDeck(requestWithLongCardsList, testUser);
         });
         assertTrue(cardsException.getErrors().get(0).contains("10000 caractères"),
-            "Doit rejeter les listes de cartes trop longues");
+                "Doit rejeter les listes de cartes trop longues");
     }
 
     private DeckImportRequestDTO createRequest(String gameId, String title, String cardsList) {
@@ -170,5 +171,31 @@ class SqlInjectionSecurityTest {
         request.setTitle(title);
         request.setCardsList(cardsList);
         return request;
+    }
+
+    @Test
+    @DisplayName("🛡️ CardRepository tri sécurisé - Doit rejeter les gameId malveillants")
+    void testCardRepositoryOrderedQuery_withMaliciousGameId_shouldBeSafe() {
+        // Given - Tentatives d'injection SQL dans la requête de tri
+        String[] maliciousGameIds = {
+                "'; DROP TABLE card; SELECT * FROM card WHERE game_id='",
+                "' UNION SELECT password FROM app_user WHERE '1'='1",
+                "'; UPDATE card SET properties='hacked'; SELECT * FROM card WHERE game_id='",
+                "' OR 1=1; DELETE FROM card; SELECT * FROM card WHERE game_id='"
+        };
+
+        // When & Then - La validation devrait rejeter ces gameId avant la requête
+        for (String maliciousGameId : maliciousGameIds) {
+            DeckImportRequestDTO request = createRequest(maliciousGameId, "Test", "4 carte test");
+
+            DeckImportException exception = assertThrows(DeckImportException.class, () -> {
+                deckImportService.importDeck(request, testUser);
+            });
+
+            assertTrue(exception.getMessage().contains("Paramètres invalides"),
+                    "Doit rejeter gameId malveillant dans requête de tri: " + maliciousGameId);
+            assertTrue(exception.getErrors().get(0).contains("caractères non autorisés"),
+                    "Doit mentionner les caractères non autorisés pour: " + maliciousGameId);
+        }
     }
 }

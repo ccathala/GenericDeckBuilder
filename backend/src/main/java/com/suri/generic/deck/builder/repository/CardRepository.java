@@ -10,35 +10,35 @@ import java.util.List;
 
 public interface CardRepository extends JpaRepository<Card, String> {
     List<Card> findByGame(Game game);
-    
+
     /**
      * Find cards by game ordered by element, extension and mana cost.
      * Elements are ordered: Végétal, Feu, Air, Eau, Minéral, Arcane
      * Extensions: "Jeu de base" first, then others
      * Mana cost: ascending order
      * 
-     * ⚠️ SÉCURITÉ: Requête JPQL sécurisée remplaçant la requête native PostgreSQL
-     * pour éviter les injections SQL tout en conservant le tri complexe
+     * ⚠️ SÉCURITÉ: Requête native PostgreSQL sécurisée avec paramètres bindés
+     * pour gérer le tri complexe sur les propriétés JSON tout en évitant les
+     * injections SQL
      */
-    @Query("""
-        SELECT c FROM Card c 
-        WHERE c.game.id = :gameId
-        ORDER BY 
-            CASE 
-                WHEN c.properties LIKE '%"element":"Végétal"%' THEN 1
-                WHEN c.properties LIKE '%"element":"Feu"%' THEN 2  
-                WHEN c.properties LIKE '%"element":"Air"%' THEN 3
-                WHEN c.properties LIKE '%"element":"Eau"%' THEN 4
-                WHEN c.properties LIKE '%"element":"Minéral"%' THEN 5
-                WHEN c.properties LIKE '%"element":"Arcane"%' THEN 6
-                ELSE 7
-            END,
-            CASE 
-                WHEN c.properties LIKE '%"extension":"Jeu de base"%' THEN 1
-                ELSE 2  
-            END,
-            c.id ASC
-        """)
+    @Query(value = """
+            SELECT * FROM card c
+            WHERE c.game_id = :gameId
+            ORDER BY
+                CASE COALESCE(c.properties::json->>'element', 'Unknown')
+                    WHEN 'Végétal' THEN 1
+                    WHEN 'Feu' THEN 2
+                    WHEN 'Air' THEN 3
+                    WHEN 'Eau' THEN 4
+                    WHEN 'Minéral' THEN 5
+                    WHEN 'Arcane' THEN 6
+                    ELSE 7
+                END,
+                CASE COALESCE(c.properties::json->>'extension', 'Unknown')
+                    WHEN 'Jeu de base' THEN 1
+                    ELSE 2
+                END,
+                CAST(COALESCE(c.properties::json->'manaCost'->>'total', '999') AS INTEGER) ASC
+            """, nativeQuery = true)
     List<Card> findByGameIdOrderedByElementExtensionAndManaCost(@Param("gameId") String gameId);
 }
-
