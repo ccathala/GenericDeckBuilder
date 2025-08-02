@@ -1,7 +1,59 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
-})
+
+  build: {
+    // Désactiver les source maps en production pour cacher le code source
+    sourcemap: mode !== "production",
+
+    // Minification aggressive
+    minify: "terser",
+    terserOptions: {
+      compress: {
+        // Supprimer les console.log en production
+        drop_console: mode === "production",
+        // Supprimer les debugger statements
+        drop_debugger: true,
+        // Supprimer les commentaires
+        dead_code: true,
+      },
+      mangle: {
+        // Obfusquer les noms de variables
+        safari10: true,
+      },
+    },
+
+    // Optimisation des chunks pour de meilleures performances
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom"],
+          router: ["react-router-dom"],
+          ui: ["lucide-react"],
+        },
+        // Noms de fichiers obfusqués en production
+        chunkFileNames:
+          mode === "production" ? "[hash].js" : "[name]-[hash].js",
+        entryFileNames:
+          mode === "production" ? "[hash].js" : "[name]-[hash].js",
+        assetFileNames:
+          mode === "production" ? "[hash].[ext]" : "[name]-[hash].[ext]",
+      },
+    },
+  },
+
+  // Configuration du serveur de développement
+  server: {
+    port: 5173,
+    host: true,
+  },
+
+  // Configuration de prévisualisation
+  preview: {
+    port: 3000,
+    host: true,
+  },
+}));
