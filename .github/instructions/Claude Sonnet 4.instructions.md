@@ -7,5 +7,5 @@ Quand tu fais une analyse montre moi les modifications à faire dans les fichier
 Demande moi de valider ton analyse avant de faire les modifications.
 Suffixe les objets DTO par "DTO".
 Pour les classes java utilise lombok pour générer les getters, setters, toString, equals et hashCode.
-Ne fais pas de test d'intégration pour les controlleurs, fais juste des tests unitaires.
+Rédige uniquement des tests unitaires.
 Applique un couplage faible entre les interfaces et les classes d'implémentation.
