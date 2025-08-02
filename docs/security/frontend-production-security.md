@@ -101,12 +101,12 @@ Réduction totale: ~85%
 
 ## 📋 Récapitulatif des scripts et ports
 
-| Script | Usage | Source Maps | Port |
-|--------|-------|-------------|------|
-| `npm run dev` | Développement | ✅ Activées | 5173 |
-| `npm run build:prod` | Build production | ❌ Désactivées | - |
-| `npm run preview:prod` | Test production | ❌ Désactivées | 3000 |
-| `npm run preview` | Test du dernier build | Selon le build | 3000 |
+| Script                 | Usage                 | Source Maps    | Port |
+| ---------------------- | --------------------- | -------------- | ---- |
+| `npm run dev`          | Développement         | ✅ Activées    | 5173 |
+| `npm run build:prod`   | Build production      | ❌ Désactivées | -    |
+| `npm run preview:prod` | Test production       | ❌ Désactivées | 3000 |
+| `npm run preview`      | Test du dernier build | Selon le build | 3000 |
 
 ## ⚠️ Important
 
