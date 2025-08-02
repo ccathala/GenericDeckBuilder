@@ -252,19 +252,25 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
         <div className="relative">
           {deck.displayImageUrl ? (
             <div className="overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative hover:scale-105">
-              <img
-                src={deck.displayImageUrl}
-                alt={deck.name}
-                className="w-full h-auto object-cover"
-                onError={(e) => {
-                  e.target.parentElement.style.display = "none";
-                  e.target.parentElement.nextSibling.style.display = "flex";
-                }}
-              />
+              <div className="w-64 h-32 relative overflow-hidden rounded-lg">
+                <img
+                  src={deck.displayImageUrl}
+                  alt={deck.name}
+                  className="w-full h-full object-cover object-center"
+                  style={{
+                    objectPosition: "center 40%",
+                  }}
+                  onError={(e) => {
+                    e.target.parentElement.parentElement.style.display = "none";
+                    e.target.parentElement.parentElement.parentElement.nextSibling.style.display =
+                      "flex";
+                  }}
+                />
+              </div>
             </div>
           ) : null}
           <div
-            className="w-64 h-80 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
+            className="w-64 h-48 bg-mage-dark-600 rounded-md border border-mage-dark-500 flex items-center justify-center"
             style={{ display: deck.displayImageUrl ? "none" : "flex" }}
           >
             <svg
