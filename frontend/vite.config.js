@@ -2,14 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
+// Configuration Vite avec stratégie de sécurité multi-niveaux :
+// 1. Railway : Sécurité automatique côté hébergeur
+// 2. Vite : Sécurité garantie côté build (portabilité + tests locaux)
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
 
   build: {
     // Désactiver les source maps en production pour cacher le code source
+    // Garantit la sécurité même si l'hébergeur ne le fait pas automatiquement
     sourcemap: mode !== "production",
 
-    // Minification aggressive
+    // Minification agressive - Défense en profondeur + portabilité
     minify: "terser",
     terserOptions: {
       compress: {

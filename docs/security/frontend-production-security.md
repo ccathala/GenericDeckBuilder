@@ -2,9 +2,32 @@
 
 ## 📋 Résumé
 
-Configuration Vite optimisée pour **cacher le code source en production** et améliorer les performances.
+Configuration Vite optimisée pour **cacher le code source en production** avec une **stratégie de sécurité multi-niveaux** garantissant la portabilité entre hébergeurs.
 
-## 🎯 Fonctionnalités de sécurité
+## 🛡️ Stratégie de sécurité multi-niveaux
+
+### 1️⃣ **Hébergeur (Railway)**
+
+- **Sécurité automatique** côté infrastructure
+- **Optimisations** intégrées par Railway
+- **Spécifique** à cet hébergeur
+
+### 2️⃣ **Build Vite (Configuration locale)**
+
+- **Sécurité garantie** indépendamment de l'hébergeur
+- **Portabilité** vers tout autre hébergeur (Vercel, Netlify, AWS, etc.)
+- **Contrôle total** sur la configuration de sécurité
+- **Tests locaux** avec production sécurisée
+
+### 🎯 **Avantages de cette approche**
+
+- ✅ **Défense en profondeur** - Double protection
+- ✅ **Portabilité** - Prêt pour tout changement d'hébergeur
+- ✅ **Indépendance** - Pas de dépendance aux configurations d'hébergeur
+- ✅ **Tests locaux** - Production locale identique à la production déployée
+- ✅ **Bonnes pratiques** - Standard de l'industrie
+
+## 🎯 Fonctionnalités de sécurité Vite
 
 ### ✅ Source Maps désactivées
 
@@ -99,7 +122,43 @@ dist/[hash].css         ~27 kB
 Réduction totale: ~85%
 ```
 
-## 📋 Récapitulatif des scripts et ports
+## 🌐 Environnements et Sécurité
+
+### 🔧 **Développement local** (`npm run dev`)
+
+- **Port:** 5173
+- **Source maps:** ✅ Activées (debugging)
+- **API:** http://localhost:8080
+- **Sécurité:** Non requise (environnement fermé)
+
+### 🧪 **Tests production locale** (`npm run preview:prod`)
+
+- **Port:** 3000
+- **Source maps:** ❌ Désactivées
+- **API:** http://localhost:8080 (détection automatique)
+- **Sécurité:** ✅ Configuration Vite active
+- **Usage:** Tests avant déploiement
+
+### 🚀 **Production déployée** (Railway)
+
+- **Port:** Variable (géré par Railway)
+- **Source maps:** ❌ Désactivées (double protection)
+- **API:** Même origine (détection automatique)
+- **Sécurité:** ✅ Railway + Configuration Vite
+- **Avantage:** Défense en profondeur
+
+## 🔄 Portabilité entre hébergeurs
+
+Cette configuration garantit que votre application reste sécurisée quel que soit l'hébergeur :
+
+| Hébergeur             | Sécurité auto | Notre config | Résultat               |
+| --------------------- | ------------- | ------------ | ---------------------- |
+| **Railway**           | ✅ Oui        | ✅ Active    | 🛡️ Double protection   |
+| **Vercel**            | ✅ Oui        | ✅ Active    | 🛡️ Double protection   |
+| **Netlify**           | ✅ Oui        | ✅ Active    | �️ Double protection   |
+| **Hébergeur basique** | ❌ Non        | ✅ Active    | 🛡️ Protection garantie |
+
+## �📋 Récapitulatif des scripts et ports
 
 | Script                 | Usage                 | Source Maps    | Port |
 | ---------------------- | --------------------- | -------------- | ---- |
@@ -113,7 +172,8 @@ Réduction totale: ~85%
 - **Ne jamais** commiter les fichiers `.env.local` avec des secrets
 - **Toujours** tester le build de production avant déploiement
 - **Vérifier** régulièrement qu'aucune information sensible n'est exposée
+- **Maintenir** la configuration même si l'hébergeur sécurise automatiquement
 
 ---
 
-**✅ Code source maintenant sécurisé en production !**
+**✅ Code source maintenant sécurisé avec stratégie multi-niveaux !**
