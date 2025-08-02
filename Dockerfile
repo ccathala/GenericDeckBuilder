@@ -26,7 +26,11 @@ RUN npm run build
 
 # Validation du build frontend
 RUN test -f dist/index.html || (echo "❌ Frontend build failed: index.html not found" && exit 1)
-RUN test -d dist/assets || (echo "❌ Frontend build failed: assets/ not found" && exit 1)
+
+# Validation flexible des assets (debug + vérification JS/CSS)
+RUN echo "🔍 Debug: Build structure:" && ls -la dist/ && echo ""
+RUN test "$(find dist/ -name "*.js" -o -name "*.css" | wc -l)" -gt 0 || (echo "❌ Frontend build failed: no JS/CSS assets found" && exit 1)
+
 RUN echo "✅ Frontend build validated successfully"
 
 # =============================================================================

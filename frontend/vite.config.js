@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
 
   build: {
+    // Répertoire de sortie pour les assets
+    outDir: "dist",
+    assetsDir: "assets",
+
     // Désactiver les source maps en production pour cacher le code source
     // Garantit la sécurité même si l'hébergeur ne le fait pas automatiquement
     sourcemap: mode !== "production",
