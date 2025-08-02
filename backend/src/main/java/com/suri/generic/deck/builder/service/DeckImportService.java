@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,9 +35,6 @@ public class DeckImportService {
 
     @Transactional
     public DeckResponseDTO importDeck(DeckImportRequestDTO importRequest, User user) {
-        // 🛡️ SÉCURITÉ: Validation et sanitisation des paramètres d'entrée
-        validateImportRequest(importRequest);
-        
         log.info("Importation d'un deck : {} par l'utilisateur {}", importRequest.getTitle(), user.getUsername());
 
         // 1. Parser la liste des cartes
@@ -127,49 +125,5 @@ public class DeckImportService {
         }
 
         return result;
-    }
-
-    /**
-     * 🛡️ SÉCURITÉ: Validation et sanitisation des paramètres d'entrée
-     * pour prévenir les injections SQL et autres attaques
-     */
-    private void validateImportRequest(DeckImportRequestDTO importRequest) {
-        if (importRequest == null) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("La requête d'import ne peut pas être nulle"));
-        }
-        
-        if (importRequest.getGameId() == null || importRequest.getGameId().trim().isEmpty()) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("L'ID du jeu ne peut pas être vide"));
-        }
-        
-        if (importRequest.getTitle() == null || importRequest.getTitle().trim().isEmpty()) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("Le titre du deck ne peut pas être vide"));
-        }
-        
-        if (importRequest.getCardsList() == null) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("La liste des cartes ne peut pas être nulle"));
-        }
-        
-        // 🛡️ Validation de sécurité: gameId ne doit contenir que des caractères autorisés
-        String gameId = importRequest.getGameId().trim();
-        if (!gameId.matches("^[a-zA-Z0-9_-]+$")) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("L'ID du jeu contient des caractères non autorisés"));
-        }
-        
-        // 🛡️ Limitation de taille pour éviter les attaques DoS
-        if (importRequest.getTitle().length() > 100) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("Le titre du deck ne peut pas dépasser 100 caractères"));
-        }
-        
-        if (importRequest.getCardsList().length() > 10000) {
-            throw new DeckImportException("Paramètres invalides", 
-                List.of("La liste des cartes ne peut pas dépasser 10000 caractères"));
-        }
     }
 }
