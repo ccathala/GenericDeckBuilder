@@ -47,6 +47,17 @@ const DeckForm = ({ isEdit = false }) => {
     left: 0,
   });
 
+  // États pour le mode preview
+  const [previewMode, setPreviewMode] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [previewColumns, setPreviewColumns] = useState([
+    { id: "column1", title: "Colonne 1", cards: [] },
+    { id: "column2", title: "Colonne 2", cards: [] },
+    { id: "column3", title: "Colonne 3", cards: [] },
+    { id: "column4", title: "Colonne 4", cards: [] },
+    { id: "column5", title: "Colonne 5", cards: [] },
+  ]);
+
   // Gestion d'erreur de chargement d'image
   const handleImageError = (cardId) => {
     setImageErrors((prev) => new Set([...prev, cardId]));
@@ -97,6 +108,30 @@ const DeckForm = ({ isEdit = false }) => {
     return card.imageUrl;
   };
 
+  // Gestion du drag & drop pour les colonnes preview
+  const moveCardToColumn = (cardId, targetColumnId) => {
+    const card = deckCards.find((c) => c.id === cardId);
+    if (!card) return;
+
+    setPreviewColumns((prev) =>
+      prev.map((column) => ({
+        ...column,
+        cards:
+          column.id === targetColumnId
+            ? [...column.cards.filter((c) => c.id !== cardId), card]
+            : column.cards.filter((c) => c.id !== cardId),
+      }))
+    );
+  };
+
+  const updateColumnTitle = (columnId, newTitle) => {
+    setPreviewColumns((prev) =>
+      prev.map((column) =>
+        column.id === columnId ? { ...column, title: newTitle } : column
+      )
+    );
+  };
+
   // Helper components
   const LoadingSpinner = () => (
     <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
@@ -138,6 +173,170 @@ const DeckForm = ({ isEdit = false }) => {
       </div>
     </div>
   );
+
+  const PreviewMode = () => {
+    const handleDragStart = (e, cardId) => {
+      e.dataTransfer.setData("text/plain", cardId);
+    };
+
+    const handleDrop = (e, columnId) => {
+      e.preventDefault();
+      const cardId = e.dataTransfer.getData("text/plain");
+      moveCardToColumn(cardId, columnId);
+    };
+
+    const handleDragOver = (e) => {
+      e.preventDefault();
+    };
+
+    const unassignedCards = deckCards.filter(
+      (card) =>
+        !previewColumns.some((col) => col.cards.some((c) => c.id === card.id))
+    );
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+        {/* Bloc gauche - Affichage visuel des cartes (75%) */}
+        <div className="lg:col-span-3 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
+          <h3 className="text-lg font-semibold mb-4">Aperçu du deck</h3>
+
+          {/* Grille de colonnes drag & drop */}
+          <div className="grid grid-cols-5 gap-2 flex-1">
+            {previewColumns.map((column) => (
+              <div key={column.id} className="flex flex-col">
+                <div
+                  className="flex-1 min-h-[200px] space-y-2 relative"
+                  onDrop={(e) => handleDrop(e, column.id)}
+                  onDragOver={handleDragOver}
+                >
+                  {column.cards.map((card, index) => (
+                    <div
+                      key={`${card.id}-${index}`}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, card.id)}
+                      className="relative cursor-move"
+                      style={{
+                        zIndex: index + 1,
+                        marginTop: index > 0 ? "-230px" : "0",
+                        width: "90%",
+                      }}
+                    >
+                      <img
+                        src={getCardImageUrl(card)}
+                        alt={card.name}
+                        className="w-full h-auto rounded shadow-lg"
+                        onError={() => handleImageError(card.id)}
+                      />
+                      {card.quantity > 1 && (
+                        <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                          {card.quantity}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {column.cards.length === 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm opacity-30">
+                      Zone {column.id.slice(-1)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Zone non assignée */}
+          {unassignedCards.length > 0 && (
+            <div className="mt-4 bg-mage-dark-600 rounded-lg p-3">
+              <h4 className="text-sm font-medium mb-2">Cartes non assignées</h4>
+              <div className="flex flex-wrap gap-2">
+                {unassignedCards.map((card) => (
+                  <div
+                    key={card.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, card.id)}
+                    className="relative w-16 h-20 cursor-move"
+                  >
+                    <img
+                      src={getCardImageUrl(card)}
+                      alt={card.name}
+                      className="w-full h-full object-cover rounded shadow"
+                      onError={() => handleImageError(card.id)}
+                    />
+                    {card.quantity > 1 && (
+                      <div className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                        {card.quantity}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bloc droite - Notes (25%) */}
+        <div className="lg:col-span-1 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
+          <h3 className="text-lg font-semibold mb-4">Notes</h3>
+
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Écrivez vos réflexions stratégiques sur le deck..."
+            className="flex-1 w-full bg-mage-dark-700 border border-gray-600 rounded-lg p-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:border-blue-500 text-sm"
+          />
+
+          {/* Bouton toggle mode preview */}
+          <div className="flex space-x-2 mb-3 pt-3 border-t border-gray-600">
+            <button
+              type="button"
+              onClick={() => setPreviewMode(!previewMode)}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 flex items-center justify-center space-x-1"
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              <span>Construction</span>
+            </button>
+          </div>
+
+          {/* Boutons d'action */}
+          <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-600">
+            <button
+              type="button"
+              onClick={() => navigate("/decks")}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={saving || !deck.name.trim()}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 disabled:cursor-not-allowed"
+            >
+              {saving ? "Sauvegarde..." : isEdit ? "Sauvegarder" : "Créer"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Load ruleset data at component initialization
   useEffect(() => {
@@ -245,6 +444,16 @@ const DeckForm = ({ isEdit = false }) => {
           description: deckData.description || "",
           gameId: "mage_noir", // Force le jeu à mage_noir même en édition
         });
+
+        // Charger les notes et colonnes si elles existent
+        setNotes(deckData.notes || "");
+        if (deckData.previewColumns) {
+          try {
+            setPreviewColumns(JSON.parse(deckData.previewColumns));
+          } catch (e) {
+            console.warn("Erreur parsing previewColumns:", e);
+          }
+        }
 
         // Transform deck cards for display
         const cards =
@@ -379,6 +588,8 @@ const DeckForm = ({ isEdit = false }) => {
 
       const deckData = {
         ...deck,
+        notes, // Ajout des notes
+        previewColumns: JSON.stringify(previewColumns), // Sérialisation des colonnes
         cards: deckCards.map((card) => ({
           cardId: card.id,
           quantity: card.quantity,
@@ -419,222 +630,260 @@ const DeckForm = ({ isEdit = false }) => {
           {/* Error Message */}
           {error && <ErrorMessage error={error} />}
 
-          {/* Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
-            {/* Zone 3: Sélection de cartes (gauche - 3/4 = 75%) */}
-            <div className="lg:col-span-3 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
-              <div className="flex-1 overflow-hidden">
-                <CardBrowser
-                  onCardSelection={handleCardSelectionChange}
-                  selectedCards={selectedCards}
-                  allowMultiSelect={true}
-                  gameId={deck.gameId}
-                  showTitle={false}
-                  className="h-full"
-                  maxColumns={5}
-                  onCardsLoaded={setBrowserCards}
-                />
-              </div>
-            </div>
-
-            {/* Zone 2: Deck actuel (droite - 1/4 = 25%) */}
-            <div className="lg:col-span-1 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
-              <div className="mb-4 flex-shrink-0">
-                {/* Nom du deck éditable */}
-                <div className="mb-3 relative">
-                  <input
-                    type="text"
-                    value={deck.name}
-                    onChange={(e) => setDeck({ ...deck, name: e.target.value })}
-                    className="w-full text-xl font-semibold bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors pb-1 pr-6"
-                    placeholder={t("decks.form.namePlaceholder")}
-                    required
+          {/* Contenu principal - Mode conditionnel */}
+          {previewMode ? (
+            <PreviewMode />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+              {/* Zone 3: Sélection de cartes (gauche - 3/4 = 75%) */}
+              <div className="lg:col-span-3 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
+                <div className="flex-1 overflow-hidden">
+                  <CardBrowser
+                    onCardSelection={handleCardSelectionChange}
+                    selectedCards={selectedCards}
+                    allowMultiSelect={true}
+                    gameId={deck.gameId}
+                    showTitle={false}
+                    className="h-full"
+                    maxColumns={5}
+                    onCardsLoaded={setBrowserCards}
                   />
-                  <svg
-                    className="absolute right-1 top-1 w-4 h-4 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                    />
-                  </svg>
                 </div>
+              </div>
 
-                {/* Statistiques avec indicateurs de validation */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-400">
-                      {t("decks.form.totalCards")}
-                    </span>
-                    <span
-                      className={`${
-                        validationRules &&
-                        validationStatus.totalCards < validationRules.minCards
-                          ? "text-red-400"
-                          : "text-white"
-                      }`}
+              {/* Zone 2: Deck actuel (droite - 1/4 = 25%) */}
+              <div className="lg:col-span-1 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
+                <div className="mb-4 flex-shrink-0">
+                  {/* Nom du deck éditable */}
+                  <div className="mb-3 relative">
+                    <input
+                      type="text"
+                      value={deck.name}
+                      onChange={(e) =>
+                        setDeck({ ...deck, name: e.target.value })
+                      }
+                      className="w-full text-xl font-semibold bg-transparent border-b-2 border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors pb-1 pr-6"
+                      placeholder={t("decks.form.namePlaceholder")}
+                      required
+                    />
+                    <svg
+                      className="absolute right-1 top-1 w-4 h-4 text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      {validationStatus.totalCards}/
-                      {validationRules?.minCards || 0}
-                    </span>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Statistiques avec indicateurs de validation */}
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">
+                        {t("decks.form.totalCards")}
+                      </span>
+                      <span
+                        className={`${
+                          validationRules &&
+                          validationStatus.totalCards < validationRules.minCards
+                            ? "text-red-400"
+                            : "text-white"
+                        }`}
+                      >
+                        {validationStatus.totalCards}/
+                        {validationRules?.minCards || 0}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {deckCards.length === 0 ? (
-                <div className="text-center py-4 flex-1 flex flex-col justify-center">
-                  <div className="text-3xl mb-2">🃏</div>
-                  <p className="text-gray-400 text-sm">
-                    {t("decks.form.noDeckCards")}
-                  </p>
-                  <p className="text-gray-500 text-xs mt-1">
-                    {t("decks.form.selectCardsBelow")}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-0.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  {deckCards.map((card) => {
-                    // Vérifier si cette carte dépasse la limite
-                    const exceedsLimit =
-                      validationRules &&
-                      card.quantity > validationRules.maxCopiesPerCard;
+                {deckCards.length === 0 ? (
+                  <div className="text-center py-4 flex-1 flex flex-col justify-center">
+                    <div className="text-3xl mb-2">🃏</div>
+                    <p className="text-gray-400 text-sm">
+                      {t("decks.form.noDeckCards")}
+                    </p>
+                    <p className="text-gray-500 text-xs mt-1">
+                      {t("decks.form.selectCardsBelow")}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-0.5 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                    {deckCards.map((card) => {
+                      // Vérifier si cette carte dépasse la limite
+                      const exceedsLimit =
+                        validationRules &&
+                        card.quantity > validationRules.maxCopiesPerCard;
 
-                    return (
-                      <div
-                        key={card.id}
-                        className={`relative flex items-center justify-between p-1.5 rounded text-xs transition-colors ${
-                          exceedsLimit
-                            ? "bg-red-900/50 border border-red-500/50"
-                            : "bg-mage-dark-700"
-                        }`}
-                        onMouseEnter={(e) => {
-                          setHoveredCard(card);
-                          const position = calculateImagePosition(
-                            e.currentTarget
-                          );
-                          setHoveredCardPosition(position);
-                        }}
-                        onMouseLeave={() => {
-                          setHoveredCard(null);
-                        }}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <h3
-                            className={`font-medium truncate leading-tight ${
-                              exceedsLimit ? "text-red-300" : "text-white"
-                            }`}
-                          >
-                            {card.name || `${card.id}`}
-                            {exceedsLimit && (
-                              <span className="text-red-400 ml-1 text-xs">
-                                (max: {validationRules.maxCopiesPerCard})
-                              </span>
-                            )}
-                          </h3>
-                        </div>
-                        <div className="flex items-center space-x-0.5 ml-1.5">
-                          <button
-                            onClick={() =>
-                              updateCardQuantity(card.id, card.quantity - 1)
-                            }
-                            className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center transition-colors"
-                          >
-                            -
-                          </button>
-                          <span
-                            className={`w-5 text-center font-semibold text-xs ${
-                              exceedsLimit ? "text-red-300" : "text-white"
-                            }`}
-                          >
-                            {card.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateCardQuantity(card.id, card.quantity + 1)
-                            }
-                            disabled={
-                              validationRules &&
-                              card.quantity >= validationRules.maxCopiesPerCard
-                            }
-                            className={`w-5 h-5 text-white rounded text-xs flex items-center justify-center transition-colors ${
-                              validationRules &&
-                              card.quantity >= validationRules.maxCopiesPerCard
-                                ? "bg-gray-500 cursor-not-allowed"
-                                : "bg-green-600 hover:bg-green-700"
-                            }`}
-                          >
-                            +
-                          </button>
-                          <button
-                            onClick={() => removeCardFromDeck(card.id)}
-                            className="w-5 h-5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs flex items-center justify-center transition-colors ml-1"
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        {/* Image au survol */}
-                        {hoveredCard?.id === card.id && (
-                          <div
-                            className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
-                            style={{
-                              left: `${hoveredCardPosition.left}px`,
-                              top: `${hoveredCardPosition.top}px`,
-                            }}
-                          >
-                            <img
-                              src={getCardImageUrl(card)}
-                              alt={card.name || card.id}
-                              className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
-                              onError={() => {
-                                handleImageError(card.id);
-                              }}
-                              onLoad={() => {
-                                // Retirer de la liste d'erreur si l'image se charge avec succès
-                                setImageErrors((prev) => {
-                                  const newSet = new Set(prev);
-                                  newSet.delete(card.id);
-                                  return newSet;
-                                });
-                              }}
-                            />
+                      return (
+                        <div
+                          key={card.id}
+                          className={`relative flex items-center justify-between p-1.5 rounded text-xs transition-colors ${
+                            exceedsLimit
+                              ? "bg-red-900/50 border border-red-500/50"
+                              : "bg-mage-dark-700"
+                          }`}
+                          onMouseEnter={(e) => {
+                            setHoveredCard(card);
+                            const position = calculateImagePosition(
+                              e.currentTarget
+                            );
+                            setHoveredCardPosition(position);
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredCard(null);
+                          }}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <h3
+                              className={`font-medium truncate leading-tight ${
+                                exceedsLimit ? "text-red-300" : "text-white"
+                              }`}
+                            >
+                              {card.name || `${card.id}`}
+                              {exceedsLimit && (
+                                <span className="text-red-400 ml-1 text-xs">
+                                  (max: {validationRules.maxCopiesPerCard})
+                                </span>
+                              )}
+                            </h3>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                          <div className="flex items-center space-x-0.5 ml-1.5">
+                            <button
+                              onClick={() =>
+                                updateCardQuantity(card.id, card.quantity - 1)
+                              }
+                              className="w-5 h-5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center transition-colors"
+                            >
+                              -
+                            </button>
+                            <span
+                              className={`w-5 text-center font-semibold text-xs ${
+                                exceedsLimit ? "text-red-300" : "text-white"
+                              }`}
+                            >
+                              {card.quantity}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateCardQuantity(card.id, card.quantity + 1)
+                              }
+                              disabled={
+                                validationRules &&
+                                card.quantity >=
+                                  validationRules.maxCopiesPerCard
+                              }
+                              className={`w-5 h-5 text-white rounded text-xs flex items-center justify-center transition-colors ${
+                                validationRules &&
+                                card.quantity >=
+                                  validationRules.maxCopiesPerCard
+                                  ? "bg-gray-500 cursor-not-allowed"
+                                  : "bg-green-600 hover:bg-green-700"
+                              }`}
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() => removeCardFromDeck(card.id)}
+                              className="w-5 h-5 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs flex items-center justify-center transition-colors ml-1"
+                            >
+                              ×
+                            </button>
+                          </div>
 
-              {/* Boutons d'action */}
-              <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-600">
-                <button
-                  type="button"
-                  onClick={() => navigate("/decks")}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
-                >
-                  {t("common.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={saving || !deck.name.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 disabled:cursor-not-allowed"
-                >
-                  {saving
-                    ? t("common.saving")
-                    : isEdit
-                    ? t("common.save")
-                    : t("common.create")}
-                </button>
+                          {/* Image au survol */}
+                          {hoveredCard?.id === card.id && (
+                            <div
+                              className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+                              style={{
+                                left: `${hoveredCardPosition.left}px`,
+                                top: `${hoveredCardPosition.top}px`,
+                              }}
+                            >
+                              <img
+                                src={getCardImageUrl(card)}
+                                alt={card.name || card.id}
+                                className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
+                                onError={() => {
+                                  handleImageError(card.id);
+                                }}
+                                onLoad={() => {
+                                  // Retirer de la liste d'erreur si l'image se charge avec succès
+                                  setImageErrors((prev) => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(card.id);
+                                    return newSet;
+                                  });
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Bouton toggle mode preview */}
+                <div className="flex space-x-2 mb-3 pt-3 border-t border-gray-600">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewMode(!previewMode)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 flex items-center justify-center space-x-1"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                    <span>Aperçu</span>
+                  </button>
+                </div>
+
+                {/* Boutons d'action */}
+                <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-600">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/decks")}
+                    className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
+                  >
+                    {t("common.cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={saving || !deck.name.trim()}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 disabled:cursor-not-allowed"
+                  >
+                    {saving
+                      ? t("common.saving")
+                      : isEdit
+                      ? t("common.save")
+                      : t("common.create")}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
