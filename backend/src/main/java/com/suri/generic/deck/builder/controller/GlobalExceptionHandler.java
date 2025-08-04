@@ -2,6 +2,8 @@ package com.suri.generic.deck.builder.controller;
 
 import com.suri.generic.deck.builder.exception.DeckNotFoundException;
 import com.suri.generic.deck.builder.exception.UnauthorizedAccessException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +81,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
         log.warn("Authentication failed: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Identifiants incorrects"));
+    }
+
+    /**
+     * Gère les tokens JWT expirés
+     * Renvoie toujours 401 Unauthorized pour forcer la déconnexion côté frontend
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Map<String, String>> handleExpiredJwt(ExpiredJwtException ex) {
+        log.warn("JWT token expired: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Token expiré. Veuillez vous reconnecter.", "code", "TOKEN_EXPIRED"));
+    }
+
+    /**
+     * Gère les autres erreurs JWT (token invalide, malformé, etc.)
+     * Renvoie toujours 401 Unauthorized pour forcer la déconnexion côté frontend
+     */
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Map<String, String>> handleJwtException(JwtException ex) {
+        log.warn("JWT error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Token invalide. Veuillez vous reconnecter.", "code", "TOKEN_INVALID"));
     }
 
     /**

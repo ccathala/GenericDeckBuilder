@@ -20,6 +20,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${jwt.expiration:86400000}")
+    private Long jwtExpirationInMs;
+
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
@@ -63,7 +66,7 @@ public class JwtServiceImpl implements JwtService {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
