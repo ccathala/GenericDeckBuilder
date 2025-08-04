@@ -3,11 +3,14 @@ package com.suri.generic.deck.builder.security;
 import com.suri.generic.deck.builder.model.User;
 import com.suri.generic.deck.builder.service.JwtService;
 import com.suri.generic.deck.builder.service.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +22,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -38,20 +42,44 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         final String jwt = authHeader.substring(7);
-        final String email = jwtService.extractUsername(jwt);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Get User entity directly without casting
-            User user = userService.findUserByEmail(email);
+        try {
+            final String email = jwtService.extractUsername(jwt);
 
-            if (jwtService.isTokenValid(jwt, user)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null,
-                        user.getAuthorities());
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Get User entity directly without casting
+                User user = userService.findUserByEmail(email);
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtService.isTokenValid(jwt, user)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null,
+                            user.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token has expired for request: {}", request.getRequestURI());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter()
+                    .write("{\"error\":\"Token expiré. Veuillez vous reconnecter.\",\"code\":\"TOKEN_EXPIRED\"}");
+            return;
+        } catch (JwtException e) {
+            log.warn("Invalid JWT token for request: {} - {}", request.getRequestURI(), e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter()
+                    .write("{\"error\":\"Token invalide. Veuillez vous reconnecter.\",\"code\":\"TOKEN_INVALID\"}");
+            return;
+        } catch (Exception e) {
+            log.error("Error processing JWT token for request: {}", request.getRequestURI(), e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write(
+                    "{\"error\":\"Erreur d'authentification. Veuillez vous reconnecter.\",\"code\":\"AUTH_ERROR\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);

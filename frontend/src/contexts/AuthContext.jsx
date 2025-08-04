@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { isTokenExpired, getTimeUntilExpiration } from "../utils/jwtUtils";
 
 const AuthContext = createContext();
 
@@ -23,8 +24,17 @@ export const AuthProvider = ({ children }) => {
         const userData = localStorage.getItem("userData");
 
         if (token && userData) {
-          setUser(JSON.parse(userData));
-          setIsAuthenticated(true);
+          // Vérifier si le token n'est pas expiré
+          if (isTokenExpired(token)) {
+            console.warn("Token expiré détecté au démarrage de l'application");
+            logout();
+          } else {
+            setUser(JSON.parse(userData));
+            setIsAuthenticated(true);
+
+            // Programmer la vérification périodique d'expiration
+            scheduleTokenExpirationCheck(token);
+          }
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -60,6 +70,9 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         setIsAuthenticated(true);
 
+        // Programmer la vérification d'expiration pour le nouveau token
+        scheduleTokenExpirationCheck(result.data.token);
+
         return { success: true };
       } else {
         return { success: false, error: result.error };
@@ -75,6 +88,42 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("userData");
     setUser(null);
     setIsAuthenticated(false);
+
+    // Nettoyer les timers d'expiration
+    if (window.tokenExpirationTimer) {
+      clearTimeout(window.tokenExpirationTimer);
+      window.tokenExpirationTimer = null;
+    }
+  };
+
+  // Programmer la vérification d'expiration du token
+  const scheduleTokenExpirationCheck = (token) => {
+    const timeUntilExpiration = getTimeUntilExpiration(token);
+
+    if (timeUntilExpiration > 0) {
+      // Nettoyer le timer précédent s'il existe
+      if (window.tokenExpirationTimer) {
+        clearTimeout(window.tokenExpirationTimer);
+      }
+
+      // Programmer la déconnexion automatique quelques secondes avant l'expiration
+      const logoutTime = Math.max(0, (timeUntilExpiration - 30) * 1000); // 30 secondes avant expiration
+
+      window.tokenExpirationTimer = setTimeout(() => {
+        console.warn("Token sur le point d'expirer, déconnexion automatique");
+        logout();
+      }, logoutTime);
+
+      console.info(
+        `Token expirera dans ${timeUntilExpiration} secondes, déconnexion programmée dans ${
+          logoutTime / 1000
+        } secondes`
+      );
+    } else {
+      // Token déjà expiré
+      console.warn("Token déjà expiré, déconnexion immédiate");
+      logout();
+    }
   };
 
   const setAuthenticatedUser = (token, userData) => {
@@ -85,6 +134,9 @@ export const AuthProvider = ({ children }) => {
     // Update context state immediately
     setUser(userData);
     setIsAuthenticated(true);
+
+    // Programmer la vérification d'expiration pour le nouveau token
+    scheduleTokenExpirationCheck(token);
   };
 
   const value = {

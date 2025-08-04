@@ -36,7 +36,7 @@ spring:
 # Configuration JWT
 jwt:
   secret: ${JWT_SECRET:QkifK9kQ1y8rJ/K/IjzhheUz3FoYfzSXTcMcLMmr2ic=}
-  expiration: 86400000 # 24 heures
+  expiration: 86400000 # 24 heures pour les tests en développement
 
 # Logs en mode debug pour le développement
 logging:

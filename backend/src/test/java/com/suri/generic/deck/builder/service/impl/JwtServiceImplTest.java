@@ -34,6 +34,7 @@ class JwtServiceImplTest {
 
     // Clé de test fixe pour assurer la cohérence des tests
     private static final String TEST_SECRET = "testSecretKeyThatIsAtLeast256BitsLongForJwtTestingPurposesOnly12345";
+    private static final Long TEST_EXPIRATION = 86400000L; // 24h pour les tests
 
     @BeforeEach
     void setUp() {
@@ -41,6 +42,8 @@ class JwtServiceImplTest {
 
         // Injecter la clé secrète de test
         ReflectionTestUtils.setField(jwtService, "secret", TEST_SECRET);
+        // Injecter la durée d'expiration de test
+        ReflectionTestUtils.setField(jwtService, "jwtExpirationInMs", TEST_EXPIRATION);
 
         // Créer un utilisateur de test
         testUser = new User();
@@ -179,11 +182,7 @@ class JwtServiceImplTest {
 
     @Test
     void testIsTokenValid_WithExpiredToken_ReturnsFalse() throws InterruptedException {
-        // Given - Créer un token avec une expiration très courte
-        JwtServiceImpl shortExpiryService = new JwtServiceImpl();
-        ReflectionTestUtils.setField(shortExpiryService, "secret", TEST_SECRET);
-
-        // Créer un token qui expire immédiatement
+        // Given - Créer un token expiré
         String expiredToken = createExpiredToken();
 
         // When
@@ -210,6 +209,7 @@ class JwtServiceImplTest {
         // Given - Token signé avec une clé différente
         JwtServiceImpl differentKeyService = new JwtServiceImpl();
         ReflectionTestUtils.setField(differentKeyService, "secret", "differentSecretKey123456789012345678901234567890");
+        ReflectionTestUtils.setField(differentKeyService, "jwtExpirationInMs", TEST_EXPIRATION);
         String tokenWithDifferentSignature = differentKeyService.generateToken(testUser);
 
         // When
@@ -246,6 +246,28 @@ class JwtServiceImplTest {
     }
 
     @Test
+    void testJwtExpirationConfiguration_DifferentValues() {
+        // Given - Créer un service avec une expiration différente
+        JwtServiceImpl customExpirationService = new JwtServiceImpl();
+        ReflectionTestUtils.setField(customExpirationService, "secret", TEST_SECRET);
+        Long customExpiration = 3600000L; // 1 heure
+        ReflectionTestUtils.setField(customExpirationService, "jwtExpirationInMs", customExpiration);
+
+        User testUser = new User();
+        testUser.setEmail("config@test.com");
+
+        // When
+        String token = customExpirationService.generateToken(testUser);
+
+        // Then
+        Date issuedAt = customExpirationService.extractClaim(token, Claims::getIssuedAt);
+        Date expiration = customExpirationService.extractClaim(token, Claims::getExpiration);
+
+        long actualExpiration = expiration.getTime() - issuedAt.getTime();
+        assertThat(actualExpiration).isBetween(customExpiration - 5000L, customExpiration + 5000L);
+    }
+
+    @Test
     void testGenerateToken_ConsistentClaims() {
         // Given
         Date beforeGeneration = new Date(System.currentTimeMillis() - 1000); // 1 seconde avant
@@ -264,9 +286,9 @@ class JwtServiceImplTest {
         assertThat(issuedAt).isBetween(beforeGeneration, afterGeneration);
         assertThat(expiration).isAfter(issuedAt);
 
-        // Vérifier que l'expiration est environ 24h après l'émission
+        // Vérifier que l'expiration correspond à la configuration de test
         long timeDiff = expiration.getTime() - issuedAt.getTime();
-        assertThat(timeDiff).isBetween(86400000L - 5000L, 86400000L + 5000L); // 24h ± 5s
+        assertThat(timeDiff).isBetween(TEST_EXPIRATION - 5000L, TEST_EXPIRATION + 5000L); // ± 5s
     }
 
     /**

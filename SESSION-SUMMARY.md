@@ -1,10 +1,20 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 2 Août 2025  
-**Branche:** `feature/secure-sql-injection`  
-**Statut:** ✅ Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+**Date:** 4 Août 2025  
+**Branche:** `fix/expired-token`  
+**Statut:** ✅ Gestion expiration JWT implémentée + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
 
 ## 🎯 Fonctionnalités implémentées
+
+### ✅ Gestion Expiration JWT (Nouveau - Session actuelle)
+
+- **Problème:** Utilisateurs restaient connectés après expiration du token JWT (403 errors après longue absence)
+- **Solution Backend:** Filtres JWT avec gestion ExpiredJwtException, GlobalExceptionHandler pour réponses 401 standardisées
+- **Solution Frontend:** Utilitaires JWT (décodage, vérification expiration), intercepteur Axios proactif, déconnexion automatique programmée
+- **Configuration:** JwtServiceImpl corrigé (valeur codée en dur → injection @Value), application.properties et application-dev.yml configurés
+- **Tests:** 164 tests passants (142 backend + 22 frontend) avec scénarios d'expiration complète
+- **Sécurité:** Prévention confusion utilisateur, gestion proactive des tokens expirés
+- **Documentation:** Guide de test local avec expiration réduite
 
 ### ✅ Sécurisation Backend contre Injections SQL (Nouveau - Session actuelle)
 
@@ -54,6 +64,41 @@
 - **Responsive:** Adaptable mobile/desktop
 
 ## 🏗️ Architecture technique
+
+### Gestion JWT (Nouveau)
+
+**Configuration JWT sécurisée:**
+
+```
+📁 backend/src/main/java/com/suri/generic/deck/builder/
+├── 🔧 service/impl/JwtServiceImpl.java         # Injection @Value pour expiration configurable
+├── 🔧 security/JwtFilter.java                 # Gestion ExpiredJwtException et JwtException
+├── 🔧 exception/GlobalExceptionHandler.java   # Handlers spécifiques JWT (401 responses)
+├── 🔧 src/main/resources/application.properties # Configuration JWT de base (24h)
+└── 🔧 src/main/resources/application-dev.yml  # Override pour tests (configurable)
+
+📁 frontend/src/
+├── 🆕 utils/jwtUtils.js                       # Utilitaires JWT (décodage, vérification expiration)
+├── 🔧 services/axiosInstance.js               # Intercepteur avec vérification proactive tokens
+├── 🔧 contexts/AuthContext.jsx                # Déconnexion automatique programmée
+└── 🆕 utils/__tests__/jwtUtils.test.js        # 22 tests unitaires JWT
+```
+
+**Tests JWT (Nouveau):**
+
+```
+📁 backend/src/test/java/com/suri/generic/deck/builder/
+└── 🆕 security/JwtTokenExpirationTest.java    # 5 tests scenarios expiration JWT
+```
+
+**Fonctionnalités JWT:**
+
+- Configuration dynamique de l'expiration (plus de valeur codée en dur)
+- Gestion proactive des tokens expirés côté frontend
+- Déconnexion automatique programmée selon l'expiration du token
+- Intercepteurs Axios intelligent avec vérification préventive
+- Tests complets des scenarios d'expiration (164 tests passants)
+- Réponses HTTP standardisées (401 pour tokens expirés/invalides)
 
 ### Sécurité Frontend (Nouveau)
 
@@ -215,17 +260,28 @@
 ### Backend
 
 ```bash
-✅ SqlInjectionSecurityTest: 4/4 tests passent (NOUVEAU)
-✅ DeckControllerExportTest: 8/8 tests passent (CORRIGÉ)
+✅ JwtTokenExpirationTest: 5/5 tests passent (NOUVEAU - Expiration JWT)
+✅ SqlInjectionSecurityTest: 4/4 tests passent
+✅ DeckControllerExportTest: 8/8 tests passent
 ✅ DeckImportServiceTest: 15/15 tests passent
 ✅ TextNormalizerTest: 17/17 tests passent
 ✅ TextNormalizationIntegrationTest: 2/2 tests passent
-✅ Tous les tests: 131/131 tests passent (100%)
+✅ Tous les tests backend: 142/142 tests passent (100%)
 ✅ Compilation: aucune erreur
-✅ Documentation sécurité: Guide SQL + Guide tests créés
+✅ Documentation sécurité: Guide SQL + Guide tests + Guide JWT créés
 ```
 
 ### Frontend
+
+**Gestion JWT (Nouveau):**
+
+```bash
+✅ jwtUtils.test.js: 22/22 tests passent (décodage, expiration, validation)
+✅ Intercepteur Axios: gestion proactive des tokens expirés
+✅ AuthContext: déconnexion automatique programmée
+✅ Module ES6: syntaxe corrigée (plus d'erreur "require is not defined")
+✅ Configuration: application fonctionnelle après corrections
+```
 
 **Sécurité de production:**
 
@@ -270,7 +326,37 @@
 
 ## 💡 Notes techniques importantes
 
-### Sécurisation Backend contre Injections SQL (Nouveau)
+### Gestion Expiration JWT (Nouveau)
+
+- **Problème résolu:** JwtServiceImpl utilisait une valeur codée en dur (86400000ms) ignorant toute configuration
+- **Solution:** Injection `@Value("${jwt.expiration:86400000}")` avec fallback 24h si propriété absente
+- **Configuration dynamique:** application.properties (production 24h) + application-dev.yml (tests configurables)
+- **Frontend proactif:** Vérification expiration avant chaque requête API, déconnexion automatique programmée
+- **Tests robustes:** 164 tests (142 backend + 22 frontend) couvrant expiration, validation, scenarios d'erreur
+- **UX améliorée:** Plus de confusion utilisateur (connecté mais 403), gestion transparente des tokens expirés
+- **Documentation:** Guide de test local avec expiration réduite pour validation rapide
+
+### Correction Syntaxe ES6 Modules (Nouveau)
+
+- **Problème:** Page blanche avec erreur "require is not defined" après implémentation JWT
+- **Cause:** Mélange syntaxe CommonJS (`require()`, `module.exports`) et ES6 (`import`, `export`)
+- **Solution:** Conversion complète vers syntaxe ES6 dans jwtUtils.js, AuthContext.jsx, axiosInstance.js
+- **Configuration:** Suppression configuration Jest conflictuelle dans package.json (garde jest.config.json)
+- **Résultat:** Application fonctionnelle, système JWT opérationnel, tests passants
+
+### Gestion JWT (Nouveau)
+
+- **Configuration JWT:** Injection `@Value("${jwt.expiration}")` dans JwtServiceImpl (plus de valeur codée en dur)
+- **Filtres Backend:** Gestion ExpiredJwtException avec réponses JSON standardisées (401)
+- **Utilitaires Frontend:** Décodage JWT, vérification expiration, calcul temps restant
+- **Intercepteurs:** Vérification proactive des tokens avant requêtes API
+- **Déconnexion automatique:** Timer programmé selon l'expiration du token utilisateur
+- **Tests complets:** 164 tests (142 backend + 22 frontend) couvrant tous les scenarios
+- **Configuration:** application.properties (24h défaut) + application-dev.yml (configurable)
+
+### Sécurité Backend contre Injections SQL
+
+### Sécurité Backend contre Injections SQL
 
 - **Vulnérabilité corrigée:** CardRepository requête native PostgreSQL → JPQL sécurisé
 - **Protection DoS:** Validation taille paramètres (titre ≤100, cartes ≤10000 caractères)
@@ -311,11 +397,13 @@
 
 ### Sécurité
 
+- **Backend JWT:** Gestion complète expiration tokens, réponses 401 standardisées, configuration dynamique
 - **Backend SQL:** 100% sécurisé contre injections SQL, validation stricte paramètres
+- **Frontend JWT:** Vérification proactive expiration, déconnexion automatique, gestion transparente erreurs
 - **Validation inputs:** Quantités > 0, format correct, caractères autorisés
-- **Authentification:** JWT obligatoire
+- **Authentification:** JWT obligatoire avec gestion expiration intelligente
 - **Autorisation:** Utilisateur propriétaire du deck
-- **Configuration:** Logs sensibles désactivés en production
+- **Configuration:** Logs sensibles désactivés en production, tokens configurables par environnement
 
 ---
 
@@ -324,8 +412,9 @@
 ### Context minimal à fournir
 
 1. **Projet:** GenericDeckBuilder (Spring Boot + React)
-2. **État:** Backend ✅ sécurisé SQL + Code source frontend ✅ sécurisé + Tests ✅ corrigés + Documentation créée
-3. **Objectif:** [Nouvelle fonctionnalité à définir]
+2. **État:** ✅ Gestion expiration JWT complète + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+3. **Dernière session:** Correction bug expiration JWT (utilisateurs connectés avec 403 errors) + Page blanche ES6 modules
+4. **Objectif:** [Nouvelle fonctionnalité à définir]
 
 ### Fichiers de référence
 
@@ -339,14 +428,20 @@
 ### Commandes de vérification
 
 ```bash
-# Backend (avec tests de sécurité SQL)
+# Backend (avec tests JWT + sécurité SQL)
 cd backend && ./mvnw test
-cd backend && ./mvnw test -Dtest=SqlInjectionSecurityTest  # Tests sécurité spécifiquesackend
-cd backend && ./mvnw test
+cd backend && ./mvnw test -Dtest=JwtTokenExpirationTest  # Tests JWT spécifiques
+cd backend && ./mvnw test -Dtest=SqlInjectionSecurityTest  # Tests sécurité SQL spécifiques
 
-# Frontend
+# Frontend (avec tests JWT)
+cd frontend && npm test -- jwtUtils.test.js  # Tests JWT spécifiques
 cd frontend && npm run build
 cd frontend && npm run preview:prod  # Test production sécurisée
+
+# Test expiration JWT en local
+# 1. Modifier application-dev.yml: expiration: 60000 (1 minute)
+# 2. Redémarrer backend: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# 3. Se connecter et attendre 1 minute pour test automatique déconnexion
 ```
 
-**🎉 Session terminée avec succès - Backend 100% sécurisé contre les injections SQL !**
+**🎉 Session terminée avec succès - Gestion expiration JWT complètement implémentée !**
