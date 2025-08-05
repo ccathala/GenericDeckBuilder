@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import UniversalImage from "./UniversalImage";
 
 const CardGallery = ({
@@ -8,8 +8,65 @@ const CardGallery = ({
   onCardClick = null,
   showSelection = false,
   selectedCards = [],
-  maxColumns = null, // Nouveau prop pour limiter le nombre de colonnes
+  maxColumns = null, // Limite le nombre de colonnes (contrôles de zoom)
+  showImagePreview = true, // Affichage de l'aperçu d'image au survol
 }) => {
+  // États pour gestion image au survol
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [imageErrors, setImageErrors] = useState(new Set());
+  const [hoveredCardPosition, setHoveredCardPosition] = useState({
+    top: 0,
+    left: 0,
+  });
+
+  // Gestion d'erreur de chargement d'image
+  const handleImageError = (cardId) => {
+    setImageErrors((prev) => new Set([...prev, cardId]));
+  };
+
+  // Calcul position dynamique pour éviter débordement
+  const calculateImagePosition = (cardElement) => {
+    if (!cardElement) return { top: 0, left: 0 };
+
+    const rect = cardElement.getBoundingClientRect();
+    const imageHeight = 420; // Hauteur approximative de l'image agrandie
+    const imageWidth = 288; // Largeur de l'image (w-72 = 18rem = 288px)
+    const viewportTop = 0;
+    const margin = 16; // Marge entre l'image et la carte
+
+    // Position de base : à gauche de la carte
+    let left = rect.left - imageWidth - margin;
+    let top = rect.top;
+
+    // Si l'image déborde à gauche, la positionner à droite
+    if (left < 0) {
+      left = rect.right + margin;
+    }
+
+    // Si l'image déborde en haut, l'ajuster vers le bas
+    if (top < viewportTop) {
+      top = Math.max(viewportTop + margin, rect.bottom - imageHeight);
+    }
+
+    // Si l'image déborde en bas, l'ajuster vers le haut
+    const viewportBottom = window.innerHeight;
+    if (top + imageHeight > viewportBottom) {
+      top = Math.max(
+        viewportTop + margin,
+        viewportBottom - imageHeight - margin
+      );
+    }
+
+    return { top, left };
+  };
+
+  // Obtenir URL d'image avec fallback
+  const getCardImageUrl = (card) => {
+    if (imageErrors.has(card.id) || !card.imageUrl) {
+      return "/images/placeholder.png";
+    }
+    return card.imageUrl;
+  };
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -34,31 +91,23 @@ const CardGallery = ({
     );
   }
 
-  // Déterminer les classes de grille basées sur maxColumns
+  // Classes CSS basées sur le nombre de colonnes choisi
   const getGridClasses = () => {
-    if (maxColumns === 4) {
-      return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-4 pt-3 pl-3";
+    switch (maxColumns) {
+      case 6:
+        return "grid grid-cols-6 gap-6 pb-4 pt-3 pl-3";
+      case 7:
+        return "grid grid-cols-7 gap-6 pb-4 pt-3 pl-3";
+      case 8:
+        return "grid grid-cols-8 gap-6 pb-4 pt-3 pl-3";
+      case 9:
+        return "grid grid-cols-9 gap-6 pb-4 pt-3 pl-3";
+      case 10:
+        return "grid grid-cols-10 gap-6 pb-4 pt-3 pl-3";
+      default:
+        // Grille responsive par défaut
+        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10 pb-4";
     }
-    if (maxColumns === 5) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-4 pt-3 pl-3";
-    }
-    if (maxColumns === 6) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-4 pt-3 pl-3";
-    }
-    if (maxColumns === 7) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6 pb-4 pt-3 pl-3";
-    }
-    if (maxColumns === 8) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 gap-6 pb-4 pt-3 pl-3";
-    }
-    if (maxColumns === 9) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 4xl:grid-cols-9 gap-6 pb-4 pt-3 pl-3";
-    }
-    if (maxColumns === 10) {
-      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 4xl:grid-cols-9 5xl:grid-cols-10 gap-6 pb-4 pt-3 pl-3";
-    }
-    // Grille par défaut (utilisée pour la galerie principale)
-    return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10 pb-4";
   };
 
   return (
@@ -75,6 +124,22 @@ const CardGallery = ({
               onCardClick ? "cursor-pointer hover:scale-105" : ""
             } ${isSelected ? "ring-4 ring-blue-500" : ""}`}
             onClick={() => onCardClick && onCardClick(card)}
+            onMouseEnter={
+              showImagePreview
+                ? (e) => {
+                    setHoveredCard(card);
+                    const position = calculateImagePosition(e.currentTarget);
+                    setHoveredCardPosition(position);
+                  }
+                : undefined
+            }
+            onMouseLeave={
+              showImagePreview
+                ? () => {
+                    setHoveredCard(null);
+                  }
+                : undefined
+            }
           >
             <UniversalImage
               src={card.imageUrl}
@@ -89,6 +154,34 @@ const CardGallery = ({
           </div>
         );
       })}
+
+      {/* Image au survol */}
+      {showImagePreview && hoveredCard && (
+        <div
+          className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+          style={{
+            left: `${hoveredCardPosition.left}px`,
+            top: `${hoveredCardPosition.top}px`,
+          }}
+        >
+          <img
+            src={getCardImageUrl(hoveredCard)}
+            alt={hoveredCard.name}
+            className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
+            onError={() => {
+              handleImageError(hoveredCard.id);
+            }}
+            onLoad={() => {
+              // Retirer de la liste d'erreur si l'image se charge avec succès
+              setImageErrors((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(hoveredCard.id);
+                return newSet;
+              });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

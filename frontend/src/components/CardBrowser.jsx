@@ -31,7 +31,10 @@ const CardBrowser = ({
   const [selectedComponents, setSelectedComponents] = useState([]);
   const [selectedType, setSelectedType] = useState("");
   const [availableComponents, setAvailableComponents] = useState([]);
-  const [columnsCount, setColumnsCount] = useState(maxColumns || 6); // État pour le nombre de colonnes
+  const [columnsCount, setColumnsCount] = useState(
+    maxColumns ? Math.max(6, Math.min(10, maxColumns)) : 7
+  ); // Nombre de colonnes pour le zoom (6-10)
+  const [showImagePreview, setShowImagePreview] = useState(true); // État pour l'aperçu d'image
 
   // Hook pour les traductions des composants
   const {
@@ -238,9 +241,13 @@ const CardBrowser = ({
   };
 
   const handleColumnsChange = (newCount) => {
-    if (newCount >= 4 && newCount <= 10) {
+    if (newCount >= 6 && newCount <= 10) {
       setColumnsCount(newCount);
     }
+  };
+
+  const handleImagePreviewToggle = () => {
+    setShowImagePreview(!showImagePreview);
   };
 
   const handleCardClick = (card) => {
@@ -283,6 +290,8 @@ const CardBrowser = ({
           onResetFilters={handleResetFilters}
           columnsCount={columnsCount}
           onColumnsChange={handleColumnsChange}
+          showImagePreview={showImagePreview}
+          onImagePreviewToggle={handleImagePreviewToggle}
         />
       </div>
 
@@ -295,6 +304,7 @@ const CardBrowser = ({
           showSelection={allowMultiSelect || showSelection}
           selectedCards={selectedCardsArray}
           maxColumns={columnsCount}
+          showImagePreview={showImagePreview}
         />
       </div>
     </div>

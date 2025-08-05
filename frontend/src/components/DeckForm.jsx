@@ -431,7 +431,7 @@ const DeckForm = ({ isEdit = false }) => {
                   gameId={deck.gameId}
                   showTitle={false}
                   className="h-full"
-                  maxColumns={5}
+                  maxColumns={6}
                   onCardsLoaded={setBrowserCards}
                 />
               </div>

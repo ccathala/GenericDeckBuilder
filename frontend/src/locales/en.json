@@ -126,7 +126,9 @@
       "typePlaceholder": "Type",
       "typeAll": "All types",
       "zoomOut": "Reduce cards per row",
-      "zoomIn": "Increase cards per row"
+      "zoomIn": "Increase cards per row",
+      "showImagePreview": "Show image preview on hover",
+      "hideImagePreview": "Hide image preview on hover"
     },
     "types": {
       "Sort": "Spell",

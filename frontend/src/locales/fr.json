@@ -126,7 +126,9 @@
       "typePlaceholder": "Type",
       "typeAll": "Tous les types",
       "zoomOut": "Réduire le nombre de cartes par ligne",
-      "zoomIn": "Augmenter le nombre de cartes par ligne"
+      "zoomIn": "Augmenter le nombre de cartes par ligne",
+      "showImagePreview": "Afficher l'aperçu d'image au survol",
+      "hideImagePreview": "Masquer l'aperçu d'image au survol"
     },
     "types": {
       "Sort": "Sort",
