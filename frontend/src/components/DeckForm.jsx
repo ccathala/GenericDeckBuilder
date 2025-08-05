@@ -39,6 +39,64 @@ const DeckForm = ({ isEdit = false }) => {
   const [error, setError] = useState(null);
   const [selectedCards, setSelectedCards] = useState(new Set());
 
+  // États pour gestion image au survol
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [imageErrors, setImageErrors] = useState(new Set());
+  const [hoveredCardPosition, setHoveredCardPosition] = useState({
+    top: 0,
+    left: 0,
+  });
+
+  // Gestion d'erreur de chargement d'image
+  const handleImageError = (cardId) => {
+    setImageErrors((prev) => new Set([...prev, cardId]));
+  };
+
+  // Calcul position dynamique pour éviter débordement
+  const calculateImagePosition = (cardElement) => {
+    if (!cardElement) return { top: 0, left: 0 };
+
+    const rect = cardElement.getBoundingClientRect();
+    const imageHeight = 420; // Hauteur approximative de l'image agrandie (50% de plus)
+    const imageWidth = 288; // Largeur de l'image (w-72 = 18rem = 288px)
+    const viewportTop = 0;
+    const margin = 16; // Marge entre l'image et la carte
+
+    // Position de base : à gauche de la carte
+    let left = rect.left - imageWidth - margin;
+    let top = rect.top;
+
+    // Si l'image déborde à gauche, la positionner à droite
+    if (left < 0) {
+      left = rect.right + margin;
+    }
+
+    // Si l'image déborde en haut, l'ajuster vers le bas
+    if (top < viewportTop) {
+      top = Math.max(viewportTop + margin, rect.bottom - imageHeight);
+    }
+
+    // Si l'image déborde en bas, l'ajuster vers le haut
+    const viewportBottom = window.innerHeight;
+    if (top + imageHeight > viewportBottom) {
+      top = Math.max(
+        viewportTop + margin,
+        viewportBottom - imageHeight - margin
+      );
+    }
+
+    return { top, left };
+  };
+
+  // Obtenir URL d'image avec fallback
+  const getCardImageUrl = (card) => {
+    if (imageErrors.has(card.id) || !card.imageUrl) {
+      return "/images/placeholder.png";
+    }
+
+    return card.imageUrl;
+  };
+
   // Helper components
   const LoadingSpinner = () => (
     <div className="min-h-screen bg-mage-bg-900 flex items-center justify-center">
@@ -364,7 +422,7 @@ const DeckForm = ({ isEdit = false }) => {
           {/* Sélection de cartes (gauche 75%) + Deck actuel (droite 25%) */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
             {/* Zone 3: Sélection de cartes (gauche - 3/4 = 75%) */}
-            <div className="lg:col-span-3 bg-mage-bg-800 rounded-lg p-6 border border-mage-dark-600 flex flex-col min-h-0">
+            <div className="lg:col-span-3 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
               <div className="flex-1 overflow-hidden">
                 <CardBrowser
                   onCardSelection={handleCardSelectionChange}
@@ -373,14 +431,14 @@ const DeckForm = ({ isEdit = false }) => {
                   gameId={deck.gameId}
                   showTitle={false}
                   className="h-full"
-                  maxColumns={5}
+                  maxColumns={6}
                   onCardsLoaded={setBrowserCards}
                 />
               </div>
             </div>
 
             {/* Zone 2: Deck actuel (droite - 1/4 = 25%) */}
-            <div className="lg:col-span-1 bg-mage-bg-800 rounded-lg p-6 border border-mage-dark-600 flex flex-col min-h-0">
+            <div className="lg:col-span-1 bg-transparent rounded-lg p-6 flex flex-col min-h-0">
               <div className="mb-4 flex-shrink-0">
                 {/* Nom du deck éditable */}
                 <div className="mb-3 relative">
@@ -449,11 +507,21 @@ const DeckForm = ({ isEdit = false }) => {
                     return (
                       <div
                         key={card.id}
-                        className={`flex items-center justify-between p-1.5 rounded text-xs transition-colors ${
+                        className={`relative flex items-center justify-between p-1.5 rounded text-xs transition-colors ${
                           exceedsLimit
                             ? "bg-red-900/50 border border-red-500/50"
                             : "bg-mage-dark-700"
                         }`}
+                        onMouseEnter={(e) => {
+                          setHoveredCard(card);
+                          const position = calculateImagePosition(
+                            e.currentTarget
+                          );
+                          setHoveredCardPosition(position);
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredCard(null);
+                        }}
                       >
                         <div className="flex-1 min-w-0">
                           <h3
@@ -509,6 +577,34 @@ const DeckForm = ({ isEdit = false }) => {
                             ×
                           </button>
                         </div>
+
+                        {/* Image au survol */}
+                        {hoveredCard?.id === card.id && (
+                          <div
+                            className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+                            style={{
+                              left: `${hoveredCardPosition.left}px`,
+                              top: `${hoveredCardPosition.top}px`,
+                            }}
+                          >
+                            <img
+                              src={getCardImageUrl(card)}
+                              alt={card.name || card.id}
+                              className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
+                              onError={() => {
+                                handleImageError(card.id);
+                              }}
+                              onLoad={() => {
+                                // Retirer de la liste d'erreur si l'image se charge avec succès
+                                setImageErrors((prev) => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(card.id);
+                                  return newSet;
+                                });
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     );
                   })}

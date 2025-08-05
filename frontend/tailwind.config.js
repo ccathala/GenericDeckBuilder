@@ -1,8 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: [
+    "grid-cols-6",
+    "grid-cols-7",
+    "grid-cols-8",
+    "grid-cols-9",
+    "grid-cols-10",
+  ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        9: "repeat(9, minmax(0, 1fr))",
+        10: "repeat(10, minmax(0, 1fr))",
+      },
       colors: {
         // Thème sombre inspiré de MageNoir
         "mage-dark": {
