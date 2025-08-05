@@ -124,7 +124,9 @@
       "componentsLoading": "Loading...",
       "noComponentsAvailable": "No components available",
       "typePlaceholder": "Type",
-      "typeAll": "All types"
+      "typeAll": "All types",
+      "zoomOut": "Reduce cards per row",
+      "zoomIn": "Increase cards per row"
     },
     "types": {
       "Sort": "Spell",

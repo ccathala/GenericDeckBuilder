@@ -42,6 +42,21 @@ const CardGallery = ({
     if (maxColumns === 5) {
       return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-4 pt-3 pl-3";
     }
+    if (maxColumns === 6) {
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 pb-4 pt-3 pl-3";
+    }
+    if (maxColumns === 7) {
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6 pb-4 pt-3 pl-3";
+    }
+    if (maxColumns === 8) {
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 gap-6 pb-4 pt-3 pl-3";
+    }
+    if (maxColumns === 9) {
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 4xl:grid-cols-9 gap-6 pb-4 pt-3 pl-3";
+    }
+    if (maxColumns === 10) {
+      return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 3xl:grid-cols-8 4xl:grid-cols-9 5xl:grid-cols-10 gap-6 pb-4 pt-3 pl-3";
+    }
     // Grille par défaut (utilisée pour la galerie principale)
     return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-10 pb-4";
   };

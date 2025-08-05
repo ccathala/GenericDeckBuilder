@@ -31,6 +31,7 @@ const CardBrowser = ({
   const [selectedComponents, setSelectedComponents] = useState([]);
   const [selectedType, setSelectedType] = useState("");
   const [availableComponents, setAvailableComponents] = useState([]);
+  const [columnsCount, setColumnsCount] = useState(maxColumns || 6); // État pour le nombre de colonnes
 
   // Hook pour les traductions des composants
   const {
@@ -236,6 +237,12 @@ const CardBrowser = ({
     setSelectedType("");
   };
 
+  const handleColumnsChange = (newCount) => {
+    if (newCount >= 4 && newCount <= 10) {
+      setColumnsCount(newCount);
+    }
+  };
+
   const handleCardClick = (card) => {
     if (onCardSelection) {
       const isCurrentlySelected = selectedCards.has(card.id);
@@ -274,6 +281,8 @@ const CardBrowser = ({
           selectedType={selectedType}
           onTypeChange={handleTypeChange}
           onResetFilters={handleResetFilters}
+          columnsCount={columnsCount}
+          onColumnsChange={handleColumnsChange}
         />
       </div>
 
@@ -285,7 +294,7 @@ const CardBrowser = ({
           onCardClick={handleCardClick}
           showSelection={allowMultiSelect || showSelection}
           selectedCards={selectedCardsArray}
-          maxColumns={maxColumns}
+          maxColumns={columnsCount}
         />
       </div>
     </div>

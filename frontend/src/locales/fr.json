@@ -124,7 +124,9 @@
       "componentsLoading": "Chargement...",
       "noComponentsAvailable": "Aucun composant disponible",
       "typePlaceholder": "Type",
-      "typeAll": "Tous les types"
+      "typeAll": "Tous les types",
+      "zoomOut": "Réduire le nombre de cartes par ligne",
+      "zoomIn": "Augmenter le nombre de cartes par ligne"
     },
     "types": {
       "Sort": "Sort",
