@@ -1,12 +1,22 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 4 Août 2025  
-**Branche:** `fix/expired-token`  
-**Statut:** ✅ Gestion expiration JWT implémentée + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+**Date:** 5 Août 2025  
+**Branche:** `feature/zoom`  
+**Statut:** ✅ Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
 
 ## 🎯 Fonctionnalités implémentées
 
-### ✅ Gestion Expiration JWT (Nouveau - Session actuelle)
+### ✅ Contrôles de Zoom et Aperçu d'Image (Nouveau - Session actuelle)
+
+- **Fonctionnalité:** Contrôles de zoom dans CardFilter pour ajuster le nombre de colonnes d'affichage des cartes (6-10)
+- **Interface:** Boutons "-" (réduire), icône loupe (centre), "+" (augmenter) à droite du bouton reset
+- **Plage dynamique:** 6 à 10 cartes par ligne avec validation Math.max/min, défaut à 7 colonnes
+- **Aperçu d'image:** Bouton toggle avec icône d'œil pour activer/désactiver l'aperçu au survol
+- **Positionnement intelligent:** Calcul automatique de position pour éviter débordement d'écran
+- **Traductions:** Support complet français/anglais pour tooltips des contrôles
+- **Configuration:** Tailwind safelist et gridTemplateColumns pour colonnes 9 et 10
+
+### ✅ Gestion Expiration JWT (Session précédente)
 
 - **Problème:** Utilisateurs restaient connectés après expiration du token JWT (403 errors après longue absence)
 - **Solution Backend:** Filtres JWT avec gestion ExpiredJwtException, GlobalExceptionHandler pour réponses 401 standardisées
@@ -16,7 +26,7 @@
 - **Sécurité:** Prévention confusion utilisateur, gestion proactive des tokens expirés
 - **Documentation:** Guide de test local avec expiration réduite
 
-### ✅ Sécurisation Backend contre Injections SQL (Nouveau - Session actuelle)
+### ✅ Sécurisation Backend contre Injections SQL (Session précédente)
 
 - **Problème:** Vulnérabilité potentielle dans CardRepository avec requête native PostgreSQL
 - **Solution:** Migration vers JPQL sécurisé + validation stricte des paramètres d'entrée
@@ -65,7 +75,41 @@
 
 ## 🏗️ Architecture technique
 
-### Gestion JWT (Nouveau)
+### Contrôles de Zoom et Aperçu d'Image (Nouveau)
+
+**Architecture des composants:**
+
+```
+📁 frontend/src/components/
+├── 🔧 CardBrowser.jsx                    # État central (columnsCount, showImagePreview)
+├── 🔧 CardFilter.jsx                     # UI contrôles zoom + toggle aperçu image
+├── 🔧 CardGallery.jsx                    # Affichage grille + image au survol
+└── 🔧 CardFilter.module.css              # Styles éléments personnalisés
+```
+
+**Configuration Tailwind (Nouveau):**
+
+```
+📁 frontend/
+├── 🔧 tailwind.config.js                 # Safelist grid-cols-6 à grid-cols-10
+└── 🔧 src/locales/*.json                 # Traductions tooltips zoom/aperçu
+```
+
+**Fonctionnalités de zoom:**
+
+- **État centralisé:** columnsCount dans CardBrowser (6-10, défaut 7)
+- **Contrôles:** Boutons -/+, icône loupe centrale, validation Math.max/min
+- **Grille responsive:** Switch statement pour classes CSS grid-cols-{6-10}
+- **Safelist Tailwind:** Classes dynamiques protégées pour éviter la purge
+
+**Fonctionnalités d'aperçu d'image:**
+
+- **Toggle intelligent:** Bouton œil avec état actif/inactif (bleu/gris)
+- **Calcul de position:** calculateImagePosition() pour éviter débordement
+- **Gestion d'erreurs:** handleImageError() avec fallback placeholder
+- **Performance:** États hover locaux, z-index élevé pour overlay
+
+### Gestion JWT (Ancien)
 
 **Configuration JWT sécurisée:**
 
@@ -100,7 +144,7 @@
 - Tests complets des scenarios d'expiration (164 tests passants)
 - Réponses HTTP standardisées (401 pour tokens expirés/invalides)
 
-### Sécurité Frontend (Nouveau)
+### Sécurité Frontend (Ancien)
 
 **Configuration Vite sécurisée:**
 
@@ -125,7 +169,7 @@
 
 ### Backend (Spring Boot)
 
-**Sécurisation contre injections SQL (Nouveau):**
+**Sécurisation contre injections SQL (Ancien):**
 
 ```
 📁 backend/src/main/java/com/suri/generic/deck/builder/
@@ -135,7 +179,7 @@
 └── 🆕 docs/security/sql-injection-protection.md  # Guide complet de sécurité SQL
 ```
 
-**Tests de sécurité (Nouveau):**
+**Tests de sécurité (Ancien):**
 
 ```
 📁 backend/src/test/java/com/suri/generic/deck/builder/
@@ -145,7 +189,7 @@
 └── 🆕 docs/development/controller-testing.md     # Guide complet créé
 ```
 
-**Tests de contrôleurs corrigés:**
+**Tests de contrôleurs corrigés (Ancien):**
 
 ```
 📁 backend/src/test/java/com/suri/generic/deck/builder/
@@ -170,6 +214,20 @@
 
 ### Frontend (React)
 
+**Contrôles de zoom et aperçu d'image (Nouveau):**
+
+```
+📁 frontend/src/
+├── 🔧 components/CardBrowser.jsx              # État columnsCount + showImagePreview
+├── 🔧 components/CardFilter.jsx               # Contrôles UI zoom + toggle aperçu
+├── 🔧 components/CardGallery.jsx              # Grille + image hover avec positioning
+├── 🔧 components/CardFilter.module.css        # Styles éléments personnalisés
+├── 🔧 locales/fr.json                         # Traductions tooltips zoom/aperçu
+└── 🔧 locales/en.json                         # Traductions tooltips zoom/aperçu
+```
+
+**Architecture existante:**
+
 ```
 📁 frontend/src/
 ├── 🆕 components/DeckImportModal.jsx          # Modal d'import
@@ -190,7 +248,24 @@
 
 ## 🎨 Standards de code établis
 
-### Sécurité Backend (Nouveau)
+### Contrôles de Zoom et UI (Nouveau)
+
+- **Range de colonnes:** 6 à 10 avec validation Math.max(6, Math.min(10, value))
+- **État par défaut:** 7 colonnes pour équilibre affichage/lisibilité
+- **Classes CSS:** Switch statement direct pour grid-cols-{6-10} sans responsive breakpoints
+- **Safelist Tailwind:** Protection contre purge des classes dynamiques
+- **Calcul de position:** Intelligence anti-débordement (gauche/droite, haut/bas)
+- **Gestion d'erreurs:** Fallback "/images/placeholder.png" pour images manquantes
+
+### Aperçu d'Image
+
+- **Toggle état:** showImagePreview boolean avec icône œil (bleu actif/gris inactif)
+- **Position dynamique:** calculateImagePosition() avec détection viewport
+- **Performance:** États hover locaux, cleanup automatique onMouseLeave
+- **Z-index:** 9999 pour overlay, pointer-events-none pour éviter conflits
+- **Taille image:** w-72 (288px) avec hauteur automatique, shadow-2xl
+
+### Sécurité Backend (Ancien)
 
 - **Repositories:** 100% JPQL avec paramètres `@Param`, aucune requête native non sécurisée
 - **Validation:** Caractères autorisés `[a-zA-Z0-9_-]` pour gameId, limitation taille (titre ≤100, cartes ≤10000)
@@ -215,9 +290,10 @@
 
 ### Traductions
 
-- **Structure:** `pages.decks.import.*` pour import, `common.*` pour éléments partagés
+- **Structure:** `cards.filters.zoomOut/zoomIn/showImagePreview/hideImagePreview` pour contrôles
 - **Fallbacks:** Valeurs par défaut en français dans le code
-- **Clés:** Cohérentes entre FR/EN
+- **Clés:** Cohérentes entre FR/EN avec tooltips descriptifs
+- **Nouveautés:** 4 nouvelles clés pour fonctionnalités zoom et aperçu image
 
 ### Tests
 
@@ -260,20 +336,35 @@
 ### Backend
 
 ```bash
-✅ JwtTokenExpirationTest: 5/5 tests passent (NOUVEAU - Expiration JWT)
-✅ SqlInjectionSecurityTest: 4/4 tests passent
-✅ DeckControllerExportTest: 8/8 tests passent
-✅ DeckImportServiceTest: 15/15 tests passent
-✅ TextNormalizerTest: 17/17 tests passent
-✅ TextNormalizationIntegrationTest: 2/2 tests passent
+✅ JwtTokenExpirationTest: 5/5 tests passent (Expiration JWT)
+✅ SqlInjectionSecurityTest: 4/4 tests passent (Sécurité SQL)
+✅ DeckControllerExportTest: 8/8 tests passent (Tests contrôleurs)
+✅ DeckImportServiceTest: 15/15 tests passent (Import de deck)
+✅ TextNormalizerTest: 17/17 tests passent (Normalisation texte)
+✅ TextNormalizationIntegrationTest: 2/2 tests passent (Intégration)
 ✅ Tous les tests backend: 142/142 tests passent (100%)
 ✅ Compilation: aucune erreur
 ✅ Documentation sécurité: Guide SQL + Guide tests + Guide JWT créés
 ```
 
+## 📊 État des tests
+
 ### Frontend
 
-**Gestion JWT (Nouveau):**
+**Contrôles de zoom et aperçu d'image (Nouveau):**
+
+```bash
+✅ Interface fonctionnelle: Contrôles zoom 6-10 colonnes (défaut 7)
+✅ Toggle aperçu image: Bouton œil avec états actif/inactif
+✅ Calcul de position: Anti-débordement intelligent (4 côtés)
+✅ Grille responsive: Classes CSS correctes pour toutes les colonnes
+✅ Traductions: 4 tooltips FR/EN pour contrôles zoom et aperçu
+✅ Configuration Tailwind: Safelist + gridTemplateColumns pour colonnes 9-10
+✅ Gestion d'erreurs: Fallback placeholder pour images manquantes
+✅ Performance: États hover optimisés, z-index sans conflits
+```
+
+**Gestion JWT (Ancien):**
 
 ```bash
 ✅ jwtUtils.test.js: 22/22 tests passent (décodage, expiration, validation)
@@ -283,7 +374,9 @@
 ✅ Configuration: application fonctionnelle après corrections
 ```
 
-**Sécurité de production:**
+**Tests existants (Ancien):**
+
+**Sécurité de production (Ancien):**
 
 ```bash
 ✅ Configuration Vite: sécurisée (source maps off, minification on)
@@ -304,6 +397,13 @@
 ```
 
 ## 🚀 Prochaines étapes possibles
+
+### Améliorations d'affichage et UX
+
+- [ ] Persistance des préférences de zoom dans localStorage
+- [ ] Animation smooth pour transitions de colonnes
+- [ ] Préréglages de zoom (Compact/Normal/Large)
+- [ ] Aperçu d'image avec delay configurable
 
 ### Améliorations d'import
 
@@ -326,7 +426,19 @@
 
 ## 💡 Notes techniques importantes
 
-### Gestion Expiration JWT (Nouveau)
+### Contrôles de Zoom et Aperçu d'Image (Nouveau)
+
+- **Architecture props drilling:** CardBrowser gère états → CardFilter (UI) → CardGallery (affichage)
+- **Plage validation:** Math.max(6, Math.min(10, value)) pour éviter débordements
+- **Classes CSS directes:** grid-cols-{6-10} sans responsive breakpoints pour simplicité
+- **Safelist Tailwind:** Protection contre purge des classes dynamiques (grid-cols-6 à grid-cols-10)
+- **Configuration custom:** gridTemplateColumns pour colonnes 9 et 10 absentes par défaut
+- **Position intelligente:** calculateImagePosition() avec détection viewport sur 4 côtés
+- **Performance optimisée:** États hover locaux, z-index 9999, pointer-events-none
+- **Gestion d'erreurs:** Set imageErrors avec fallback placeholder automatique
+- **UX cohérente:** Icône œil avec couleurs état (bleu actif, gris inactif), tooltips bilingues
+
+### Gestion Expiration JWT (Ancien)
 
 - **Problème résolu:** JwtServiceImpl utilisait une valeur codée en dur (86400000ms) ignorant toute configuration
 - **Solution:** Injection `@Value("${jwt.expiration:86400000}")` avec fallback 24h si propriété absente
@@ -336,7 +448,7 @@
 - **UX améliorée:** Plus de confusion utilisateur (connecté mais 403), gestion transparente des tokens expirés
 - **Documentation:** Guide de test local avec expiration réduite pour validation rapide
 
-### Correction Syntaxe ES6 Modules (Nouveau)
+### Correction Syntaxe ES6 Modules (Ancien)
 
 - **Problème:** Page blanche avec erreur "require is not defined" après implémentation JWT
 - **Cause:** Mélange syntaxe CommonJS (`require()`, `module.exports`) et ES6 (`import`, `export`)
@@ -344,7 +456,7 @@
 - **Configuration:** Suppression configuration Jest conflictuelle dans package.json (garde jest.config.json)
 - **Résultat:** Application fonctionnelle, système JWT opérationnel, tests passants
 
-### Gestion JWT (Nouveau)
+### Gestion JWT (Ancien)
 
 - **Configuration JWT:** Injection `@Value("${jwt.expiration}")` dans JwtServiceImpl (plus de valeur codée en dur)
 - **Filtres Backend:** Gestion ExpiredJwtException avec réponses JSON standardisées (401)
@@ -354,9 +466,7 @@
 - **Tests complets:** 164 tests (142 backend + 22 frontend) couvrant tous les scenarios
 - **Configuration:** application.properties (24h défaut) + application-dev.yml (configurable)
 
-### Sécurité Backend contre Injections SQL
-
-### Sécurité Backend contre Injections SQL
+### Sécurité Backend contre Injections SQL (Ancien)
 
 - **Vulnérabilité corrigée:** CardRepository requête native PostgreSQL → JPQL sécurisé
 - **Protection DoS:** Validation taille paramètres (titre ≤100, cartes ≤10000 caractères)
@@ -366,7 +476,7 @@
 - **Niveau sécurité:** 🟢 100% des repositories (8/8) protégés
 - **Documentation:** Guide complet bonnes pratiques + procédure urgence
 
-### Sécurisation du Code Source Frontend
+### Sécurisation du Code Source Frontend (Ancien)
 
 - **Stratégie multi-niveaux:** Railway (hébergeur) + Configuration Vite (build)
 - **Avantages:** Défense en profondeur, portabilité, indépendance d'hébergeur
@@ -376,7 +486,7 @@
 - **Performance:** Bundle réduit de ~85% avec compression gzip
 - **Portabilité:** Prêt pour tout changement d'hébergeur (Vercel, Netlify, AWS, etc.)
 
-### Correction des Tests de Contrôleurs
+### Correction des Tests de Contrôleurs (Ancien)
 
 - **Problème @MockBean:** Deprecated mais fonctionnel dans Spring Boot 3.4+
 - **Authentification JWT:** Requires manual SecurityContextHolder configuration
@@ -412,9 +522,10 @@
 ### Context minimal à fournir
 
 1. **Projet:** GenericDeckBuilder (Spring Boot + React)
-2. **État:** ✅ Gestion expiration JWT complète + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
-3. **Dernière session:** Correction bug expiration JWT (utilisateurs connectés avec 403 errors) + Page blanche ES6 modules
-4. **Objectif:** [Nouvelle fonctionnalité à définir]
+2. **État:** ✅ Contrôles de zoom + Aperçu d'image + Gestion expiration JWT + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+3. **Dernière session:** Ajout contrôles zoom (6-10 colonnes) + aperçu image au survol avec toggle dans CardFilter
+4. **Branche actuelle:** `feature/zoom`
+5. **Objectif:** [Nouvelle fonctionnalité à définir]
 
 ### Fichiers de référence
 
@@ -433,15 +544,23 @@ cd backend && ./mvnw test
 cd backend && ./mvnw test -Dtest=JwtTokenExpirationTest  # Tests JWT spécifiques
 cd backend && ./mvnw test -Dtest=SqlInjectionSecurityTest  # Tests sécurité SQL spécifiques
 
-# Frontend (avec tests JWT)
+# Frontend (avec tests JWT + contrôles zoom/aperçu)
 cd frontend && npm test -- jwtUtils.test.js  # Tests JWT spécifiques
 cd frontend && npm run build
 cd frontend && npm run preview:prod  # Test production sécurisée
+cd frontend && npm run dev  # Test contrôles zoom en développement
 
 # Test expiration JWT en local
 # 1. Modifier application-dev.yml: expiration: 60000 (1 minute)
 # 2. Redémarrer backend: mvn spring-boot:run -Dspring-boot.run.profiles=dev
 # 3. Se connecter et attendre 1 minute pour test automatique déconnexion
+
+# Test contrôles zoom
+# 1. Démarrer frontend: npm run dev
+# 2. Aller sur page "Cartes"
+# 3. Tester boutons -/+ pour colonnes 6-10
+# 4. Tester toggle aperçu image (icône œil)
+# 5. Vérifier positionnement intelligent image au survol
 ```
 
-**🎉 Session terminée avec succès - Gestion expiration JWT complètement implémentée !**
+**🎉 Session terminée avec succès - Contrôles de zoom et aperçu d'image complètement implémentés !**
