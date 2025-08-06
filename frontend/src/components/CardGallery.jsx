@@ -16,7 +16,7 @@ const CardGallery = ({
   const handleCardRedirect = (cardUrl, event) => {
     event.stopPropagation(); // Empêche le déclenchement du onClick de la carte
     if (cardUrl) {
-      window.open(cardUrl, '_blank', 'noopener,noreferrer');
+      window.open(cardUrl, "_blank", "noopener,noreferrer");
     }
   };
   // États pour gestion image au survol
@@ -159,10 +159,10 @@ const CardGallery = ({
                 ✓
               </div>
             )}
-            
+
             {/* Bouton de redirection en overlay (pattern DecksPage) */}
             {card.cardUrl && (
-              <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <button
                   onClick={(e) => handleCardRedirect(card.cardUrl, e)}
                   className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
