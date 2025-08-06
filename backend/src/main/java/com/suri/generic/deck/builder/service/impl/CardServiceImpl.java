@@ -36,7 +36,8 @@ public class CardServiceImpl implements CardService {
 
     @Override
     public List<CardResponseDTO> getCardsByLocale(String gameId, String locale) {
-        // Use the new ordered method to get cards sorted by element, extension and mana cost
+        // Use the new ordered method to get cards sorted by element, extension and mana
+        // cost
         List<Card> cards = cardRepository.findByGameIdOrderedByElementExtensionAndManaCost(gameId);
         List<CardResponseDTO> result = new ArrayList<>();
 
@@ -49,6 +50,7 @@ public class CardServiceImpl implements CardService {
             String name = loc.map(CardLocalization::getName).orElse("Nom inconnu");
             String description = loc.map(CardLocalization::getDescription).orElse("");
             String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
+            String cardUrl = loc.map(CardLocalization::getCardUrl).orElse("");
 
             // Parse properties
             Map<String, Object> props;
@@ -58,7 +60,7 @@ public class CardServiceImpl implements CardService {
                 props = Map.of(); // fail-safe
             }
 
-            result.add(new CardResponseDTO(card.getId(), name, description, imageUrl, props));
+            result.add(new CardResponseDTO(card.getId(), name, description, imageUrl, cardUrl, props));
         }
 
         return result;
@@ -147,6 +149,7 @@ public class CardServiceImpl implements CardService {
         String name = loc.map(CardLocalization::getName).orElse("Nom inconnu");
         String description = loc.map(CardLocalization::getDescription).orElse("");
         String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
+        String cardUrl = loc.map(CardLocalization::getCardUrl).orElse("");
 
         // Parse properties
         Map<String, Object> props;
@@ -156,7 +159,7 @@ public class CardServiceImpl implements CardService {
             props = Map.of(); // fail-safe
         }
 
-        return new CardResponseDTO(card.getId(), name, description, imageUrl, props);
+        return new CardResponseDTO(card.getId(), name, description, imageUrl, cardUrl, props);
     }
 
     @Override

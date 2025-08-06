@@ -64,6 +64,7 @@ class CardServiceImplTest {
         frenchLocalization.setName("Carte de Test");
         frenchLocalization.setDescription("Description française");
         frenchLocalization.setImageUrl("https://example.com/card-fr.png");
+        frenchLocalization.setCardUrl("https://example.com/card-fr-official");
 
         englishLocalization = new CardLocalization();
         englishLocalization.setId(new CardLocalizationId("card-001", "en"));
@@ -71,6 +72,7 @@ class CardServiceImplTest {
         englishLocalization.setName("Test Card");
         englishLocalization.setDescription("English description");
         englishLocalization.setImageUrl("https://example.com/card-en.png");
+        englishLocalization.setCardUrl("https://example.com/card-en-official");
 
         testCard.setLocalizations(Arrays.asList(frenchLocalization, englishLocalization));
     }
@@ -414,6 +416,8 @@ class CardServiceImplTest {
         CardLocalization duplicateFrench = new CardLocalization();
         duplicateFrench.setId(new CardLocalizationId("card-001", "fr"));
         duplicateFrench.setCard(testCard);
+        duplicateFrench.setImageUrl("");
+        duplicateFrench.setCardUrl("");
 
         testCard.setLocalizations(Arrays.asList(frenchLocalization, englishLocalization, duplicateFrench));
 
@@ -516,7 +520,7 @@ class CardServiceImplTest {
 
         // Then
         assertThat(result).hasSize(3);
-        
+
         // Verify the order is preserved
         assertThat(result.get(0).getId()).isEqualTo("card1");
         assertThat(result.get(1).getId()).isEqualTo("card2");
@@ -526,7 +530,7 @@ class CardServiceImplTest {
         Map<String, Object> props1 = result.get(0).getProperties();
         assertThat(props1.get("element")).isEqualTo("Végétal");
         assertThat(props1.get("extension")).isEqualTo("Jeu de base");
-        
+
         @SuppressWarnings("unchecked")
         Map<String, Object> manaCost1 = (Map<String, Object>) props1.get("manaCost");
         assertThat(manaCost1.get("total")).isEqualTo(1);
@@ -543,20 +547,21 @@ class CardServiceImplTest {
         localization.setName("Test Card " + id);
         localization.setDescription("Test description");
         localization.setImageUrl("http://example.com/image.png");
+        localization.setCardUrl("http://example.com/card-official.html");
         localization.setCard(card);
 
         card.setLocalizations(List.of(localization));
 
         // Set properties JSON
         String properties = String.format("""
-            {
-                "element": "%s",
-                "extension": "%s",
-                "manaCost": {
-                    "total": %d
+                {
+                    "element": "%s",
+                    "extension": "%s",
+                    "manaCost": {
+                        "total": %d
+                    }
                 }
-            }
-            """, element, extension, manaCost);
+                """, element, extension, manaCost);
 
         card.setProperties(properties);
         return card;
