@@ -1,12 +1,23 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 5 Août 2025  
-**Branche:** `feature/zoom`  
-**Statut:** ✅ Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+**Date:** 6 Août 2025  
+**Branche:** `feature/add_card-url`  
+**Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
 
 ## 🎯 Fonctionnalités implémentées
 
-### ✅ Contrôles de Zoom et Aperçu d'Image (Nouveau - Session actuelle)
+### ✅ Champ cardUrl et Icône de Redirection (Nouveau - Session actuelle)
+
+- **Fonctionnalité:** Ajout du champ `cardUrl` à l'entité `CardLocalization` pour liens vers sites officiels
+- **Backend:** Modification entité JPA, DTO, service et tests pour support `cardUrl`
+- **Scraper:** Amélioration `sql_generator_v2.py` pour générer les INSERT avec `card_url`
+- **Migration SQL:** Script de mise à jour généré avec 410 entrées depuis CSV export
+- **Frontend:** Icône de redirection sur chaque carte avec survol et redirection sécurisée
+- **UX:** Bouton `ExternalLink` en bas centre des cartes, visible au hover uniquement
+- **Sécurité:** `window.open()` avec `noopener,noreferrer` pour protection XSS
+- **Design:** Style cohérent avec DecksPage, sans bordure/ombre parasite
+
+### ✅ Contrôles de Zoom et Aperçu d'Image (Session précédente)
 
 - **Fonctionnalité:** Contrôles de zoom dans CardFilter pour ajuster le nombre de colonnes d'affichage des cartes (6-10)
 - **Interface:** Boutons "-" (réduire), icône loupe (centre), "+" (augmenter) à droite du bouton reset
@@ -75,7 +86,54 @@
 
 ## 🏗️ Architecture technique
 
-### Contrôles de Zoom et Aperçu d'Image (Nouveau)
+### Champ cardUrl et Icône de Redirection (Nouveau)
+
+**Architecture Backend:**
+
+```
+📁 backend/src/main/java/com/suri/generic/deck/builder/
+├── 🔧 entity/CardLocalization.java             # Ajout @Column(name = "card_url") String cardUrl
+├── 🔧 dto/response/CardResponseDTO.java        # Ajout cardUrl dans constructeur
+├── 🔧 service/impl/CardServiceImpl.java        # Extraction cardUrl via CardLocalization::getCardUrl
+└── 🔧 test/java/**/*Test.java                  # Mise à jour 164 tests avec cardUrl (tous passants)
+```
+
+**Architecture Scraper:**
+
+```
+📁 scraper/
+├── 🔧 sql_generator_v2.py                      # Fonction generate_card_sql() modifiée pour card_url
+├── 📄 exact_410_card_urls_and_images_fr_en.csv # Export CSV avec URLs officielles
+└── 🆕 update_card_localization_with_card_url.sql # Script SQL 1910 lignes (410 UPDATE)
+```
+
+**Architecture Frontend:**
+
+```
+📁 frontend/src/components/
+├── 🔧 CardGallery.jsx                          # Icône ExternalLink + fonction handleCardRedirect
+└── 🔧 Import { ExternalLink } from "lucide-react" # Icône cohérente avec DecksPage
+```
+
+**Fonctionnalités cardUrl:**
+
+- **Entité JPA:** Champ `cardUrl` nullable avec @Column(name = "card_url")
+- **DTO Response:** Constructeur mis à jour pour inclure cardUrl
+- **Service Layer:** Extraction via `CardLocalization::getCardUrl` dans 2 méthodes
+- **Tests Backend:** 164 tests adaptés et tous passants après modifications
+- **SQL Generator:** Support card_url dans génération INSERT statements
+- **Migration SQL:** 410 UPDATE statements pour peupler cardUrl existant
+
+**Fonctionnalités icône de redirection:**
+
+- **Position:** Bas centre de chaque carte (`bottom-2 left-1/2 transform -translate-x-1/2`)
+- **Animation:** Opacity 0→100 au survol (`group-hover:opacity-100`)
+- **Icône:** `ExternalLink` taille 14px cohérente avec DecksPage
+- **Redirection:** `window.open(cardUrl, '_blank', 'noopener,noreferrer')`
+- **Style:** Bouton bleu sans bordure/ombre (`border-0 outline-none shadow-none`)
+- **Condition:** Affiché uniquement si `card.cardUrl` existe
+
+### Contrôles de Zoom et Aperçu d'Image (Ancien)
 
 **Architecture des composants:**
 
@@ -248,7 +306,20 @@
 
 ## 🎨 Standards de code établis
 
-### Contrôles de Zoom et UI (Nouveau)
+### Champ cardUrl et Icône de Redirection (Nouveau)
+
+- **Champ nullable:** `cardUrl` avec @Column(name = "card_url") pour compatibilité existant
+- **Propagation complète:** Entité → DTO → Service → Tests (164 tests adaptés)
+- **SQL Generator:** Modification `generate_card_sql()` pour inclure card_url dans INSERT
+- **Migration BDD:** 410 UPDATE statements générés depuis CSV export Mage Noir
+- **Icône conditionnelle:** Affichage uniquement si `card.cardUrl` existe et truthy
+- **Position centrée:** `left-1/2 transform -translate-x-1/2` pour centrage horizontal parfait
+- **Style épuré:** Suppression toute bordure/ombre (`border-0 outline-none shadow-none`)
+- **Pattern cohérent:** Même approche que boutons DecksPage (ExternalLink, taille 14px)
+- **Sécurité XSS:** `window.open()` avec flags `noopener,noreferrer`
+- **UX intuitive:** Survol pour révéler, clic pour redirection, tooltip informatif
+
+### Contrôles de Zoom et Aperçu d'Image (Ancien)
 
 - **Range de colonnes:** 6 à 10 avec validation Math.max(6, Math.min(10, value))
 - **État par défaut:** 7 colonnes pour équilibre affichage/lisibilité
@@ -336,22 +407,50 @@
 ### Backend
 
 ```bash
+✅ CardLocalization Tests: 164/164 tests passent (avec cardUrl)
+✅ DTO et Service Tests: Tous adaptés pour cardUrl
 ✅ JwtTokenExpirationTest: 5/5 tests passent (Expiration JWT)
 ✅ SqlInjectionSecurityTest: 4/4 tests passent (Sécurité SQL)
 ✅ DeckControllerExportTest: 8/8 tests passent (Tests contrôleurs)
 ✅ DeckImportServiceTest: 15/15 tests passent (Import de deck)
 ✅ TextNormalizerTest: 17/17 tests passent (Normalisation texte)
 ✅ TextNormalizationIntegrationTest: 2/2 tests passent (Intégration)
-✅ Tous les tests backend: 142/142 tests passent (100%)
+✅ Tous les tests backend: 164/164 tests passent (100%)
 ✅ Compilation: aucune erreur
 ✅ Documentation sécurité: Guide SQL + Guide tests + Guide JWT créés
+```
+
+## 📊 État du Scraper et Migration
+
+### Python et SQL
+
+```bash
+✅ sql_generator_v2.py: Modifié pour support card_url
+✅ CSV Export: 410 cartes avec URLs officielles Mage Noir
+✅ Script SQL: 1910 lignes générées (410 UPDATE statements)
+✅ Distribution: AIR(68), ARCANE(68), EAU(68), FEU(64), MINÉRAL(74), VÉGÉTAL(68)
+✅ Format: UPDATE card_localization SET card_url = 'URL' WHERE card_id = X AND locale = 'fr'
+✅ Validation: Toutes les URLs vérifiées et formatées
 ```
 
 ## 📊 État des tests
 
 ### Frontend
 
-**Contrôles de zoom et aperçu d'image (Nouveau):**
+**Icône de redirection cardUrl (Nouveau):**
+
+```bash
+✅ Import ExternalLink: lucide-react cohérent avec DecksPage
+✅ Fonction handleCardRedirect: stopPropagation + window.open sécurisé
+✅ Position centrée: left-1/2 transform -translate-x-1/2 parfait
+✅ Animation hover: opacity-0 → opacity-100 smooth
+✅ Style épuré: border-0 outline-none shadow-none (pas de bordure grise)
+✅ Condition d'affichage: uniquement si card.cardUrl existe
+✅ Tooltip: "Voir sur le site officiel" informatif
+✅ Pattern DecksPage: même taille (14px), même couleur (blue-600/700)
+```
+
+**Contrôles de zoom et aperçu d'image (Ancien):**
 
 ```bash
 ✅ Interface fonctionnelle: Contrôles zoom 6-10 colonnes (défaut 7)
@@ -398,6 +497,13 @@
 
 ## 🚀 Prochaines étapes possibles
 
+### Améliorations cardUrl et redirection
+
+- [ ] Ajout cardUrl pour d'autres jeux (pas seulement Mage Noir)
+- [ ] Icône différenciée selon le type de site (officiel, wiki, boutique)
+- [ ] Aperçu de la page cible en hover (mini-iframe ou capture)
+- [ ] Statistiques de clics sur les redirections
+
 ### Améliorations d'affichage et UX
 
 - [ ] Persistance des préférences de zoom dans localStorage
@@ -426,7 +532,22 @@
 
 ## 💡 Notes techniques importantes
 
-### Contrôles de Zoom et Aperçu d'Image (Nouveau)
+### Champ cardUrl et Icône de Redirection (Nouveau)
+
+- **Migration BDD:** Champ `cardUrl` nullable pour compatibilité avec données existantes
+- **Propagation entité:** CardLocalization → CardResponseDTO → CardServiceImpl (extraction via ::getCardUrl)
+- **Tests exhaustifs:** 164 tests backend adaptés pour inclure cardUrl, tous passants après modifications
+- **SQL Generator:** Fonction `generate_card_sql()` modifiée pour inclure `card_url` dans INSERT statements
+- **CSV Processing:** 410 cartes Mage Noir avec URLs officielles, distribution par élément équilibrée
+- **Script SQL:** UPDATE statements avec WHERE card_id + locale pour ciblage précis
+- **Icône conditionnelle:** `{card.cardUrl && (...)` pour affichage uniquement si URL existe
+- **Position mathématique:** `left-1/2 transform -translate-x-1/2` pour centrage horizontal parfait
+- **Style épuré:** Classes `border-0 outline-none shadow-none` pour supprimer bordures navigateur
+- **Sécurité XSS:** `window.open()` avec flags `noopener,noreferrer` contre target="\_blank" exploits
+- **UX cohérente:** Pattern DecksPage (ExternalLink 14px, blue-600/700, p-1.5)
+- **Performance:** stopPropagation() pour éviter conflit avec onClick carte parent
+
+### Contrôles de Zoom et Aperçu d'Image (Ancien)
 
 - **Architecture props drilling:** CardBrowser gère états → CardFilter (UI) → CardGallery (affichage)
 - **Plage validation:** Math.max(6, Math.min(10, value)) pour éviter débordements
@@ -522,9 +643,9 @@
 ### Context minimal à fournir
 
 1. **Projet:** GenericDeckBuilder (Spring Boot + React)
-2. **État:** ✅ Contrôles de zoom + Aperçu d'image + Gestion expiration JWT + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
-3. **Dernière session:** Ajout contrôles zoom (6-10 colonnes) + aperçu image au survol avec toggle dans CardFilter
-4. **Branche actuelle:** `feature/zoom`
+2. **État:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image + Gestion expiration JWT + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+3. **Dernière session:** Ajout champ `cardUrl` à CardLocalization + icône de redirection centrée bas des cartes + script SQL migration 410 entrées
+4. **Branche actuelle:** `feature/add_card-url`
 5. **Objectif:** [Nouvelle fonctionnalité à définir]
 
 ### Fichiers de référence
@@ -555,7 +676,15 @@ cd frontend && npm run dev  # Test contrôles zoom en développement
 # 2. Redémarrer backend: mvn spring-boot:run -Dspring-boot.run.profiles=dev
 # 3. Se connecter et attendre 1 minute pour test automatique déconnexion
 
-# Test contrôles zoom
+# Test cardUrl et icône de redirection
+# 1. Démarrer backend: mvn spring-boot:run
+# 2. Exécuter script SQL: psql -d db -f update_card_localization_with_card_url.sql
+# 3. Démarrer frontend: npm run dev
+# 4. Aller sur page "Cartes" et survoler une carte Mage Noir
+# 5. Vérifier icône ExternalLink apparaît en bas centre
+# 6. Cliquer icône → redirection vers site officiel dans nouvel onglet
+
+# Test contrôles zoom (Session précédente)
 # 1. Démarrer frontend: npm run dev
 # 2. Aller sur page "Cartes"
 # 3. Tester boutons -/+ pour colonnes 6-10
@@ -563,4 +692,4 @@ cd frontend && npm run dev  # Test contrôles zoom en développement
 # 5. Vérifier positionnement intelligent image au survol
 ```
 
-**🎉 Session terminée avec succès - Contrôles de zoom et aperçu d'image complètement implémentés !**
+**🎉 Session terminée avec succès - Champ cardUrl et icône de redirection complètement implémentés !**
