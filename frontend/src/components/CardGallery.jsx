@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import UniversalImage from "./UniversalImage";
+import { ExternalLink } from "lucide-react";
 
 const CardGallery = ({
   cards,
@@ -11,6 +12,13 @@ const CardGallery = ({
   maxColumns = null, // Limite le nombre de colonnes (contrôles de zoom)
   showImagePreview = true, // Affichage de l'aperçu d'image au survol
 }) => {
+  // Fonction pour gérer la redirection vers le site officiel
+  const handleCardRedirect = (cardUrl, event) => {
+    event.stopPropagation(); // Empêche le déclenchement du onClick de la carte
+    if (cardUrl) {
+      window.open(cardUrl, "_blank", "noopener,noreferrer");
+    }
+  };
   // États pour gestion image au survol
   const [hoveredCard, setHoveredCard] = useState(null);
   const [imageErrors, setImageErrors] = useState(new Set());
@@ -120,7 +128,7 @@ const CardGallery = ({
         return (
           <div
             key={card.id}
-            className={`overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative ${
+            className={`overflow-hidden rounded-lg shadow-lg transition-all duration-200 relative group ${
               onCardClick ? "cursor-pointer hover:scale-105" : ""
             } ${isSelected ? "ring-4 ring-blue-500" : ""}`}
             onClick={() => onCardClick && onCardClick(card)}
@@ -149,6 +157,20 @@ const CardGallery = ({
             {isSelected && (
               <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
                 ✓
+              </div>
+            )}
+
+            {/* Bouton de redirection en overlay (pattern DecksPage) */}
+            {card.cardUrl && (
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button
+                  onClick={(e) => handleCardRedirect(card.cardUrl, e)}
+                  className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors border-0 outline-none focus:outline-none shadow-none"
+                  title="Voir sur le site officiel"
+                  aria-label="Voir sur le site officiel"
+                >
+                  <ExternalLink size={14} />
+                </button>
               </div>
             )}
           </div>
