@@ -162,10 +162,10 @@ const CardGallery = ({
 
             {/* Bouton de redirection en overlay (pattern DecksPage) */}
             {card.cardUrl && (
-              <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm rounded-md p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <button
                   onClick={(e) => handleCardRedirect(card.cardUrl, e)}
-                  className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                  className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors border-0 outline-none focus:outline-none shadow-none"
                   title="Voir sur le site officiel"
                   aria-label="Voir sur le site officiel"
                 >
