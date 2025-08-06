@@ -1033,7 +1033,7 @@ class MageNoirSQLGeneratorV2:
         # Commentaire pour les localisations
         sql_lines.append(f"-- Localisations pour {display_name}")
         sql_lines.append("INSERT INTO public.card_localization")
-        sql_lines.append("(card_id, description, image_url, locale, \"name\")")
+        sql_lines.append("(card_id, description, image_url, card_url, locale, \"name\")")
         sql_lines.append("VALUES")
         
         localizations = []
@@ -1043,6 +1043,7 @@ class MageNoirSQLGeneratorV2:
             fr_loc = card['localizations']['fr']
             fr_name = fr_loc.get('name', card_id)
             fr_image = fr_loc.get('image_url', '')
+            fr_card_url = fr_loc.get('card_url', '')
             fr_description = fr_loc.get('description', 'Description à compléter')
             
             # Validation et nettoyage de la description française
@@ -1056,16 +1057,17 @@ class MageNoirSQLGeneratorV2:
             # Échapper les apostrophes pour PostgreSQL
             fr_description_escaped = fr_description.replace("'", "''")
             fr_name_escaped = fr_name.replace("'", "''")
-            localizations.append(f"('{card_id}', E'{fr_description_escaped}', '{fr_image}', 'fr', '{fr_name_escaped}')")
+            localizations.append(f"('{card_id}', E'{fr_description_escaped}', '{fr_image}', '{fr_card_url}', 'fr', '{fr_name_escaped}')")
         else:
             # Si pas de français, utiliser un placeholder
-            localizations.append(f"('{card_id}', E'Description à compléter', '', 'fr', '{display_name}')")
+            localizations.append(f"('{card_id}', E'Description à compléter', '', '', 'fr', '{display_name}')")
         
         # Localisation anglaise (obligatoire)
         if 'en' in card['localizations']:
             en_loc = card['localizations']['en']
             en_name = en_loc.get('name', card_id)
             en_image = en_loc.get('image_url', '')
+            en_card_url = en_loc.get('card_url', '')
             en_description = en_loc.get('description', 'Description to complete')
             
             # Validation et nettoyage de la description anglaise
@@ -1085,10 +1087,10 @@ class MageNoirSQLGeneratorV2:
             # Échapper les apostrophes pour PostgreSQL
             en_description_escaped = en_description.replace("'", "''")
             en_name_escaped = en_name.replace("'", "''")
-            localizations.append(f"('{card_id}', E'{en_description_escaped}', '{en_image}', 'en', '{en_name_escaped}')")
+            localizations.append(f"('{card_id}', E'{en_description_escaped}', '{en_image}', '{en_card_url}', 'en', '{en_name_escaped}')")
         else:
             # Si pas d'anglais, utiliser un placeholder
-            localizations.append(f"('{card_id}', E'Description to complete', '', 'en', '{display_name}')")
+            localizations.append(f"('{card_id}', E'Description to complete', '', '', 'en', '{display_name}')")
         
         # Joindre les localisations avec des virgules
         sql_lines.append(',\n'.join(localizations) + ';')
