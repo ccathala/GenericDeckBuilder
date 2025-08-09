@@ -226,9 +226,9 @@ const CardFilter = ({
         <div className="flex items-center ml-4 space-x-1">
           <button
             onClick={() =>
-              onColumnsChange && onColumnsChange(Math.max(6, columnsCount - 1))
+              onColumnsChange && onColumnsChange(Math.min(10, columnsCount + 1))
             }
-            disabled={columnsCount <= 6}
+            disabled={columnsCount >= 10}
             className="p-2 text-gray-400 hover:text-white hover:bg-mage-dark-700 
                      rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             title={t("cards.filters.zoomOut")}
@@ -266,9 +266,9 @@ const CardFilter = ({
 
           <button
             onClick={() =>
-              onColumnsChange && onColumnsChange(Math.min(10, columnsCount + 1))
+              onColumnsChange && onColumnsChange(Math.max(6, columnsCount - 1))
             }
-            disabled={columnsCount >= 10}
+            disabled={columnsCount <= 6}
             className="p-2 text-gray-400 hover:text-white hover:bg-mage-dark-700 
                      rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             title={t("cards.filters.zoomIn")}
