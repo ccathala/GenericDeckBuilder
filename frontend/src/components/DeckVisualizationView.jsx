@@ -9,14 +9,14 @@ const cardImageStyles = `
     position: relative;
     width: 100%;
     aspect-ratio: 5/7;
-    margin-bottom: -80%;
+    margin-bottom: -90%;
     cursor: grab;
     transition: transform 0.2s ease;
     z-index: 1;
   }
 
   .deck-card-image:first-child {
-    margin-bottom: -80%;
+    margin-bottom: -90%;
   }
 
   .deck-card-image:last-child {
@@ -73,7 +73,7 @@ const cardImageStyles = `
   }
 `;
 
-const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
+const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstruction }) => {
   const { t } = useLanguage();
   const {
     visualization,
@@ -188,18 +188,28 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     <div className="h-full flex flex-col">
       <style>{cardImageStyles}</style>
       
-      {/* Header avec titre et bouton d'ajout */}
+      {/* Header avec titre et boutons */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-white">
-          {t("decks.visualization.title")}
-        </h2>
-        <button
-          onClick={() => setShowCreateColumnModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          <Plus size={16} />
-          {t("decks.visualization.addColumn")}
-        </button>
+        <h1 className="text-2xl font-bold text-white">
+          {visualization?.deck_name || t("decks.visualization.title")}
+        </h1>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowCreateColumnModal(true)}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus size={16} />
+            {t("decks.visualization.addColumn")}
+          </button>
+          {onToggleConstruction && (
+            <button
+              onClick={onToggleConstruction}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              {t("decks.visualization.toggleConstruction")}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Zone des colonnes */}

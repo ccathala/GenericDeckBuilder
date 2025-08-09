@@ -41,19 +41,13 @@ const DeckFormWithVisualization = ({ isEdit = false }) => {
         <div className="bg-mage-bg-900 text-white">
           <div className="w-full px-6 py-4 h-[calc(100vh-6rem)] flex flex-col">
             <div className="flex flex-col gap-4 h-full overflow-hidden">
-              {/* Header avec toggle vue */}
-              <div className="flex justify-between items-center flex-shrink-0">
+              {/* Header simplifié */}
+              <div className="flex-shrink-0">
                 <h1 className="text-2xl font-bold text-white">
                   {isEdit
                     ? t("decks.form.editTitle")
                     : t("decks.form.createTitle")}
                 </h1>
-                <button
-                  onClick={toggleViewMode}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-                >
-                  {t("decks.visualization.toggleConstruction")}
-                </button>
               </div>
 
               {/* Contenu visualisation */}
@@ -63,6 +57,7 @@ const DeckFormWithVisualization = ({ isEdit = false }) => {
                     deckId={id}
                     deckCards={[]} // Pour l'instant vide, sera géré par l'API
                     onCardUpdate={() => {}} // Callback vide pour l'instant
+                    onToggleConstruction={toggleViewMode}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400">
