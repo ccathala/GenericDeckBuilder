@@ -2,14 +2,17 @@ package com.suri.generic.deck.builder.service.impl;
 
 import com.suri.generic.deck.builder.dto.request.DeckCardRequestDTO;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
+import com.suri.generic.deck.builder.dto.request.DeckColumnCreateRequestDTO;
 import com.suri.generic.deck.builder.dto.response.DeckCardResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckSummaryResponseDTO;
 import com.suri.generic.deck.builder.model.*;
 import com.suri.generic.deck.builder.repository.*;
 import com.suri.generic.deck.builder.service.DeckService;
+import com.suri.generic.deck.builder.service.DeckVisualizationService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +20,14 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeckServiceImpl implements DeckService {
 
     private final DeckRepository deckRepository;
     private final DeckRulesetRepository rulesetRepository;
     private final GameRepository gameRepository;
     private final CardRepository cardRepository;
+    private final DeckVisualizationService deckVisualizationService;
 
     @Override
     public DeckResponseDTO createDeck(DeckRequestDTO deckDTO, User owner) {
@@ -53,7 +58,12 @@ public class DeckServiceImpl implements DeckService {
         // New validation: only block excess cards per individual card
         validateCardLimits(deck);
 
-        return toResponseDto(deckRepository.save(deck));
+        Deck savedDeck = deckRepository.save(deck);
+
+        // Créer automatiquement la première colonne "Deck" pour la visualisation
+        createDefaultVisualizationColumn(savedDeck.getId(), owner.getId());
+
+        return toResponseDto(savedDeck);
     }
 
     @Override
@@ -197,5 +207,25 @@ public class DeckServiceImpl implements DeckService {
                 .map(CardLocalization::getImageUrl)
                 .orElse(
                         card.getLocalizations().get(0).getImageUrl());
+    }
+
+    /**
+     * Crée automatiquement une colonne par défaut "Deck" pour la visualisation
+     * lors de la création d'un nouveau deck
+     */
+    private void createDefaultVisualizationColumn(UUID deckId, Long userId) {
+        try {
+            DeckColumnCreateRequestDTO defaultColumnDTO = new DeckColumnCreateRequestDTO();
+            defaultColumnDTO.setName("Deck");
+            defaultColumnDTO.setColorHex("#6B7280");
+
+            deckVisualizationService.createColumnGroup(deckId, defaultColumnDTO, userId);
+
+            log.info("Colonne par défaut 'Deck' créée pour le deck {} (utilisateur {})", deckId, userId);
+        } catch (Exception e) {
+            // Log l'erreur mais ne pas faire échouer la création du deck
+            log.warn("Impossible de créer la colonne par défaut pour le deck {} (utilisateur {}): {}",
+                    deckId, userId, e.getMessage());
+        }
     }
 }

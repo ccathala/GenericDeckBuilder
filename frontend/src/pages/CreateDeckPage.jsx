@@ -1,8 +1,8 @@
 import React from "react";
-import DeckForm from "../components/DeckForm";
+import DeckFormWithVisualization from "../components/DeckFormWithVisualization";
 
 const CreateDeckPage = () => {
-  return <DeckForm isEdit={false} />;
+  return <DeckFormWithVisualization isEdit={false} />;
 };
 
 export default CreateDeckPage;

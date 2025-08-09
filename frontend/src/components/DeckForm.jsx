@@ -6,7 +6,7 @@ import deckService from "../services/deckService";
 import gameService from "../services/gameService";
 import CardBrowser from "./CardBrowser";
 
-const DeckForm = ({ isEdit = false }) => {
+const DeckForm = ({ isEdit = false, onToggleVisualization = null }) => {
   const { t } = useLanguage();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -484,6 +484,19 @@ const DeckForm = ({ isEdit = false }) => {
                     </span>
                   </div>
                 </div>
+
+                {/* Bouton toggle vers visualisation - seulement si deck existant */}
+                {onToggleVisualization && (
+                  <div className="mt-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={onToggleVisualization}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg transition-colors text-sm"
+                    >
+                      {t("decks.visualization.toggleVisualization")}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {deckCards.length === 0 ? (
