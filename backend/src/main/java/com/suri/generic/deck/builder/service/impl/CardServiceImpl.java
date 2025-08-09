@@ -60,7 +60,14 @@ public class CardServiceImpl implements CardService {
                 props = Map.of(); // fail-safe
             }
 
-            result.add(new CardResponseDTO(card.getId(), name, description, imageUrl, cardUrl, props));
+            result.add(CardResponseDTO.builder()
+                    .id(card.getId())
+                    .name(name)
+                    .description(description)
+                    .imageUrl(imageUrl)
+                    .cardUrl(cardUrl)
+                    .properties(props)
+                    .build());
         }
 
         return result;
@@ -159,7 +166,14 @@ public class CardServiceImpl implements CardService {
             props = Map.of(); // fail-safe
         }
 
-        return new CardResponseDTO(card.getId(), name, description, imageUrl, cardUrl, props);
+        return CardResponseDTO.builder()
+                .id(card.getId())
+                .name(name)
+                .description(description)
+                .imageUrl(imageUrl)
+                .cardUrl(cardUrl)
+                .properties(props)
+                .build();
     }
 
     @Override
