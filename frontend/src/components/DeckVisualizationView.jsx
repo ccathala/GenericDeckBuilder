@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useDeckVisualization } from "../hooks/useDeckVisualization";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 // Styles CSS pour l'affichage des images de cartes
 const cardImageStyles = `
@@ -599,16 +599,18 @@ const DeckColumn = ({
             <div className="flex space-x-1">
               <button
                 onClick={() => setIsEditing(true)}
-                className="p-1 text-gray-400 hover:text-white"
+                className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                title={t("columns.edit")}
               >
-                ✏️
+                <Pencil size={14} />
               </button>
               {canDelete && (
                 <button
                   onClick={handleDelete}
-                  className="p-1 text-gray-400 hover:text-red-400"
+                  className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                  title={t("columns.delete")}
                 >
-                  🗑️
+                  <Trash2 size={14} />
                 </button>
               )}
             </div>
