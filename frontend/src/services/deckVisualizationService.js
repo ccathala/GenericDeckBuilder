@@ -93,21 +93,28 @@ export const deckVisualizationService = {
       console.log("sourceColumnId:", sourceColumnId);
       console.log("targetColumnId:", targetColumnId);
       console.log("newPositionInPile:", newPositionInPile);
-      
+
+      const payload = {
+        cardId,
+        sourceColumnId,
+        targetColumnId,
+        newPositionInPile,
+      };
+      console.log("Payload final envoyé à l'API:", payload);
+
       const response = await axiosInstance.post(
         `/api/decks/${deckId}/visualization/move-card`,
-        {
-          cardId,
-          sourceColumnId,
-          targetColumnId,
-          newPositionInPile,
-        }
+        payload
       );
+
+      console.log("Réponse de l'API:", response.data);
+
       return {
         success: true,
         data: response.data,
       };
     } catch (error) {
+      console.error("Erreur dans le service moveCard:", error);
       return {
         success: false,
         error: error.response?.data?.error || error.message,

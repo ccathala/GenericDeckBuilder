@@ -164,12 +164,16 @@ export const useDeckVisualization = (deckId) => {
         console.log("targetColumnId reçu:", targetColumnId);
         console.log("newPositionInPile reçu:", newPositionInPile);
 
-        const result = await deckVisualizationService.moveCard(deckId, {
+        const payload = {
           cardId,
           sourceColumnId,
           targetColumnId,
           newPositionInPile,
-        });
+        };
+        console.log("Payload envoyé au service:", payload);
+
+        const result = await deckVisualizationService.moveCard(deckId, payload);
+        console.log("Résultat du service:", result);
 
         if (result.success) {
           // Recharger les données pour avoir l'état correct après déplacement

@@ -71,6 +71,32 @@ const cardImageStyles = `
     min-width: 120px;
     max-width: none;
   }
+
+  .drop-indicator {
+    height: 4px;
+    background: linear-gradient(90deg, #8B5CF6, #A855F7);
+    border-radius: 2px;
+    margin: 2px 0;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+    animation: pulse 1s infinite;
+    position: relative;
+    z-index: 1000;
+    width: 100%;
+  }
+
+  .drop-indicator-container {
+    position: relative;
+    width: 100%;
+    z-index: 1000;
+    margin: 0;
+    height: 4px;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
 `;
 
 const DeckVisualizationView = ({
@@ -93,6 +119,7 @@ const DeckVisualizationView = ({
 
   // État local pour le drag & drop
   const [draggedCard, setDraggedCard] = useState(null);
+  const [dropIndicator, setDropIndicator] = useState(null); // { columnId, position }
   const [showCreateColumnModal, setShowCreateColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState("");
 
@@ -114,12 +141,12 @@ const DeckVisualizationView = ({
   // Gestion du drag & drop (version simplifiée pour l'instant)
   const handleDragStart = (e, card, sourceColumnId) => {
     console.log("🎯 Drag start - Card ID:", card.id);
-    
+
     setDraggedCard({
       card,
       sourceColumnId,
     });
-    
+
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -137,18 +164,51 @@ const DeckVisualizationView = ({
   const handleDragEnd = (e) => {
     e.target.style.opacity = "1";
     setDraggedCard(null);
+    setDropIndicator(null); // Ajouter ici pour nettoyer l'indicateur
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+
+    // Calculer et afficher l'indicateur en temps réel pendant le drag
+    if (draggedCard) {
+      const targetColumnId =
+        e.currentTarget.getAttribute("data-column-id") ||
+        e.currentTarget
+          .closest("[data-column-id]")
+          ?.getAttribute("data-column-id");
+      if (targetColumnId) {
+        calculateDropPosition(e, targetColumnId);
+      }
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    // Masquer l'indicateur seulement si on sort vraiment de la colonne
+    // et qu'on ne va pas vers un élément enfant
+    const currentTarget = e.currentTarget;
+    const relatedTarget = e.relatedTarget;
+
+    // Si relatedTarget est null (on sort de la fenêtre) ou
+    // si relatedTarget n'est pas un enfant de currentTarget
+    if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
+      setDropIndicator(null);
+    }
   };
 
   const handleDrop = async (e, targetColumnId) => {
     e.preventDefault();
+    setDropIndicator(null); // Masquer l'indicateur après le drop
+
+    console.log("=== DEBUG HANDLE DROP ===");
+    console.log("draggedCard:", draggedCard);
+    console.log("targetColumnId:", targetColumnId);
 
     if (!draggedCard || draggedCard.sourceColumnId === targetColumnId) {
+      console.log("Pas de drag ou même colonne, abandon");
       setDraggedCard(null);
+      setDropIndicator(null); // Ajouter ici aussi pour nettoyer l'indicateur
       return;
     }
 
@@ -157,14 +217,101 @@ const DeckVisualizationView = ({
       console.log("cardId:", draggedCard.card.id);
       console.log("sourceColumnId:", draggedCard.sourceColumnId);
       console.log("targetColumnId:", targetColumnId);
-      
-      await moveCard(draggedCard.card.id, draggedCard.sourceColumnId, targetColumnId);
+
+      // Calculer la position d'insertion basée sur la position du drop
+      const dropPosition = calculateDropPosition(e, targetColumnId);
+      console.log("Position calculée pour le drop:", dropPosition);
+
+      await moveCard(
+        draggedCard.card.id,
+        draggedCard.sourceColumnId,
+        targetColumnId,
+        dropPosition
+      );
       console.log("✅ Déplacement réussi");
     } catch (err) {
       console.error("❌ Erreur lors du déplacement:", err);
     } finally {
       setDraggedCard(null);
+      setDropIndicator(null); // S'assurer que l'indicateur disparaît toujours
     }
+  };
+
+  // Calculer la position d'insertion dans la pile (version simplifiée)
+  const calculateDropPosition = (dropEvent, targetColumnId) => {
+    const dropY = dropEvent.clientY;
+
+    console.log("=== DEBUG CALCULATE DROP POSITION (SIMPLIFIÉ) ===");
+    console.log("dropY:", dropY);
+    console.log("targetColumnId:", targetColumnId);
+
+    // Trouver la colonne cible
+    const targetColumn = visualization?.column_groups?.find(
+      (col) => col.id === targetColumnId
+    );
+
+    if (
+      !targetColumn ||
+      !targetColumn.cards ||
+      targetColumn.cards.length === 0
+    ) {
+      console.log("Colonne vide, position = 0");
+      return 0;
+    }
+
+    console.log(
+      "Nombre de cartes dans la colonne cible:",
+      targetColumn.cards.length
+    );
+
+    // Obtenir l'élément de la colonne
+    const columnElement = dropEvent.currentTarget;
+    const cardsContainer = columnElement.querySelector(".cards-container");
+
+    if (!cardsContainer) {
+      console.log("Container non trouvé, position = 0");
+      return 0;
+    }
+
+    // Obtenir les dimensions du conteneur
+    const containerRect = cardsContainer.getBoundingClientRect();
+    const relativeY = dropY - containerRect.top;
+    const containerHeight = containerRect.height;
+
+    console.log("containerRect.top:", containerRect.top);
+    console.log("containerHeight:", containerHeight);
+    console.log("relativeY:", relativeY);
+
+    // Diviser la zone en segments égaux selon le nombre de cartes + 1
+    // +1 car on peut insérer avant la première carte, entre les cartes, ou après la dernière
+    const numberOfSegments = targetColumn.cards.length + 1;
+    const segmentHeight = containerHeight / numberOfSegments;
+
+    console.log("numberOfSegments:", numberOfSegments);
+    console.log("segmentHeight:", segmentHeight);
+
+    // Calculer dans quel segment le drop a eu lieu
+    const segmentIndex = Math.floor(relativeY / segmentHeight);
+    const insertPosition = Math.max(
+      0,
+      Math.min(segmentIndex, targetColumn.cards.length)
+    );
+
+    console.log("segmentIndex calculé:", segmentIndex);
+    console.log(
+      "Position finale (simplifiée):",
+      insertPosition,
+      "/",
+      targetColumn.cards.length
+    );
+
+    // Mettre à jour l'indicateur visuel
+    setDropIndicator({
+      columnId: targetColumnId,
+      position: insertPosition,
+    });
+
+    return insertPosition;
   };
 
   // Rendu du loading
@@ -231,11 +378,13 @@ const DeckVisualizationView = ({
               canDelete={visualization.column_groups.length > 1}
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               draggedCard={draggedCard}
               handleDrag={handleDrag}
               handleDragEnd={handleDragEnd}
               handleImageError={handleImageError}
+              dropIndicator={dropIndicator}
               isLastColumn={index === visualization.column_groups.length - 1}
             />
           ))}
@@ -306,10 +455,12 @@ const DeckColumn = ({
   onDragStart,
   onDragOver,
   onDrop,
+  onDragLeave,
   draggedCard,
   handleDrag,
   handleDragEnd,
   handleImageError,
+  dropIndicator,
   isLastColumn = false,
 }) => {
   const { t } = useLanguage();
@@ -349,7 +500,9 @@ const DeckColumn = ({
   return (
     <div
       className="deck-column w-[280px] min-w-[280px] max-w-[280px] bg-transparent flex flex-col border-r border-gray-600"
+      data-column-id={column.id}
       onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
       onDrop={(e) => onDrop(e, column.id)}
     >
       {/* Header de colonne */}
@@ -413,35 +566,64 @@ const DeckColumn = ({
 
       {/* Corps de colonne avec cartes */}
       <div
-        className="flex-1 p-3 overflow-y-auto min-h-40"
-        style={{ paddingTop: "12px" }}
+        className="cards-container flex-1 p-3 overflow-y-auto min-h-40"
+        style={{ paddingTop: "12px", position: "relative" }}
       >
         {column.cards?.length === 0 ? (
-          <div className="text-center text-gray-400 text-sm py-8">
-            {t("decks.visualization.dropCardsHere")}
-          </div>
-        ) : (
-          column.cards?.map((card, index) => (
-            <div
-              key={`${card.card.id}-${index}`}
-              className="deck-card-image"
-              style={{ zIndex: index + 1 }}
-              draggable
-              onDragStart={(e) => onDragStart(e, card, column.id)}
-              onDrag={handleDrag}
-              onDragEnd={handleDragEnd}
-            >
-              <img
-                src={card.card.imageUrl}
-                alt={card.card.name}
-                className="card-image"
-                onError={handleImageError}
-              />
-              {card.quantity > 1 && (
-                <span className="quantity-badge">{card.quantity}</span>
-              )}
+          <>
+            {/* Indicateur pour colonne vide */}
+            {dropIndicator && dropIndicator.columnId === column.id && (
+              <div className="drop-indicator-container">
+                <div className="drop-indicator"></div>
+              </div>
+            )}
+            <div className="text-center text-gray-400 text-sm py-8">
+              {t("decks.visualization.dropCardsHere")}
             </div>
-          ))
+          </>
+        ) : (
+          <>
+            {column.cards?.map((card, index) => (
+              <React.Fragment key={`${card.card.id}-${index}`}>
+                {/* Indicateur de drop AVANT cette carte */}
+                {dropIndicator &&
+                  dropIndicator.columnId === column.id &&
+                  dropIndicator.position === index && (
+                    <div className="drop-indicator-container">
+                      <div className="drop-indicator"></div>
+                    </div>
+                  )}
+
+                <div
+                  className="deck-card-image"
+                  style={{ zIndex: index + 1 }}
+                  draggable
+                  onDragStart={(e) => onDragStart(e, card, column.id)}
+                  onDrag={handleDrag}
+                  onDragEnd={handleDragEnd}
+                >
+                  <img
+                    src={card.card.imageUrl}
+                    alt={card.card.name}
+                    className="card-image"
+                    onError={handleImageError}
+                  />
+                  {card.quantity > 1 && (
+                    <span className="quantity-badge">{card.quantity}</span>
+                  )}
+                </div>
+              </React.Fragment>
+            ))}
+
+            {/* Indicateur de drop APRÈS la dernière carte */}
+            {dropIndicator &&
+              dropIndicator.columnId === column.id &&
+              dropIndicator.position === column.cards.length && (
+                <div className="drop-indicator-container">
+                  <div className="drop-indicator"></div>
+                </div>
+              )}
+          </>
         )}
       </div>
     </div>
