@@ -357,14 +357,9 @@ const DeckColumn = ({
 
   return (
     <div
-      className={`deck-column flex-1 min-w-[120px] bg-transparent rounded-lg flex flex-col ${!isLastColumn ? 'border-r border-gray-600' : ''}`}
+      className={`deck-column flex-1 min-w-[120px] bg-transparent flex flex-col ${!isLastColumn ? 'border-r border-gray-600' : ''}`}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, column.id)}
-      style={{
-        borderTop: `4px solid ${
-          column.color_hex || column.colorHex || "#6B7280"
-        }`,
-      }}
     >
       {/* Header de colonne */}
       <div className="p-3">{/* Header transparent */}
