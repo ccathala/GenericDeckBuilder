@@ -145,7 +145,7 @@ public class DeckVisualizationController {
                                 deckId, user.getEmail());
 
                 try {
-                        visualizationService.moveCardBetweenColumns(
+                        visualizationService.moveCard(
                                         deckId,
                                         request.getCardId(), // Maintenant String au lieu d'UUID
                                         request.getSourceColumnId(),

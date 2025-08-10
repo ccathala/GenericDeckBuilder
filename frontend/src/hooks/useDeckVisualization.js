@@ -143,16 +143,11 @@ export const useDeckVisualization = (deckId) => {
     [deckId, visualization?.column_groups?.length, loadVisualization]
   );
 
-  // Déplacer une carte entre colonnes
+  // Déplacer une carte entre colonnes ou dans la même colonne
   const moveCard = useCallback(
     async (cardId, sourceColumnId, targetColumnId, newPositionInPile = 0) => {
       if (!deckId || !cardId || !sourceColumnId || !targetColumnId) {
         throw new Error("Tous les paramètres sont requis pour le déplacement");
-      }
-
-      // Pas de déplacement si source = target
-      if (sourceColumnId === targetColumnId) {
-        return;
       }
 
       try {

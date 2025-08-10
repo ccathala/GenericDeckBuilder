@@ -205,10 +205,10 @@ const DeckVisualizationView = ({
     console.log("draggedCard:", draggedCard);
     console.log("targetColumnId:", targetColumnId);
 
-    if (!draggedCard || draggedCard.sourceColumnId === targetColumnId) {
-      console.log("Pas de drag ou même colonne, abandon");
+    if (!draggedCard) {
+      console.log("Pas de carte déplacée, abandon");
       setDraggedCard(null);
-      setDropIndicator(null); // Ajouter ici aussi pour nettoyer l'indicateur
+      setDropIndicator(null);
       return;
     }
 
@@ -222,13 +222,66 @@ const DeckVisualizationView = ({
       const dropPosition = calculateDropPosition(e, targetColumnId);
       console.log("Position calculée pour le drop:", dropPosition);
 
-      await moveCard(
-        draggedCard.card.id,
-        draggedCard.sourceColumnId,
-        targetColumnId,
-        dropPosition
-      );
-      console.log("✅ Déplacement réussi");
+      // Vérifier si c'est un déplacement dans la même colonne
+      if (draggedCard.sourceColumnId === targetColumnId) {
+        const sourceColumn = visualization?.column_groups?.find(
+          (col) => col.id === draggedCard.sourceColumnId
+        );
+
+        // CORRECTION : utiliser l'ID du DeckCard (pas card.card.id)
+        const draggedCardDeckId = draggedCard.card.id; // ID du DeckCard
+        const currentPosition = sourceColumn?.cards?.findIndex(
+          (deckCard) => deckCard.id === draggedCardDeckId
+        );
+
+        console.log("DEBUG - draggedCard structure:", draggedCard.card);
+        console.log("DEBUG - draggedCardDeckId:", draggedCardDeckId);
+        console.log(
+          "DEBUG - sourceColumn.cards[0] structure:",
+          sourceColumn?.cards?.[0]
+        );
+        console.log("DEBUG - currentPosition:", currentPosition);
+        console.log("DEBUG - dropPosition:", dropPosition);
+
+        if (currentPosition === -1) {
+          console.error("❌ Carte non trouvée dans la colonne source");
+          setDraggedCard(null);
+          setDropIndicator(null);
+          return;
+        }
+
+        if (currentPosition === dropPosition) {
+          console.log(
+            "Même position dans la même colonne, pas de déplacement nécessaire"
+          );
+          setDraggedCard(null);
+          setDropIndicator(null);
+          return;
+        }
+        console.log(
+          `Réorganisation dans la même colonne: ${currentPosition} → ${dropPosition}`
+        );
+
+        // ✅ CORRECTION : Appeler moveCard() aussi pour les déplacements intra-colonne
+        console.log("🔄 Appel API moveCard pour intra-colonne...");
+        await moveCard(
+          draggedCard.card.id,
+          draggedCard.sourceColumnId,
+          targetColumnId,
+          dropPosition
+        );
+        console.log("✅ Réorganisation intra-colonne réussie");
+      } else {
+        // Déplacement inter-colonne
+        console.log("🔄 Déplacement inter-colonne, appel API moveCard...");
+        await moveCard(
+          draggedCard.card.id,
+          draggedCard.sourceColumnId,
+          targetColumnId,
+          dropPosition
+        );
+        console.log("✅ Déplacement inter-colonne réussi");
+      }
     } catch (err) {
       console.error("❌ Erreur lors du déplacement:", err);
     } finally {

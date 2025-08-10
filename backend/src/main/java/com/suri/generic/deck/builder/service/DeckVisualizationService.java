@@ -35,8 +35,9 @@ public interface DeckVisualizationService {
         void deleteColumnGroup(UUID deckId, UUID columnGroupId, Long userId);
 
         /**
-         * Déplace une carte entre colonnes
+         * Déplace une carte vers une position spécifique (même colonne ou colonne
+         * différente)
          */
-        void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
+        void moveCard(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
                         Integer targetPosition, Long userId);
 }

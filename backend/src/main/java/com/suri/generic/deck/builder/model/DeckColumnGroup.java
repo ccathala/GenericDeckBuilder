@@ -122,6 +122,28 @@ public class DeckColumnGroup {
     }
 
     /**
+     * Réorganise une carte existante vers une nouvelle position dans la même
+     * colonne
+     */
+    public void reorderCardToPosition(DeckCard deckCard, int newPosition) {
+        if (deckCard == null || !cards.contains(deckCard)) {
+            return;
+        }
+
+        // Retirer la carte de sa position actuelle
+        cards.remove(deckCard);
+
+        // Valider et ajuster la position
+        int targetPosition = Math.max(0, Math.min(newPosition, cards.size()));
+
+        // Insérer à la nouvelle position
+        cards.add(targetPosition, deckCard);
+
+        // Mettre à jour les positions de toutes les cartes
+        reorderPositions();
+    }
+
+    /**
      * Calcule le nombre total de cartes dans cette colonne
      */
     public int getTotalCardsCount() {

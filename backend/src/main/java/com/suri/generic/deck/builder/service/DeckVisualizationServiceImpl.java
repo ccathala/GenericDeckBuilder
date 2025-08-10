@@ -173,7 +173,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     }
 
     @Override
-    public void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
+    public void moveCard(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
             Integer targetPosition, Long userId) {
         log.debug("Déplacement carte {} de {} vers {} position {} pour deck {} par utilisateur {}",
                 cardIdentifier, sourceColumnId, targetColumnId, targetPosition, deckId, userId);
@@ -210,30 +210,33 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
                 .findFirst()
                 .orElseThrow(() -> new ValidationException("Carte non trouvée dans la colonne source"));
 
+        // Gestion spécifique pour le déplacement dans la même colonne
+        if (sourceColumnId.equals(targetColumnId)) {
+            log.debug("Réorganisation de carte dans la même colonne {} vers position {}", targetColumnId,
+                    targetPosition);
+
+            // Valider et ajuster la position cible
+            Integer newPosition = validateAndAdjustPosition(targetPosition, targetColumn.getCards().size());
+
+            // Utiliser une méthode spécialisée pour le réarrangement interne
+            sourceColumn.reorderCardToPosition(cardToMove, newPosition);
+
+            // Sauvegarder les changements
+            columnGroupRepository.save(sourceColumn);
+            autoAssignmentService.updateColumnGroupTimestamp(sourceColumnId);
+
+            log.debug("Réorganisation dans la même colonne terminée");
+            return;
+        }
+
+        // Gestion du déplacement entre colonnes différentes (logique existante)
+        log.debug("Déplacement entre colonnes différentes {} → {}", sourceColumnId, targetColumnId);
+
         // Retirer de la colonne source
         sourceColumn.removeCard(cardToMove);
 
         // Valider et ajuster la position cible
-        Integer newPosition = targetPosition;
-        if (newPosition != null) {
-            // Valider que la position est positive
-            if (newPosition < 0) {
-                log.warn("Position négative détectée ({}), ajustée à 0", newPosition);
-                newPosition = 0;
-            }
-
-            // Limiter la position au nombre de cartes dans la colonne cible
-            int maxPosition = targetColumn.getCards().size();
-            if (newPosition > maxPosition) {
-                log.warn("Position trop élevée ({} > {}), ajustée à {}", newPosition, maxPosition, maxPosition);
-                newPosition = maxPosition;
-            }
-        } else {
-            // Calculer la nouvelle position si non spécifiée
-            newPosition = autoAssignmentService.calculateNextPosition(targetColumnId);
-        }
-
-        log.debug("Position finale calculée pour la carte: {}", newPosition);
+        Integer newPosition = validateAndAdjustPosition(targetPosition, targetColumn.getCards().size());
 
         // Assigner à la nouvelle colonne à la position spécifiée
         targetColumn.insertCardAtPosition(cardToMove, newPosition);
@@ -318,5 +321,25 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
                 .cardUrl(localization != null ? localization.getCardUrl() : "")
                 .properties(Map.of()) // TODO: parser les properties du JSON si nécessaire
                 .build();
+    }
+
+    /**
+     * Valide et ajuste une position cible
+     */
+    private Integer validateAndAdjustPosition(Integer targetPosition, int maxSize) {
+        Integer newPosition = targetPosition;
+        if (newPosition != null) {
+            if (newPosition < 0) {
+                log.warn("Position négative détectée ({}), ajustée à 0", newPosition);
+                newPosition = 0;
+            }
+            if (newPosition > maxSize) {
+                log.warn("Position trop élevée ({} > {}), ajustée à {}", newPosition, maxSize, maxSize);
+                newPosition = maxSize;
+            }
+        } else {
+            newPosition = maxSize; // Fin de la liste par défaut
+        }
+        return newPosition;
     }
 }
