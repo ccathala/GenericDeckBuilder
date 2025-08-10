@@ -41,15 +41,6 @@ const DeckFormWithVisualization = ({ isEdit = false }) => {
         <div className="bg-mage-bg-900 text-white">
           <div className="w-full px-6 py-4 h-[calc(100vh-6rem)] flex flex-col">
             <div className="flex flex-col gap-4 h-full overflow-hidden">
-              {/* Header simplifié */}
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-white">
-                  {isEdit
-                    ? t("decks.form.editTitle")
-                    : t("decks.form.createTitle")}
-                </h1>
-              </div>
-
               {/* Contenu visualisation */}
               <div className="flex-1 overflow-hidden">
                 {id ? (

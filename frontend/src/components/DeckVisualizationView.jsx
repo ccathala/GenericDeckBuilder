@@ -214,7 +214,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
 
       {/* Zone des colonnes */}
       <div className="flex-1 flex gap-3 min-h-0">
-        {visualization?.column_groups?.map((column) => (
+        {visualization?.column_groups?.map((column, index) => (
           <DeckColumn
             key={column.id}
             column={column}
@@ -228,6 +228,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
             handleDrag={handleDrag}
             handleDragEnd={handleDragEnd}
             handleImageError={handleImageError}
+            isLastColumn={index === visualization.column_groups.length - 1}
           />
         ))}
 
@@ -313,6 +314,7 @@ const DeckColumn = ({
   handleDrag,
   handleDragEnd,
   handleImageError,
+  isLastColumn = false,
 }) => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
@@ -355,7 +357,7 @@ const DeckColumn = ({
 
   return (
     <div
-      className="deck-column flex-1 min-w-[120px] bg-mage-dark-800 rounded-lg flex flex-col"
+      className={`deck-column flex-1 min-w-[120px] bg-transparent rounded-lg flex flex-col ${!isLastColumn ? 'border-r border-gray-600' : ''}`}
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, column.id)}
       style={{
@@ -365,7 +367,7 @@ const DeckColumn = ({
       }}
     >
       {/* Header de colonne */}
-      <div className="p-3 border-b border-mage-dark-600">
+      <div className="p-3">{/* Header transparent */}
         {isEditing ? (
           <div className="space-y-3">
             <input
