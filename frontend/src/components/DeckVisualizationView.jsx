@@ -220,8 +220,8 @@ const DeckVisualizationView = ({
       </div>
 
       {/* Zone des colonnes */}
-      <div className="flex-1 flex gap-3 min-h-0 overflow-x-auto">
-        <div className="flex gap-3 min-h-full">
+      <div className="flex-1 flex gap-0 min-h-0 overflow-x-auto">
+        <div className="flex gap-0 min-h-full">
           {visualization?.column_groups?.map((column, index) => (
             <DeckColumn
               key={column.id}
