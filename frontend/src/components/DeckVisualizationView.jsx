@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useDeckVisualization } from "../hooks/useDeckVisualization";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 
 // Styles CSS pour l'affichage des images de cartes
 const cardImageStyles = `
@@ -105,6 +106,7 @@ const DeckVisualizationView = ({
   onToggleConstruction,
 }) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const {
     visualization,
     loading,
@@ -396,9 +398,18 @@ const DeckVisualizationView = ({
 
       {/* Header avec titre et boutons */}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-white">
-          {visualization?.deck_name || t("decks.visualization.title")}
-        </h1>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate('/decks')}
+            className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+            title={t("common.back")}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-2xl font-bold text-white">
+            {visualization?.deck_name || t("decks.visualization.title")}
+          </h1>
+        </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowCreateColumnModal(true)}
