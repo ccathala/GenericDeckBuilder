@@ -95,18 +95,16 @@ const DeckVisualizationView = ({
   const [draggedCard, setDraggedCard] = useState(null);
   const [showCreateColumnModal, setShowCreateColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState("");
-  const [newColumnColor, setNewColumnColor] = useState("#6B7280");
 
   // Gestion de la création de colonne
   const handleCreateColumn = async () => {
     try {
       const columnName =
         newColumnName.trim() || t("decks.visualization.newColumnName");
-      await createColumn(columnName, newColumnColor);
+      await createColumn(columnName);
 
       // Reset du formulaire
       setNewColumnName("");
-      setNewColumnColor("#6B7280");
       setShowCreateColumnModal(false);
     } catch (err) {
       console.error("Erreur lors de la création de la colonne:", err);
@@ -273,18 +271,6 @@ const DeckVisualizationView = ({
                   className="w-full px-3 py-2 bg-mage-dark-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {t("decks.visualization.columnColor")}
-                </label>
-                <input
-                  type="color"
-                  value={newColumnColor}
-                  onChange={(e) => setNewColumnColor(e.target.value)}
-                  className="w-full h-10 bg-mage-dark-700 border border-gray-600 rounded-lg"
-                />
-              </div>
             </div>
 
             <div className="flex justify-end space-x-3 mt-6">
@@ -292,7 +278,6 @@ const DeckVisualizationView = ({
                 onClick={() => {
                   setShowCreateColumnModal(false);
                   setNewColumnName("");
-                  setNewColumnColor("#6B7280");
                 }}
                 className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
               >
@@ -330,16 +315,11 @@ const DeckColumn = ({
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(column.name);
-  // Correction du mapping : color_hex de l'API -> colorHex pour le composant
-  const [editColor, setEditColor] = useState(
-    column.color_hex || column.colorHex || "#6B7280"
-  );
 
   const handleSave = async () => {
     try {
       await onUpdateColumn(column.id, {
         name: editName,
-        color: editColor,
       });
       setIsEditing(false);
     } catch (err) {
@@ -383,20 +363,11 @@ const DeckColumn = ({
               onChange={(e) => setEditName(e.target.value)}
               className="w-full px-2 py-1 bg-mage-dark-700 border border-gray-600 rounded text-white text-sm"
             />
-            <input
-              type="color"
-              value={editColor}
-              onChange={(e) => setEditColor(e.target.value)}
-              className="w-full h-8 bg-mage-dark-700 border border-gray-600 rounded"
-            />
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {
                   setIsEditing(false);
                   setEditName(column.name);
-                  setEditColor(
-                    column.color_hex || column.colorHex || "#6B7280"
-                  );
                 }}
                 className="px-2 py-1 text-xs text-gray-300 hover:text-white"
               >

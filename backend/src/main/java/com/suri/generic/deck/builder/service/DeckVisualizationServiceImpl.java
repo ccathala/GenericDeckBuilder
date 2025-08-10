@@ -30,7 +30,6 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
     // Constantes pour les colonnes par défaut
     private static final String DEFAULT_COLUMN_NAME = "Toutes les cartes";
-    private static final String DEFAULT_COLUMN_COLOR = "#6B7280";
     private static final int MAX_COLUMNS_PER_DECK = 8;
 
     @Override
@@ -101,7 +100,6 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         DeckColumnGroup columnGroup = new DeckColumnGroup();
         columnGroup.setDeck(deck);
         columnGroup.setName(requestDTO.getName());
-        columnGroup.setColorHex(requestDTO.getColorHex());
         columnGroup.setDisplayOrder(currentCount);
 
         columnGroup = columnGroupRepository.save(columnGroup);
@@ -131,8 +129,11 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
         // Mettre à jour les propriétés
         columnGroup.setName(requestDTO.getName());
-        columnGroup.setColorHex(requestDTO.getColorHex());
-        columnGroup.setDisplayOrder(requestDTO.getDisplayOrder());
+        
+        // Ne mettre à jour displayOrder que s'il est explicitement fourni
+        if (requestDTO.getDisplayOrder() != null && requestDTO.getDisplayOrder() != columnGroup.getDisplayOrder()) {
+            columnGroup.setDisplayOrder(requestDTO.getDisplayOrder());
+        }
 
         columnGroup = columnGroupRepository.save(columnGroup);
         return mapToDTO(columnGroup);
@@ -235,7 +236,6 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         DeckColumnGroup defaultColumn = new DeckColumnGroup();
         defaultColumn.setDeck(deck);
         defaultColumn.setName(DEFAULT_COLUMN_NAME);
-        defaultColumn.setColorHex(DEFAULT_COLUMN_COLOR);
         defaultColumn.setDisplayOrder(0);
 
         defaultColumn = columnGroupRepository.save(defaultColumn);
@@ -260,7 +260,6 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         return DeckColumnGroupDTO.builder()
                 .id(columnGroup.getId().toString())
                 .name(columnGroup.getName())
-                .colorHex(columnGroup.getColorHex())
                 .displayOrder(columnGroup.getDisplayOrder())
                 .cards(cardDTOs)
                 .cardCount(cardDTOs.size())

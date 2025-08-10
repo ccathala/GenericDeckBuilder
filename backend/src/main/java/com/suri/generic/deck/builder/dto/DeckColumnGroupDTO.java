@@ -25,9 +25,6 @@ public class DeckColumnGroupDTO {
     @JsonProperty("display_order")
     private int displayOrder;
 
-    @JsonProperty("color_hex")
-    private String colorHex;
-
     private List<DeckCardVisualizationDTO> cards;
 
     @JsonProperty("card_count")

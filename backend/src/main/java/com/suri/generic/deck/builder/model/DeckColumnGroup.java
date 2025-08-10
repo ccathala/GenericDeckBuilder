@@ -36,9 +36,6 @@ public class DeckColumnGroup {
     @Column(name = "display_order", nullable = false)
     private int displayOrder; // Ordre d'affichage (0, 1, 2...)
 
-    @Column(name = "color_hex", length = 7, nullable = false)
-    private String colorHex = "#6B7280"; // Code couleur hex (#FF5733)
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -63,11 +60,10 @@ public class DeckColumnGroup {
     /**
      * Constructeur avec paramètres essentiels
      */
-    public DeckColumnGroup(Deck deck, String name, int displayOrder, String colorHex) {
+    public DeckColumnGroup(Deck deck, String name, int displayOrder) {
         this.deck = deck;
         this.name = name;
         this.displayOrder = displayOrder;
-        this.colorHex = colorHex;
     }
 
     /**

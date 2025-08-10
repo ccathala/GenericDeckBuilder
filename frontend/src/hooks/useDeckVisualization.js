@@ -32,7 +32,7 @@ export const useDeckVisualization = (deckId) => {
 
   // Créer une nouvelle colonne
   const createColumn = useCallback(
-    async (name = "Nouvelle colonne", color = "#6B7280") => {
+    async (name = "Nouvelle colonne") => {
       if (!deckId) throw new Error("Deck ID requis");
 
       try {
@@ -40,7 +40,6 @@ export const useDeckVisualization = (deckId) => {
 
         const result = await deckVisualizationService.createColumn(deckId, {
           name,
-          color,
         });
 
         if (result.success) {

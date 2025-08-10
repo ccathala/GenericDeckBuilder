@@ -20,13 +20,12 @@ export const deckVisualizationService = {
   },
 
   // Créer une nouvelle colonne
-  async createColumn(deckId, { name, color }) {
+  async createColumn(deckId, { name }) {
     try {
       const response = await axiosInstance.post(
         `/api/decks/${deckId}/visualization/columns`,
         {
           name,
-          color,
         }
       );
       return {
@@ -42,11 +41,10 @@ export const deckVisualizationService = {
   },
 
   // Modifier une colonne existante
-  async updateColumn(deckId, columnId, { name, color, displayOrder }) {
+  async updateColumn(deckId, columnId, { name, displayOrder }) {
     try {
       const payload = {};
       if (name !== undefined) payload.name = name;
-      if (color !== undefined) payload.color = color;
       if (displayOrder !== undefined) payload.displayOrder = displayOrder;
 
       const response = await axiosInstance.put(
