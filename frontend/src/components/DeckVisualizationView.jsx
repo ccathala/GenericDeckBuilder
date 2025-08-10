@@ -9,14 +9,14 @@ const cardImageStyles = `
     position: relative;
     width: 100%;
     aspect-ratio: 5/7;
-    margin-bottom: -90%;
+    margin-bottom: -95%;
     cursor: grab;
     transition: transform 0.2s ease;
     z-index: 1;
   }
 
   .deck-card-image:first-child {
-    margin-bottom: -90%;
+    margin-bottom: -95%;
   }
 
   .deck-card-image:last-child {
@@ -73,7 +73,12 @@ const cardImageStyles = `
   }
 `;
 
-const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstruction }) => {
+const DeckVisualizationView = ({
+  deckId,
+  deckCards,
+  onCardUpdate,
+  onToggleConstruction,
+}) => {
   const { t } = useLanguage();
   const {
     visualization,
@@ -110,26 +115,29 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
 
   // Gestion du drag & drop (version simplifiée pour l'instant)
   const handleDragStart = (e, card, sourceColumnId) => {
+    console.log("🎯 Drag start - Card ID:", card.id);
+    
     setDraggedCard({
       card,
       sourceColumnId,
     });
+    
     e.dataTransfer.effectAllowed = "move";
   };
 
   // Gestion des erreurs d'image
   const handleImageError = (e) => {
-    e.target.src = '/images/card-placeholder.png';
+    e.target.src = "/images/card-placeholder.png";
     e.target.alt = `Image non disponible pour ${e.target.alt}`;
   };
 
   // Gestion du drag pour les images
   const handleDrag = (e) => {
-    e.target.style.opacity = '0.5';
+    e.target.style.opacity = "0.5";
   };
 
   const handleDragEnd = (e) => {
-    e.target.style.opacity = '1';
+    e.target.style.opacity = "1";
     setDraggedCard(null);
   };
 
@@ -147,14 +155,15 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
     }
 
     try {
-      await moveCard(
-        draggedCard.card.cardId,
-        draggedCard.sourceColumnId,
-        targetColumnId,
-        0 // Position en bas de pile par défaut
-      );
+      console.log("=== DEBUG AVANT APPEL MOVE CARD ===");
+      console.log("cardId:", draggedCard.card.id);
+      console.log("sourceColumnId:", draggedCard.sourceColumnId);
+      console.log("targetColumnId:", targetColumnId);
+      
+      await moveCard(draggedCard.card.id, draggedCard.sourceColumnId, targetColumnId);
+      console.log("✅ Déplacement réussi");
     } catch (err) {
-      console.error("Erreur lors du déplacement:", err);
+      console.error("❌ Erreur lors du déplacement:", err);
     } finally {
       setDraggedCard(null);
     }
@@ -187,7 +196,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
   return (
     <div className="h-full flex flex-col">
       <style>{cardImageStyles}</style>
-      
+
       {/* Header avec titre et boutons */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-white">
@@ -213,24 +222,26 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate, onToggleConstr
       </div>
 
       {/* Zone des colonnes */}
-      <div className="flex-1 flex gap-3 min-h-0">
-        {visualization?.column_groups?.map((column, index) => (
-          <DeckColumn
-            key={column.id}
-            column={column}
-            onUpdateColumn={updateColumn}
-            onDeleteColumn={deleteColumn}
-            canDelete={visualization.column_groups.length > 1}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            draggedCard={draggedCard}
-            handleDrag={handleDrag}
-            handleDragEnd={handleDragEnd}
-            handleImageError={handleImageError}
-            isLastColumn={index === visualization.column_groups.length - 1}
-          />
-        ))}
+      <div className="flex-1 flex gap-3 min-h-0 overflow-x-auto">
+        <div className="flex gap-3 min-h-full">
+          {visualization?.column_groups?.map((column, index) => (
+            <DeckColumn
+              key={column.id}
+              column={column}
+              onUpdateColumn={updateColumn}
+              onDeleteColumn={deleteColumn}
+              canDelete={visualization.column_groups.length > 1}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              draggedCard={draggedCard}
+              handleDrag={handleDrag}
+              handleDragEnd={handleDragEnd}
+              handleImageError={handleImageError}
+              isLastColumn={index === visualization.column_groups.length - 1}
+            />
+          ))}
+        </div>
 
         {/* Message si aucune colonne */}
         {(!visualization?.column_groups ||
@@ -357,12 +368,13 @@ const DeckColumn = ({
 
   return (
     <div
-      className={`deck-column flex-1 min-w-[120px] bg-transparent flex flex-col ${!isLastColumn ? 'border-r border-gray-600' : ''}`}
+      className="deck-column w-[280px] min-w-[280px] max-w-[280px] bg-transparent flex flex-col border-r border-gray-600"
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, column.id)}
     >
       {/* Header de colonne */}
-      <div className="p-3">{/* Header transparent */}
+      <div className="p-3">
+        {/* Header transparent */}
         {isEditing ? (
           <div className="space-y-3">
             <input
@@ -429,7 +441,10 @@ const DeckColumn = ({
       </div>
 
       {/* Corps de colonne avec cartes */}
-      <div className="flex-1 p-3 overflow-y-auto min-h-40" style={{ paddingTop: '12px' }}>
+      <div
+        className="flex-1 p-3 overflow-y-auto min-h-40"
+        style={{ paddingTop: "12px" }}
+      >
         {column.cards?.length === 0 ? (
           <div className="text-center text-gray-400 text-sm py-8">
             {t("decks.visualization.dropCardsHere")}
@@ -445,8 +460,8 @@ const DeckColumn = ({
               onDrag={handleDrag}
               onDragEnd={handleDragEnd}
             >
-              <img 
-                src={card.card.imageUrl} 
+              <img
+                src={card.card.imageUrl}
                 alt={card.card.name}
                 className="card-image"
                 onError={handleImageError}

@@ -17,6 +17,9 @@ import com.suri.generic.deck.builder.dto.response.CardResponseDTO;
 @NoArgsConstructor
 public class DeckCardVisualizationDTO {
 
+    @JsonProperty("id")
+    private String id; // ID de l'entrée DeckCard (UUID)
+
     @JsonProperty("card")
     private CardResponseDTO card; // Données de carte pure
 

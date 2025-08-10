@@ -159,6 +159,12 @@ export const useDeckVisualization = (deckId) => {
       try {
         setError(null);
 
+        console.log("=== DEBUG HOOK MOVE CARD ===");
+        console.log("cardId reçu:", cardId);
+        console.log("sourceColumnId reçu:", sourceColumnId);
+        console.log("targetColumnId reçu:", targetColumnId);
+        console.log("newPositionInPile reçu:", newPositionInPile);
+
         const result = await deckVisualizationService.moveCard(deckId, {
           cardId,
           sourceColumnId,

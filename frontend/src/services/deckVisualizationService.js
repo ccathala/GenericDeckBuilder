@@ -89,6 +89,13 @@ export const deckVisualizationService = {
     { cardId, sourceColumnId, targetColumnId, newPositionInPile }
   ) {
     try {
+      console.log("=== DEBUG SERVICE MOVE CARD ===");
+      console.log("deckId:", deckId);
+      console.log("cardId:", cardId);
+      console.log("sourceColumnId:", sourceColumnId);
+      console.log("targetColumnId:", targetColumnId);
+      console.log("newPositionInPile:", newPositionInPile);
+      
       const response = await axiosInstance.post(
         `/api/decks/${deckId}/visualization/move-card`,
         {

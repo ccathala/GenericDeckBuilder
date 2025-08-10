@@ -119,17 +119,46 @@ public class DeckVisualizationController {
             @Valid @RequestBody CardMoveRequestDTO request,
             @AuthenticationPrincipal User user) {
 
+        // LOGS DE DEBUG POUR IDENTIFIER LE PROBLÈME
+        log.info("=== DEBUG MOVE CARD REQUEST ===");
+        log.info("deckId: {}", deckId);
+        log.info("request: {}", request);
+        log.info("request.getCardId(): '{}'", request.getCardId());
+        log.info("request.getSourceColumnId(): {}", request.getSourceColumnId());
+        log.info("request.getTargetColumnId(): {}", request.getTargetColumnId());
+        log.info("request.getNewPositionInPile(): {}", request.getNewPositionInPile());
+        log.info("user: {}", user.getEmail());
+
+        // VALIDATION AVANT UUID.fromString()
+        if (request.getCardId() == null) {
+            log.error("❌ cardId est NULL");
+            return ResponseEntity.badRequest().build();
+        }
+        if (request.getCardId().trim().isEmpty()) {
+            log.error("❌ cardId est vide: '{}'", request.getCardId());
+            return ResponseEntity.badRequest().build();
+        }
+
         log.info("Déplacement carte {} de {} vers {} pour deck {} par utilisateur {}",
                 request.getCardId(), request.getSourceColumnId(), request.getTargetColumnId(),
                 deckId, user.getEmail());
 
-        visualizationService.moveCardBetweenColumns(
-                deckId,
-                UUID.fromString(request.getCardId()),
-                request.getSourceColumnId(),
-                request.getTargetColumnId(),
-                request.getNewPositionInPile(),
-                user.getId());
-        return ResponseEntity.ok().build();
+        try {
+            visualizationService.moveCardBetweenColumns(
+                    deckId,
+                    request.getCardId(), // Maintenant String au lieu d'UUID
+                    request.getSourceColumnId(),
+                    request.getTargetColumnId(),
+                    request.getNewPositionInPile(),
+                    user.getId());
+            log.info("✅ Déplacement réussi");
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("❌ Format invalide pour cardId: '{}'", request.getCardId(), e);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.error("❌ Erreur lors du déplacement", e);
+            return ResponseEntity.status(500).build();
+        }
     }
 }

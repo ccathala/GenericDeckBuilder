@@ -17,18 +17,28 @@ import java.util.UUID;
 public class CardMoveRequestDTO {
 
     @NotBlank(message = "L'ID de carte est obligatoire")
-    @JsonProperty("card_id")
+    @JsonProperty("cardId")
     private String cardId;
 
     @NotNull(message = "La colonne source est obligatoire")
-    @JsonProperty("source_column_id")
+    @JsonProperty("sourceColumnId")
     private UUID sourceColumnId; // Obligatoire, toutes les cartes sont dans une colonne
 
     @NotNull(message = "La colonne cible est obligatoire")
-    @JsonProperty("target_column_id")
+    @JsonProperty("targetColumnId")
     private UUID targetColumnId; // Obligatoire, toutes les cartes sont dans une colonne
 
     @Min(value = 0, message = "La position dans la pile doit être positive ou zéro")
-    @JsonProperty("new_position_in_pile")
+    @JsonProperty("newPositionInPile")
     private Integer newPositionInPile; // Position dans la pile (0 = bas de pile/position haute)
+
+    @Override
+    public String toString() {
+        return "CardMoveRequestDTO{" +
+                "cardId='" + cardId + '\'' +
+                ", sourceColumnId=" + sourceColumnId +
+                ", targetColumnId=" + targetColumnId +
+                ", newPositionInPile=" + newPositionInPile +
+                '}';
+    }
 }

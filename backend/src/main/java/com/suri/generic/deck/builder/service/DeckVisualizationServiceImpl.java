@@ -172,10 +172,24 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     }
 
     @Override
-    public void moveCardBetweenColumns(UUID deckId, UUID cardId, UUID sourceColumnId, UUID targetColumnId,
+    public void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
             Integer targetPosition, Long userId) {
         log.debug("Déplacement carte {} de {} vers {} position {} pour deck {} par utilisateur {}",
-                cardId, sourceColumnId, targetColumnId, targetPosition, deckId, userId);
+                cardIdentifier, sourceColumnId, targetColumnId, targetPosition, deckId, userId);
+
+        // Parser l'identifiant composite
+        String[] parts = cardIdentifier.split("\\|");
+        if (parts.length != 2) {
+            throw new ValidationException("Identifiant de carte invalide: " + cardIdentifier);
+        }
+        
+        UUID parsedDeckId = UUID.fromString(parts[0]);
+        String cardId = parts[1];
+        
+        // Vérifier que le deckId correspond
+        if (!parsedDeckId.equals(deckId)) {
+            throw new ValidationException("Deck ID ne correspond pas");
+        }
 
         // Vérifier les permissions et récupérer les colonnes
         DeckColumnGroup sourceColumn = columnGroupRepository.findByIdAndUserId(sourceColumnId, userId)
@@ -191,7 +205,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
         // Trouver la carte à déplacer dans la colonne source
         DeckCard cardToMove = sourceColumn.getCards().stream()
-                .filter(card -> card.getCard().getId().equals(cardId.toString()))
+                .filter(card -> card.getCard().getId().equals(cardId))
                 .findFirst()
                 .orElseThrow(() -> new ValidationException("Carte non trouvée dans la colonne source"));
 
@@ -259,7 +273,11 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     private DeckCardVisualizationDTO mapToDeckCardVisualizationDTO(DeckCard deckCard) {
         CardResponseDTO cardResponse = mapCardToDTO(deckCard);
 
+        // Générer un UUID unique basé sur les composants de DeckCardId
+        String uniqueId = deckCard.getId().getDeckId().toString() + "|" + deckCard.getId().getCardId();
+
         return DeckCardVisualizationDTO.builder()
+                .id(uniqueId) // UUID composite unique
                 .card(cardResponse)
                 .quantity(deckCard.getQuantity())
                 .positionInColumn(deckCard.getPositionInColumn())

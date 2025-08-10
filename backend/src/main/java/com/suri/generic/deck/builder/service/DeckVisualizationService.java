@@ -37,6 +37,6 @@ public interface DeckVisualizationService {
     /**
      * Déplace une carte entre colonnes
      */
-    void moveCardBetweenColumns(UUID deckId, UUID cardId, UUID sourceColumnId, UUID targetColumnId,
+    void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
             Integer targetPosition, Long userId);
 }
