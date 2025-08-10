@@ -8,7 +8,6 @@ const cardImageStyles = `
   .deck-card-image {
     position: relative;
     width: 100%;
-    aspect-ratio: 5/7;
     margin-bottom: -95%;
     cursor: grab;
     transition: transform 0.2s ease;
@@ -34,8 +33,8 @@ const cardImageStyles = `
 
   .card-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
     border: 2px solid transparent;
@@ -552,7 +551,7 @@ const DeckColumn = ({
 
   return (
     <div
-      className="deck-column w-[280px] min-w-[280px] max-w-[280px] bg-transparent flex flex-col border-r border-gray-600"
+      className="deck-column w-[294px] min-w-[294px] max-w-[294px] bg-transparent flex flex-col border-r border-gray-600"
       data-column-id={column.id}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
