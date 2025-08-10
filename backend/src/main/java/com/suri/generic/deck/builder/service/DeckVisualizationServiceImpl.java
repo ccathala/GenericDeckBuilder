@@ -129,7 +129,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
         // Mettre à jour les propriétés
         columnGroup.setName(requestDTO.getName());
-        
+
         // Ne mettre à jour displayOrder que s'il est explicitement fourni
         if (requestDTO.getDisplayOrder() != null && requestDTO.getDisplayOrder() != columnGroup.getDisplayOrder()) {
             columnGroup.setDisplayOrder(requestDTO.getDisplayOrder());
@@ -183,10 +183,10 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         if (parts.length != 2) {
             throw new ValidationException("Identifiant de carte invalide: " + cardIdentifier);
         }
-        
+
         UUID parsedDeckId = UUID.fromString(parts[0]);
         String cardId = parts[1];
-        
+
         // Vérifier que le deckId correspond
         if (!parsedDeckId.equals(deckId)) {
             throw new ValidationException("Deck ID ne correspond pas");
@@ -213,14 +213,32 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         // Retirer de la colonne source
         sourceColumn.removeCard(cardToMove);
 
-        // Calculer la nouvelle position si non spécifiée
-        Integer newPosition = targetPosition != null ? targetPosition
-                : autoAssignmentService.calculateNextPosition(targetColumnId);
+        // Valider et ajuster la position cible
+        Integer newPosition = targetPosition;
+        if (newPosition != null) {
+            // Valider que la position est positive
+            if (newPosition < 0) {
+                log.warn("Position négative détectée ({}), ajustée à 0", newPosition);
+                newPosition = 0;
+            }
 
-        // Assigner à la nouvelle colonne et position
-        cardToMove.setColumnGroup(targetColumn);
-        cardToMove.setPositionInColumn(newPosition);
-        targetColumn.addCard(cardToMove);
+            // Limiter la position au nombre de cartes dans la colonne cible
+            int maxPosition = targetColumn.getCards().size();
+            if (newPosition > maxPosition) {
+                log.warn("Position trop élevée ({} > {}), ajustée à {}", newPosition, maxPosition, maxPosition);
+                newPosition = maxPosition;
+            }
+        } else {
+            // Calculer la nouvelle position si non spécifiée
+            newPosition = autoAssignmentService.calculateNextPosition(targetColumnId);
+        }
+
+        log.debug("Position finale calculée pour la carte: {}", newPosition);
+
+        // Assigner à la nouvelle colonne à la position spécifiée
+        targetColumn.insertCardAtPosition(cardToMove, newPosition);
+
+        log.debug("Carte déplacée avec succès à la position {} dans la colonne {}", newPosition, targetColumnId);
 
         // Sauvegarder les changements et mettre à jour les timestamps
         columnGroupRepository.save(sourceColumn);

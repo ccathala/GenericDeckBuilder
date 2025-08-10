@@ -90,6 +90,29 @@ public class DeckColumnGroup {
     }
 
     /**
+     * Insère une carte à une position spécifique en décalant les autres
+     */
+    public void insertCardAtPosition(DeckCard deckCard, int position) {
+        if (deckCard != null) {
+            deckCard.setColumnGroup(this);
+
+            // Valider et ajuster la position si nécessaire
+            int targetPosition = Math.max(0, Math.min(position, cards.size()));
+
+            // Décaler les positions des cartes existantes à partir de la position
+            // d'insertion
+            for (int i = targetPosition; i < cards.size(); i++) {
+                DeckCard existingCard = cards.get(i);
+                existingCard.setPositionInColumn(existingCard.getPositionInColumn() + 1);
+            }
+
+            // Définir la position de la nouvelle carte et l'insérer
+            deckCard.setPositionInColumn(targetPosition);
+            cards.add(targetPosition, deckCard);
+        }
+    }
+
+    /**
      * Réorganise les positions des cartes après une modification
      */
     private void reorderPositions() {

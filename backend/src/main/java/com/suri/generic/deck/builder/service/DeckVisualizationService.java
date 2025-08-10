@@ -13,30 +13,30 @@ import java.util.UUID;
  */
 public interface DeckVisualizationService {
 
-    /**
-     * Récupère la visualisation complète d'un deck
-     */
-    DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId);
+        /**
+         * Récupère la visualisation complète d'un deck
+         */
+        DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId);
 
-    /**
-     * Crée une nouvelle colonne de visualisation
-     */
-    DeckColumnGroupDTO createColumnGroup(UUID deckId, DeckColumnCreateRequestDTO requestDTO, Long userId);
+        /**
+         * Crée une nouvelle colonne de visualisation
+         */
+        DeckColumnGroupDTO createColumnGroup(UUID deckId, DeckColumnCreateRequestDTO requestDTO, Long userId);
 
-    /**
-     * Met à jour une colonne existante
-     */
-    DeckColumnGroupDTO updateColumnGroup(UUID deckId, UUID columnGroupId, DeckColumnUpdateRequestDTO requestDTO,
-            Long userId);
+        /**
+         * Met à jour une colonne existante
+         */
+        DeckColumnGroupDTO updateColumnGroup(UUID deckId, UUID columnGroupId, DeckColumnUpdateRequestDTO requestDTO,
+                        Long userId);
 
-    /**
-     * Supprime une colonne de visualisation
-     */
-    void deleteColumnGroup(UUID deckId, UUID columnGroupId, Long userId);
+        /**
+         * Supprime une colonne de visualisation
+         */
+        void deleteColumnGroup(UUID deckId, UUID columnGroupId, Long userId);
 
-    /**
-     * Déplace une carte entre colonnes
-     */
-    void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
-            Integer targetPosition, Long userId);
+        /**
+         * Déplace une carte entre colonnes
+         */
+        void moveCardBetweenColumns(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
+                        Integer targetPosition, Long userId);
 }
