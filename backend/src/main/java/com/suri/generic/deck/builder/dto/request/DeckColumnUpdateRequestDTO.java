@@ -23,6 +23,6 @@ public class DeckColumnUpdateRequestDTO {
     private int displayOrder;
 
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "La couleur doit être un code hexadécimal valide (#RRGGBB)")
-    @JsonProperty("color_hex")
+    @JsonProperty("color")
     private String colorHex;
 }
