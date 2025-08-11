@@ -42,6 +42,9 @@ class DeckServiceImplColumnAssignmentTest {
     @Mock
     private DeckVisualizationService deckVisualizationService;
 
+    @Mock
+    private DeckRulesetRepository rulesetRepository;
+
     @InjectMocks
     private DeckServiceImpl deckService;
 
@@ -114,7 +117,8 @@ class DeckServiceImplColumnAssignmentTest {
         // Assert - Vérifier que les méthodes de repository ont été appelées
         verify(deckColumnGroupRepository).findByDeckIdAndDisplayOrder(any(UUID.class), eq(0));
         verify(deckCardRepository).findByColumnGroupId(defaultColumn.getId());
-        verify(deckRepository).save(any(Deck.class));
+        verify(deckRepository, times(2)).save(any(Deck.class)); // Appelé 2 fois : création de base + assignation des
+                                                                // cartes
     }
 
     @Test
@@ -133,6 +137,8 @@ class DeckServiceImplColumnAssignmentTest {
 
         Deck savedDeck = new Deck();
         savedDeck.setId(UUID.randomUUID());
+        savedDeck.setGame(game);
+        savedDeck.setOwner(owner);
         savedDeck.setCards(new ArrayList<>());
         when(deckRepository.save(any(Deck.class))).thenReturn(savedDeck);
 

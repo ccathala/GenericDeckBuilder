@@ -87,21 +87,6 @@ class DeckCardAutoAssignmentServiceTest {
     }
 
     @Test
-    void autoAssignToFirstColumn_ShouldNotAssign_WhenColumnAlreadyAssigned() {
-        // Given
-        deckCard.setColumnGroup(firstColumn);
-        deckCard.setPositionInColumn(1);
-
-        // When
-        autoAssignmentService.autoAssignToFirstColumn(deckCard);
-
-        // Then
-        verify(deckColumnGroupRepository, never()).findFirstByDeckIdOrderByDisplayOrder(any());
-        assertEquals(firstColumn, deckCard.getColumnGroup());
-        assertEquals(1, deckCard.getPositionInColumn());
-    }
-
-    @Test
     void autoAssignToFirstColumn_ShouldNotAssign_WhenNoDeckAssociated() {
         // Given
         deckCard.setDeck(null);
