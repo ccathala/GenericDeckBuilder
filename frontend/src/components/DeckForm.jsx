@@ -63,7 +63,7 @@ const DeckForm = ({ isEdit = false }) => {
         }
       }
     },
-    2000
+    1500
   );
 
   // États pour gestion image au survol

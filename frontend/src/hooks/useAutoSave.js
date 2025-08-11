@@ -30,6 +30,7 @@ export const useAutoSave = (data, saveFunction, delay = 2000) => {
 
     if (previousDataRef.current && currentDataString !== previousDataString) {
       setHasChanges(true);
+      setIsSaving(true); // ✅ Spinner visible immédiatement
       console.log("🔄 Changements détectés, préparation auto-save...");
     }
 
@@ -48,7 +49,6 @@ export const useAutoSave = (data, saveFunction, delay = 2000) => {
       if (!hasChanges) return;
 
       try {
-        setIsSaving(true);
         console.log("💾 Début auto-save...");
 
         await saveFunction(data);
@@ -61,7 +61,7 @@ export const useAutoSave = (data, saveFunction, delay = 2000) => {
         // Ne pas changer hasChanges en cas d'erreur pour retry
         throw error;
       } finally {
-        setIsSaving(false);
+        setIsSaving(false); // ✅ Spinner disparaît après sauvegarde/erreur
       }
     }, delay);
   }, [data, saveFunction, delay, hasChanges]);
