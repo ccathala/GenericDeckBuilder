@@ -516,6 +516,11 @@
 
 ## 🚀 Prochaines étapes possibles
 
+### TODO
+
+- [ ] DeckVisualizationView - Empêcher la création d'un colonne si une avec le même nom existe déjà
+- [ ] DeckVisualizationView - Ajouter un text-area note pour consigner les stratégies
+
 ### Améliorations cardUrl et redirection
 
 - [ ] Ajout cardUrl pour d'autres jeux (pas seulement Mage Noir)
