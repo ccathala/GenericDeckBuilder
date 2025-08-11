@@ -1,12 +1,31 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 6 Août 2025  
-**Branche:** `feature/add_card-url`  
-**Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+**Date:** 6 Août 2025 - 11 Août 2025  
+**Branche principale:** `feature/add_card-url` → `feature/preview`  
+**Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée + **✅ Vue de Visualisation de Deck complète avec colonnes personnalisables (11 Août 2025)**
 
 ## 🎯 Fonctionnalités implémentées
 
-### ✅ Champ cardUrl et Icône de Redirection (Nouveau - Session actuelle)
+### ✅ Vue de Visualisation de Deck avec Colonnes Personnalisables (Nouveau - 11 Août 2025)
+
+- **Fonctionnalité majeure:** Système complet de visualisation de deck avec colonnes personnalisables et glisser-déposer
+- **Architecture Backend:** Entités JPA `DeckColumnGroup`, services avec pattern interface/implémentation, 5 endpoints REST sécurisés
+- **Auto-assignation intelligente:** Service Java pour assignation automatique des cartes à la colonne par défaut "Deck"
+- **Frontend React:** Composant `DeckVisualizationView` avec hooks `useDeckVisualization`, drag & drop HTML5 complet
+- **Navigation simplifiée:** Pages indépendantes `/decks/:id/edit` (construction) et `/decks/:id/visualization` avec boutons bidirectionnels
+- **Gestion colonnes robuste:** Création, modification, suppression avec réordonnancement automatique des `displayOrder`
+- **Tests unitaires:** 15+ tests couvrant logique métier critique avec mocking complet
+- **Corrections bonus:** Auto-save opérationnel, spinner visible, import de decks restauré, assignation cartes automatique
+
+### ✅ Auto-save et Navigation Améliorée (Corrections 11 Août 2025)
+
+- **Auto-save corrigé:** Format DTO backend conforme (`cardId`/`quantity`), ajout `gameId` par défaut
+- **Spinner visible:** Modification hook `useAutoSave` pour affichage immédiat pendant debounce (~2+ secondes)
+- **Navigation bidirectionnelle:** Boutons "Vue Construction" ↔ "Vue Visualisation" + boutons retour vers page "Mes decks"
+- **Bouton "Voir" activé:** Navigation directe vers visualisation depuis la page des decks
+- **Architecture simplifiée:** Suppression du toggle complexe, pages indépendantes pour UX fluide
+
+### ✅ Champ cardUrl et Icône de Redirection (Session précédente)
 
 - **Fonctionnalité:** Ajout du champ `cardUrl` à l'entité `CardLocalization` pour liens vers sites officiels
 - **Backend:** Modification entité JPA, DTO, service et tests pour support `cardUrl`
