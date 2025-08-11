@@ -29,8 +29,8 @@ public class DeckCardAutoAssignmentServiceImpl implements DeckCardAutoAssignment
     @Override
     @Transactional
     public void autoAssignToFirstColumn(DeckCard deckCard) {
-        // Si la carte n'a pas de colonne assignée, l'assigner à la première colonne
-        if (deckCard.getColumnGroup() == null && deckCard.getDeck() != null) {
+        // Assigner à la première colonne si le deck existe
+        if (deckCard.getDeck() != null) {
             log.debug("Auto-assignation de la carte {} à la première colonne du deck {}",
                     deckCard.getId(), deckCard.getDeck().getId());
 
@@ -41,15 +41,20 @@ public class DeckCardAutoAssignmentServiceImpl implements DeckCardAutoAssignment
             if (firstColumn.isPresent()) {
                 DeckColumnGroup columnGroup = firstColumn.get();
 
-                // Calculer la prochaine position dans la pile
-                Integer nextPosition = calculateNextPosition(columnGroup.getId());
+                // Ne réassigner que si nécessaire (pas de colonne ou colonne différente)
+                if (deckCard.getColumnGroup() == null ||
+                        !deckCard.getColumnGroup().getId().equals(columnGroup.getId())) {
 
-                // Assigner la carte
-                deckCard.setColumnGroup(columnGroup);
-                deckCard.setPositionInColumn(nextPosition);
+                    // Calculer la prochaine position dans la pile
+                    Integer nextPosition = calculateNextPosition(columnGroup.getId());
 
-                log.debug("Carte {} assignée à la colonne {} à la position {}",
-                        deckCard.getId(), columnGroup.getId(), nextPosition);
+                    // Assigner la carte
+                    deckCard.setColumnGroup(columnGroup);
+                    deckCard.setPositionInColumn(nextPosition);
+
+                    log.debug("Carte {} assignée à la colonne {} à la position {}",
+                            deckCard.getId(), columnGroup.getId(), nextPosition);
+                }
             } else {
                 log.warn("Aucune colonne trouvée pour le deck {}", deckCard.getDeck().getId());
             }

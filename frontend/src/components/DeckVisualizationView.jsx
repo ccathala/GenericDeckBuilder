@@ -99,12 +99,7 @@ const cardImageStyles = `
   }
 `;
 
-const DeckVisualizationView = ({
-  deckId,
-  deckCards,
-  onCardUpdate,
-  onToggleConstruction,
-}) => {
+const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const {
@@ -400,7 +395,7 @@ const DeckVisualizationView = ({
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate('/decks')}
+            onClick={() => navigate("/decks")}
             className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
             title={t("common.back")}
           >
@@ -418,14 +413,14 @@ const DeckVisualizationView = ({
             <Plus size={16} />
             {t("decks.visualization.addColumn")}
           </button>
-          {onToggleConstruction && (
-            <button
-              onClick={onToggleConstruction}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
-            >
-              {t("decks.visualization.toggleConstruction")}
-            </button>
-          )}
+          <button
+            onClick={() => navigate(`/decks/${deckId}/edit`)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            title={t("decks.visualization.viewConstruction")}
+          >
+            <Pencil size={16} />
+            {t("decks.visualization.viewConstruction")}
+          </button>
         </div>
       </div>
 

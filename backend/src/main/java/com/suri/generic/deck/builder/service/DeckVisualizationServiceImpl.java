@@ -151,25 +151,32 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
             throw new ValidationException("La colonne n'appartient pas à ce deck");
         }
 
-        // Utiliser le service d'auto-assignation pour gérer le déplacement des cartes
-        // Note: reorderPositionsAfterDelete prend un displayOrder Integer, pas Long
-        // userId
-        // Il faut d'abord déplacer les cartes vers une autre colonne
-        List<DeckColumnGroup> remainingColumns = columnGroupRepository
-                .findByDeckIdAndUserIdOrderByDisplayOrder(deckId, userId)
-                .stream()
-                .filter(col -> !col.getId().equals(columnGroupId))
-                .collect(Collectors.toList());
+        // Sauvegarder les cartes à réassigner AVANT suppression
+        List<DeckCard> cardsToReassign = new ArrayList<>(columnGroup.getCards());
 
-        if (!remainingColumns.isEmpty()) {
-            // Déplacer chaque carte vers la première colonne
-            for (DeckCard card : columnGroup.getCards()) {
+        // Supprimer la colonne en premier
+        columnGroupRepository.deleteByIdAndUserId(columnGroupId, userId);
+        log.debug("Colonne {} supprimée", columnGroupId);
+
+        // Récupérer les colonnes restantes APRÈS suppression
+        List<DeckColumnGroup> remainingColumns = columnGroupRepository
+                .findByDeckIdAndUserIdOrderByDisplayOrder(deckId, userId);
+
+        // Réordonner les displayOrder des colonnes restantes
+        reorderDisplayOrders(remainingColumns);
+
+        // Réassigner les cartes APRÈS réordonnancement
+        if (!remainingColumns.isEmpty() && !cardsToReassign.isEmpty()) {
+            log.debug("Réassignation de {} cartes vers la première colonne restante", cardsToReassign.size());
+            for (DeckCard card : cardsToReassign) {
                 autoAssignmentService.autoAssignToFirstColumn(card);
             }
+        } else if (!cardsToReassign.isEmpty()) {
+            log.warn("Suppression d'une colonne sans colonnes restantes - {} cartes perdues", cardsToReassign.size());
         }
 
-        // Supprimer la colonne
-        columnGroupRepository.deleteByIdAndUserId(columnGroupId, userId);
+        log.debug("Suppression colonne terminée - displayOrder réorganisés et {} cartes réassignées",
+                cardsToReassign.size());
     }
 
     @Override
@@ -341,5 +348,33 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
             newPosition = maxSize; // Fin de la liste par défaut
         }
         return newPosition;
+    }
+
+    /**
+     * Réordonne les displayOrder des colonnes restantes pour qu'ils soient
+     * consécutifs à partir de 0
+     */
+    private void reorderDisplayOrders(List<DeckColumnGroup> columns) {
+        if (columns.isEmpty()) {
+            return;
+        }
+
+        log.debug("Réorganisation des displayOrder pour {} colonnes", columns.size());
+
+        // Trier par displayOrder actuel pour maintenir l'ordre relatif
+        columns.sort(Comparator.comparing(DeckColumnGroup::getDisplayOrder));
+
+        // Réassigner les displayOrder de façon consécutive
+        for (int i = 0; i < columns.size(); i++) {
+            DeckColumnGroup column = columns.get(i);
+            if (column.getDisplayOrder() != i) {
+                log.debug("Mise à jour displayOrder colonne '{}' : {} → {}",
+                        column.getName(), column.getDisplayOrder(), i);
+                column.setDisplayOrder(i);
+                columnGroupRepository.save(column);
+            }
+        }
+
+        log.debug("Réorganisation des displayOrder terminée");
     }
 }

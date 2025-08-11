@@ -49,6 +49,27 @@ export const deckService = {
     }
   },
 
+  // Créer un deck vide automatiquement
+  async createEmptyDeck() {
+    try {
+      const response = await axiosInstance.post("/api/decks", {
+        name: "Nouveau deck",
+        description: "",
+        gameId: "mage_noir",
+        cards: [],
+      });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  },
+
   // Mettre à jour un deck
   async updateDeck(deckId, deckData) {
     try {

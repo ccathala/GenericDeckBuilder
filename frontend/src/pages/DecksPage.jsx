@@ -14,6 +14,7 @@ const DecksPage = () => {
   const [decks, setDecks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isCreating, setIsCreating] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // États pour l'export
@@ -52,6 +53,34 @@ const DecksPage = () => {
   const handleImportSuccess = (importedDeck) => {
     setDecks((prevDecks) => [importedDeck, ...prevDecks]);
     // Vous pouvez ajouter un message de succès ici si nécessaire
+  };
+
+  const handleCreateDeck = async () => {
+    try {
+      setIsCreating(true);
+      setError(null);
+
+      // Créer le deck vide
+      const result = await deckService.createEmptyDeck();
+
+      if (result.success) {
+        // Rafraîchir la liste des decks (nouveau deck apparaîtra en bas)
+        await fetchDecks();
+
+        setNotification({
+          isVisible: true,
+          message: t("decks.createSuccess") || "Deck créé avec succès",
+          type: "success",
+        });
+      } else {
+        setError(result.error);
+      }
+    } catch (err) {
+      console.error("Erreur création deck:", err);
+      setError("Échec de la création du deck. Veuillez réessayer.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleDeleteDeck = async (deckId) => {
@@ -144,9 +173,10 @@ const DecksPage = () => {
               </svg>
               {t("decks.importDeck")}
             </button>
-            <Link
-              to="/decks/new"
-              className="bg-mage-dark-600 hover:bg-mage-dark-500 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center"
+            <button
+              onClick={handleCreateDeck}
+              disabled={isCreating}
+              className="bg-mage-dark-600 hover:bg-mage-dark-500 disabled:bg-mage-dark-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200 flex items-center"
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -161,8 +191,10 @@ const DecksPage = () => {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              {t("decks.createNew")}
-            </Link>
+              {isCreating
+                ? t("common.creating") || "Création..."
+                : t("decks.createNew")}
+            </button>
           </div>
         </div>
 
@@ -194,12 +226,15 @@ const DecksPage = () => {
             <div className="text-6xl mb-4">🎴</div>
             <h3 className="text-xl font-semibold mb-2">{t("decks.noDecks")}</h3>
             <p className="text-gray-400 mb-6">{t("decks.noDecksMessage")}</p>
-            <Link
-              to="/decks/new"
-              className="bg-mage-dark-600 hover:bg-mage-dark-500 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200"
+            <button
+              onClick={handleCreateDeck}
+              disabled={isCreating}
+              className="bg-mage-dark-600 hover:bg-mage-dark-500 disabled:bg-mage-dark-700 text-white font-medium py-3 px-6 rounded-md transition-colors duration-200"
             >
-              {t("decks.createFirst")}
-            </Link>
+              {isCreating
+                ? t("common.creating") || "Création..."
+                : t("decks.createFirst")}
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
