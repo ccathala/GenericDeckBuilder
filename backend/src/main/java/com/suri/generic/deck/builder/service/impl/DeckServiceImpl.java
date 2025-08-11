@@ -72,6 +72,8 @@ public class DeckServiceImpl implements DeckService {
         deck.setName(request.getName());
         deck.setDescription(request.getDescription());
 
+        List<DeckCard> existingCards = new ArrayList<>(deck.getCards());
+
         Game game = gameRepository.findById(request.getGameId())
                 .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable"));
         deck.setGame(game);
@@ -82,16 +84,30 @@ public class DeckServiceImpl implements DeckService {
         // Add new cards
         List<DeckCardRequestDTO> newCards = new ArrayList<>();
         for (DeckCardRequestDTO cardDto : request.getCards()) {
-            Card card = cardRepository.findById(cardDto.getCardId())
-                    .orElseThrow(() -> new IllegalArgumentException("Carte introuvable : " + cardDto.getCardId()));
 
-            DeckCard deckCard = new DeckCard();
-            deckCard.setDeck(deck);
-            deckCard.setCard(card);
-            deckCard.setQuantity(cardDto.getQuantity());
+            Optional<DeckCard> existingCardOpt = existingCards.stream()
+                    .filter(c -> c.getCard().getId().equals(cardDto.getCardId()))
+                    .findFirst();
+
+            DeckCard deckCard = null;
+
+            if (existingCardOpt.isPresent()) {
+                // Update existing card
+                deckCard = existingCardOpt.get();
+                deckCard.setQuantity(cardDto.getQuantity());
+            } else {
+                Card card = cardRepository.findById(cardDto.getCardId())
+                        .orElseThrow(() -> new IllegalArgumentException("Carte introuvable : " + cardDto.getCardId()));
+
+                // Create new card
+                deckCard = new DeckCard();
+                deckCard.setDeck(deck);
+                deckCard.setCard(card);
+                deckCard.setQuantity(cardDto.getQuantity());
+                newCards.add(cardDto);
+            }
 
             deck.getCards().add(deckCard);
-            newCards.add(cardDto);
         }
 
         // Assign new cards to default column
@@ -140,7 +156,8 @@ public class DeckServiceImpl implements DeckService {
                 deck.getName(),
                 deck.getDescription(),
                 deck.getGame().getId(),
-                cards);
+                cards,
+                deck.getNotes());
     }
 
     public DeckSummaryResponseDTO toSummaryDto(Deck deck) {
@@ -309,5 +326,18 @@ public class DeckServiceImpl implements DeckService {
 
         // Assigner à la colonne par défaut
         assignCardsToDefaultColumn(deck, cardRequestDTOs);
+    }
+
+    @Override
+    @Transactional
+    public DeckResponseDTO updateDeckNotes(UUID deckId, String notes, User user) {
+        Deck deck = deckRepository.findById(deckId)
+                .filter(d -> d.getOwner().getId().equals(user.getId()))
+                .orElseThrow(() -> new IllegalArgumentException("Deck introuvable ou non autorisé"));
+
+        deck.setNotes(notes);
+        deckRepository.save(deck);
+
+        return toResponseDto(deck);
     }
 }

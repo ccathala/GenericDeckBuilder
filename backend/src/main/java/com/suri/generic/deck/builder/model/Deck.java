@@ -42,4 +42,7 @@ public class Deck {
     @JoinColumn(name = "display_card_id")
     private Card displayCard;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
 }

@@ -23,7 +23,7 @@
     "search": "Search",
     "back": "Back",
     "saving": "Saving...",
-    "autoSaved": "Auto-saved at"
+    "autoSaved": "Saved at"
   },
   "pages": {
     "home": {
@@ -225,14 +225,14 @@
       "selectCardsBelow": "Select cards below to add them",
       "cardSelection": "Card Selection",
       "loginMessage": "Login to create decks.",
-      "viewVisualization": "Visualization View",
-      "goToVisualization": "Go to visualization"
+      "viewVisualization": "Preview",
+      "goToVisualization": "Go to preview"
     },
     "visualization": {
-      "title": "Visualization View",
-      "toggleConstruction": "🔧 Construction View",
-      "toggleVisualization": "📊 Visualization View",
-      "saveFirstMessage": "Save your deck first to access the visualization view",
+      "title": "Preview",
+      "toggleConstruction": "🔧 Builder",
+      "toggleVisualization": "📊 Preview",
+      "saveFirstMessage": "Save your deck first to access the preview",
       "createDeckFirst": "Create your deck first to organize your cards in columns",
       "addColumn": "Add column",
       "newColumnName": "New column",
@@ -240,8 +240,8 @@
       "editColumn": "Edit column",
       "deleteColumn": "Delete column",
       "cannotDeleteLastColumn": "Cannot delete the last column",
-      "viewConstruction": "Construction View",
-      "goToConstruction": "Go to construction",
+      "viewConstruction": "Builder",
+      "goToConstruction": "Go to builder",
       "confirmDeleteColumn": "Delete column \"{{name}}\"?",
       "dropCardsHere": "Drop cards here",
       "totalCards": "{{count}} cards",
@@ -253,6 +253,8 @@
       "cancel": "Cancel",
       "moveCard": "Move card",
       "selectQuantity": "Select quantity to move",
+      "notes": "Notes",
+      "notesPlaceholder": "Write down your thoughts and strategies here...",
       "errors": {
         "loadFailed": "Unable to load visualization",
         "saveFailed": "Unable to save changes",

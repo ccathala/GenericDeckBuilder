@@ -104,6 +104,24 @@ export const deckService = {
       };
     }
   },
+
+  // Mettre à jour les notes d'un deck
+  async updateDeckNotes(deckId, notes) {
+    try {
+      const response = await axiosInstance.patch(`/api/decks/${deckId}/notes`, {
+        notes: notes,
+      });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  },
 };
 
 export default deckService;

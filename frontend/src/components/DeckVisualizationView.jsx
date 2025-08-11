@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useDeckVisualization } from "../hooks/useDeckVisualization";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import NotesPanel from "./NotesPanel";
 
 // Styles CSS pour l'affichage des images de cartes
 const cardImageStyles = `
@@ -424,37 +425,43 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
         </div>
       </div>
 
-      {/* Zone des colonnes */}
-      <div className="flex-1 flex gap-0 min-h-0 overflow-x-auto">
-        <div className="flex gap-0 min-h-full">
-          {visualization?.column_groups?.map((column, index) => (
-            <DeckColumn
-              key={column.id}
-              column={column}
-              onUpdateColumn={updateColumn}
-              onDeleteColumn={deleteColumn}
-              canDelete={visualization.column_groups.length > 1}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              draggedCard={draggedCard}
-              handleDrag={handleDrag}
-              handleDragEnd={handleDragEnd}
-              handleImageError={handleImageError}
-              dropIndicator={dropIndicator}
-              isLastColumn={index === visualization.column_groups.length - 1}
-            />
-          ))}
+      {/* Zone principale avec colonnes + panneau notes */}
+      <div className="flex-1 flex min-h-0">
+        {/* Zone des colonnes (flex-1 pour prendre l'espace restant) */}
+        <div className="flex-1 flex gap-0 min-h-0 overflow-x-auto">
+          <div className="flex gap-0 min-h-full">
+            {visualization?.column_groups?.map((column, index) => (
+              <DeckColumn
+                key={column.id}
+                column={column}
+                onUpdateColumn={updateColumn}
+                onDeleteColumn={deleteColumn}
+                canDelete={visualization.column_groups.length > 1}
+                onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                draggedCard={draggedCard}
+                handleDrag={handleDrag}
+                handleDragEnd={handleDragEnd}
+                handleImageError={handleImageError}
+                dropIndicator={dropIndicator}
+                isLastColumn={index === visualization.column_groups.length - 1}
+              />
+            ))}
+          </div>
+
+          {/* Message si aucune colonne */}
+          {(!visualization?.column_groups ||
+            visualization.column_groups.length === 0) && (
+            <div className="flex-1 flex items-center justify-center text-gray-400">
+              <p>Aucune colonne trouvée</p>
+            </div>
+          )}
         </div>
 
-        {/* Message si aucune colonne */}
-        {(!visualization?.column_groups ||
-          visualization.column_groups.length === 0) && (
-          <div className="flex-1 flex items-center justify-center text-gray-400">
-            <p>Aucune colonne trouvée</p>
-          </div>
-        )}
+        {/* Panneau notes fixe à droite */}
+        <NotesPanel deckId={deckId} />
       </div>
 
       {/* Modal de création de colonne */}

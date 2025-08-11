@@ -23,7 +23,7 @@
     "search": "Rechercher",
     "back": "Retour",
     "saving": "Sauvegarde...",
-    "autoSaved": "Sauvegardé automatiquement à"
+    "autoSaved": "Sauvegardé à"
   },
   "pages": {
     "home": {
@@ -225,13 +225,13 @@
       "selectCardsBelow": "Sélectionnez des cartes ci-dessous pour les ajouter",
       "cardSelection": "Sélection de cartes",
       "loginMessage": "Connectez-vous pour créer des decks.",
-      "viewVisualization": "Vue Visualisation",
-      "goToVisualization": "Aller à la visualisation"
+      "viewVisualization": "Aperçu",
+      "goToVisualization": "Aller à l'aperçu"
     },
     "visualization": {
-      "title": "Vue Visualisation",
-      "toggleConstruction": "🔧 Vue Construction",
-      "toggleVisualization": "📊 Vue Visualisation",
+      "title": "Aperçu",
+      "toggleConstruction": "🔧 Construction",
+      "toggleVisualization": "📊 Aperçu",
       "saveFirstMessage": "Sauvegardez d'abord votre deck pour accéder à la vue de visualisation",
       "createDeckFirst": "Créez d'abord votre deck pour organiser vos cartes en colonnes",
       "addColumn": "Ajouter une colonne",
@@ -240,7 +240,7 @@
       "editColumn": "Modifier la colonne",
       "deleteColumn": "Supprimer la colonne",
       "cannotDeleteLastColumn": "Impossible de supprimer la dernière colonne",
-      "viewConstruction": "Vue Construction",
+      "viewConstruction": "Construction",
       "goToConstruction": "Aller à la construction",
       "confirmDeleteColumn": "Supprimer la colonne \"{{name}}\" ?",
       "dropCardsHere": "Glissez des cartes ici",
@@ -253,6 +253,8 @@
       "cancel": "Annuler",
       "moveCard": "Déplacer la carte",
       "selectQuantity": "Sélectionnez la quantité à déplacer",
+      "notes": "Notes",
+      "notesPlaceholder": "Consignez vos réflexions et stratégies ici...",
       "errors": {
         "loadFailed": "Impossible de charger la visualisation",
         "saveFailed": "Impossible de sauvegarder les modifications",
