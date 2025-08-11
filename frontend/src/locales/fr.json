@@ -20,7 +20,10 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "create": "Créer",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "back": "Retour",
+    "saving": "Sauvegarde...",
+    "autoSaved": "Sauvegardé automatiquement à"
   },
   "pages": {
     "home": {
@@ -221,7 +224,9 @@
       "noDeckCards": "Aucune carte dans le deck",
       "selectCardsBelow": "Sélectionnez des cartes ci-dessous pour les ajouter",
       "cardSelection": "Sélection de cartes",
-      "loginMessage": "Connectez-vous pour créer des decks."
+      "loginMessage": "Connectez-vous pour créer des decks.",
+      "viewVisualization": "Vue Visualisation",
+      "goToVisualization": "Aller à la visualisation"
     },
     "visualization": {
       "title": "Vue Visualisation",
@@ -235,6 +240,8 @@
       "editColumn": "Modifier la colonne",
       "deleteColumn": "Supprimer la colonne",
       "cannotDeleteLastColumn": "Impossible de supprimer la dernière colonne",
+      "viewConstruction": "Vue Construction",
+      "goToConstruction": "Aller à la construction",
       "confirmDeleteColumn": "Supprimer la colonne \"{{name}}\" ?",
       "dropCardsHere": "Glissez des cartes ici",
       "totalCards": "{{count}} cartes",

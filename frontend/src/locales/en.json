@@ -20,7 +20,10 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "search": "Search"
+    "search": "Search",
+    "back": "Back",
+    "saving": "Saving...",
+    "autoSaved": "Auto-saved at"
   },
   "pages": {
     "home": {
@@ -221,7 +224,9 @@
       "noDeckCards": "No cards in deck",
       "selectCardsBelow": "Select cards below to add them",
       "cardSelection": "Card Selection",
-      "loginMessage": "Login to create decks."
+      "loginMessage": "Login to create decks.",
+      "viewVisualization": "Visualization View",
+      "goToVisualization": "Go to visualization"
     },
     "visualization": {
       "title": "Visualization View",
@@ -235,6 +240,8 @@
       "editColumn": "Edit column",
       "deleteColumn": "Delete column",
       "cannotDeleteLastColumn": "Cannot delete the last column",
+      "viewConstruction": "Construction View",
+      "goToConstruction": "Go to construction",
       "confirmDeleteColumn": "Delete column \"{{name}}\"?",
       "dropCardsHere": "Drop cards here",
       "totalCards": "{{count}} cards",
