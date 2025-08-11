@@ -33,28 +33,19 @@ public class DeckServiceImpl implements DeckService {
 
     @Override
     public DeckResponseDTO createDeck(DeckRequestDTO deckDTO, User owner) {
-        Deck deck = new Deck();
-        deck.setName(deckDTO.getName());
-        deck.setDescription(deckDTO.getDescription());
-        deck.setOwner(owner);
+        // Créer le deck de base
+        Deck deck = createBaseDeck(deckDTO, owner);
 
-        Game game = gameRepository.findById(deckDTO.getGameId())
-                .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable"));
-        deck.setGame(game);
+        // Créer la colonne par défaut
+        createDefaultVisualizationColumn(deck.getId(), owner.getId());
 
-        // Sauvegarder d'abord le deck (vide pour l'instant)
-        Deck savedDeck = deckRepository.save(deck);
+        // Créer et assigner les cartes SI elles sont fournies
+        if (deckDTO.getCards() != null && !deckDTO.getCards().isEmpty()) {
+            createAndAssignCards(deck, deckDTO.getCards());
+        }
 
-        // Créer automatiquement la première colonne "Deck" pour la visualisation
-        createDefaultVisualizationColumn(savedDeck.getId(), owner.getId());
-
-        // Assigner les cartes à la colonne par défaut après création de la colonne
-        assignCardsToDefaultColumn(savedDeck, deckDTO.getCards());
-
-        // New validation: only block excess cards per individual card
-        validateCardLimits(savedDeck);
-
-        return toResponseDto(savedDeck);
+        validateCardLimits(deck);
+        return toResponseDto(deck);
     }
 
     @Override
@@ -274,5 +265,49 @@ public class DeckServiceImpl implements DeckService {
             log.warn("Impossible de créer la colonne par défaut pour le deck {} (utilisateur {}): {}",
                     deckId, userId, e.getMessage());
         }
+    }
+
+    /**
+     * Crée le deck de base sans les cartes
+     */
+    private Deck createBaseDeck(DeckRequestDTO deckDTO, User owner) {
+        Deck deck = new Deck();
+        deck.setName(deckDTO.getName());
+        deck.setDescription(deckDTO.getDescription());
+        deck.setOwner(owner);
+
+        Game game = gameRepository.findById(deckDTO.getGameId())
+                .orElseThrow(() -> new IllegalArgumentException("Jeu introuvable"));
+        deck.setGame(game);
+
+        return deckRepository.save(deck);
+    }
+
+    /**
+     * Crée les DeckCard et les assigne à la colonne par défaut
+     */
+    private void createAndAssignCards(Deck deck, List<DeckCardRequestDTO> cardRequestDTOs) {
+        if (cardRequestDTOs == null || cardRequestDTOs.isEmpty()) {
+            return;
+        }
+
+        // Créer les DeckCard
+        for (DeckCardRequestDTO cardDto : cardRequestDTOs) {
+            Card card = cardRepository.findById(cardDto.getCardId())
+                    .orElseThrow(() -> new IllegalArgumentException("Carte introuvable : " + cardDto.getCardId()));
+
+            DeckCard deckCard = new DeckCard();
+            deckCard.setDeck(deck);
+            deckCard.setCard(card);
+            deckCard.setQuantity(cardDto.getQuantity());
+
+            deck.getCards().add(deckCard);
+        }
+
+        // Sauvegarder les cartes
+        deckRepository.save(deck);
+
+        // Assigner à la colonne par défaut
+        assignCardsToDefaultColumn(deck, cardRequestDTOs);
     }
 }

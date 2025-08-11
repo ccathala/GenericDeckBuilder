@@ -331,12 +331,13 @@ const DeckCard = ({ deck, onDelete, onExport }) => {
               <span>{deck.totalCards || 0}</span>
             </div>
 
-            <span
-              className="p-1.5 text-gray-400 rounded cursor-not-allowed opacity-40"
+            <Link
+              to={`/decks/${deck.id}/visualization`}
+              className="p-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
               title={t("decks.view")}
             >
               <Eye size={14} />
-            </span>
+            </Link>
 
             <Link
               to={`/decks/${deck.id}/edit`}
