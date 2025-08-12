@@ -264,7 +264,8 @@
         "moveFailed": "Unable to move card",
         "invalidName": "Column name is required",
         "invalidColor": "Invalid color format",
-        "networkError": "Server connection error"
+        "networkError": "Server connection error",
+        "duplicateColumnName": "A column with the name '{{name}}' already exists"
       }
     },
     "detail": {

@@ -55,8 +55,9 @@ export const useDeckVisualization = (deckId) => {
           throw new Error(result.error);
         }
       } catch (err) {
-        setError(err.message || "Erreur lors de la création de la colonne");
-        throw err;
+        const errorMessage = err.message || "Erreur lors de la création de la colonne";
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
     },
     [deckId]
@@ -225,6 +226,11 @@ export const useDeckVisualization = (deckId) => {
     loadVisualization();
   }, [loadVisualization]);
 
+  // Fonction pour clear les erreurs manuellement
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     // État
     visualization,
@@ -238,6 +244,7 @@ export const useDeckVisualization = (deckId) => {
     deleteColumn,
     moveCard,
     reorderColumns,
+    clearError,
   };
 };
 

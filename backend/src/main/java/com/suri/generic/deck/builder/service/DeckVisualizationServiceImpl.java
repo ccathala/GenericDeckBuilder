@@ -377,4 +377,9 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
         log.debug("Réorganisation des displayOrder terminée");
     }
+
+    @Override
+    public boolean existsByDeckAndName(UUID deckId, String columnName) {
+        return columnGroupRepository.existsByDeckIdAndName(deckId, columnName.trim());
+    }
 }

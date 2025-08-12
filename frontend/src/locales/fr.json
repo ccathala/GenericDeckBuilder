@@ -264,7 +264,8 @@
         "moveFailed": "Impossible de déplacer la carte",
         "invalidName": "Le nom de la colonne est obligatoire",
         "invalidColor": "Format de couleur invalide",
-        "networkError": "Erreur de connexion au serveur"
+        "networkError": "Erreur de connexion au serveur",
+        "duplicateColumnName": "Une colonne avec le nom '{{name}}' existe déjà"
       }
     },
     "detail": {

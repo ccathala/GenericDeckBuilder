@@ -52,7 +52,8 @@ public class DeckVisualizationController {
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "Colonne créée avec succès"),
                         @ApiResponse(responseCode = "400", description = "Données de requête invalides"),
-                        @ApiResponse(responseCode = "403", description = "Accès non autorisé")
+                        @ApiResponse(responseCode = "403", description = "Accès non autorisé"),
+                        @ApiResponse(responseCode = "409", description = "Une colonne avec ce nom existe déjà")
         })
         public ResponseEntity<DeckColumnGroupDTO> createColumn(
                         @Parameter(description = "ID du deck") @PathVariable UUID deckId,

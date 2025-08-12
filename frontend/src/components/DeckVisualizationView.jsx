@@ -112,6 +112,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     deleteColumn,
     moveCard,
     reorderColumns,
+    clearError,
   } = useDeckVisualization(deckId);
 
   // État local pour le drag & drop
@@ -408,7 +409,10 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={() => setShowCreateColumnModal(true)}
+            onClick={() => {
+              setShowCreateColumnModal(true);
+              clearError(); // Clear l'erreur quand on ouvre le modal
+            }}
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
           >
             <Plus size={16} />
@@ -472,6 +476,13 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
               {t("decks.visualization.addColumn")}
             </h3>
 
+            {/* Affichage de l'erreur */}
+            {error && (
+              <div className="bg-red-600 text-white p-3 rounded mb-4 text-sm">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -480,7 +491,10 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 <input
                   type="text"
                   value={newColumnName}
-                  onChange={(e) => setNewColumnName(e.target.value)}
+                  onChange={(e) => {
+                    setNewColumnName(e.target.value);
+                    if (error) clearError(); // Clear l'erreur quand l'utilisateur tape
+                  }}
                   placeholder={t("decks.visualization.newColumnName")}
                   className="w-full px-3 py-2 bg-mage-dark-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none"
                 />
@@ -492,6 +506,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 onClick={() => {
                   setShowCreateColumnModal(false);
                   setNewColumnName("");
+                  clearError(); // Clear l'erreur quand on ferme le modal
                 }}
                 className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
               >

@@ -33,6 +33,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Gère les ValidationException pour les erreurs métier
+     * (ex: nom de colonne en doublon, contraintes business)
+     */
+    @ExceptionHandler(com.suri.generic.deck.builder.exception.ValidationException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(com.suri.generic.deck.builder.exception.ValidationException ex) {
+        log.warn("Business validation error: {}", ex.getMessage());
+        
+        // Si c'est une erreur de doublon de nom, on retourne 409 Conflict
+        if (ex.getMessage().contains("existe déjà")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
+        }
+        
+        // Sinon, erreur de validation classique (400 Bad Request)
+        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+    }
+
+    /**
      * Gère les EntityNotFoundException
      * (ex: deck non trouvé, carte non trouvée)
      */

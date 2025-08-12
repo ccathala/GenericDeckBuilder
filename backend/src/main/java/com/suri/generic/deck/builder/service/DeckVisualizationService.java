@@ -40,4 +40,9 @@ public interface DeckVisualizationService {
          */
         void moveCard(UUID deckId, String cardIdentifier, UUID sourceColumnId, UUID targetColumnId,
                         Integer targetPosition, Long userId);
+
+        /**
+         * Vérifie si une colonne avec ce nom existe déjà pour ce deck
+         */
+        boolean existsByDeckAndName(UUID deckId, String columnName);
 }
