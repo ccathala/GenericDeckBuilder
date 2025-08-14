@@ -34,7 +34,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
     @Override
     @Transactional(readOnly = true)
-    public DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId) {
+    public DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId, String locale) {
         log.debug("Récupération visualisation deck {} pour utilisateur {}", deckId, userId);
 
         // Vérifier l'existence et les permissions du deck
@@ -57,7 +57,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
         // Convertir en DTOs
         List<DeckColumnGroupDTO> columnGroupDTOs = columnGroups.stream()
-                .map(this::mapToDTO)
+                .map(columnGroup -> mapToDTO(columnGroup, locale))
                 .collect(Collectors.toList());
 
         int totalCards = deck.getCards().stream()
@@ -281,8 +281,15 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
      * Convertit une entité DeckColumnGroup en DTO
      */
     private DeckColumnGroupDTO mapToDTO(DeckColumnGroup columnGroup) {
+        return mapToDTO(columnGroup, null);
+    }
+
+    /**
+     * Convertit une entité DeckColumnGroup en DTO selon locale
+     */
+    private DeckColumnGroupDTO mapToDTO(DeckColumnGroup columnGroup, String locale) {
         List<DeckCardVisualizationDTO> cardDTOs = columnGroup.getCards().stream()
-                .map(this::mapToDeckCardVisualizationDTO)
+                .map(card -> mapToDeckCardVisualizationDTO(card, locale))
                 .collect(Collectors.toList());
 
         return DeckColumnGroupDTO.builder()
@@ -295,10 +302,10 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     }
 
     /**
-     * Convertit une carte du deck en DTO de visualisation
+     * Convertit une carte du deck en DTO de visualisation selon locale
      */
-    private DeckCardVisualizationDTO mapToDeckCardVisualizationDTO(DeckCard deckCard) {
-        CardResponseDTO cardResponse = mapCardToDTO(deckCard);
+    private DeckCardVisualizationDTO mapToDeckCardVisualizationDTO(DeckCard deckCard, String locale) {
+        CardResponseDTO cardResponse = mapCardToDTO(deckCard, locale);
 
         // Générer un UUID unique basé sur les composants de DeckCardId
         String uniqueId = deckCard.getId().getDeckId().toString() + "|" + deckCard.getId().getCardId();
@@ -312,13 +319,21 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     }
 
     /**
-     * Convertit une carte du deck en DTO de réponse pur
+     * Convertit une carte du deck en DTO de réponse pur selon locale
      */
-    private CardResponseDTO mapCardToDTO(DeckCard deckCard) {
+    private CardResponseDTO mapCardToDTO(DeckCard deckCard, String locale) {
         Card card = deckCard.getCard();
 
-        // Utiliser la première localisation disponible ou des valeurs par défaut
-        CardLocalization localization = card.getLocalizations().isEmpty() ? null : card.getLocalizations().get(0);
+        CardLocalization localization = null;
+        if (locale != null) {
+            localization = card.getLocalizations().isEmpty() ? null
+                    : card.getLocalizations()
+                            .stream().filter(loc -> locale.equals(loc.getId().getLocale())).findFirst()
+                            .orElse(card.getLocalizations().get(0));
+        } else {
+            // Utiliser la première localisation disponible ou des valeurs par défaut
+            localization = card.getLocalizations().isEmpty() ? null : card.getLocalizations().get(0);
+        }
 
         return CardResponseDTO.builder()
                 .id(card.getId())

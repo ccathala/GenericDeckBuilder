@@ -40,10 +40,12 @@ public class DeckVisualizationController {
         })
         public ResponseEntity<DeckVisualizationResponseDTO> getDeckVisualization(
                         @Parameter(description = "ID du deck") @PathVariable UUID deckId,
-                        @AuthenticationPrincipal User user) {
+                        @AuthenticationPrincipal User user,
+                        @RequestParam(defaultValue = "fr") String locale) {
 
                 log.info("Récupération visualisation deck {} par utilisateur {}", deckId, user.getEmail());
-                DeckVisualizationResponseDTO response = visualizationService.getDeckVisualization(deckId, user.getId());
+                DeckVisualizationResponseDTO response = visualizationService.getDeckVisualization(deckId, user.getId(),
+                                locale);
                 return ResponseEntity.ok(response);
         }
 

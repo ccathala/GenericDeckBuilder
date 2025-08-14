@@ -16,7 +16,7 @@ public interface DeckVisualizationService {
         /**
          * Récupère la visualisation complète d'un deck
          */
-        DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId);
+        DeckVisualizationResponseDTO getDeckVisualization(UUID deckId, Long userId, String locale);
 
         /**
          * Crée une nouvelle colonne de visualisation

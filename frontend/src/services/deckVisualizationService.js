@@ -2,10 +2,13 @@ import axiosInstance from "./axiosInstance";
 
 export const deckVisualizationService = {
   // Récupérer la visualisation complète d'un deck
-  async getDeckVisualization(deckId) {
+  async getDeckVisualization(deckId, locale) {
     try {
       const response = await axiosInstance.get(
-        `/api/decks/${deckId}/visualization`
+        `/api/decks/${deckId}/visualization`,
+        {
+          params: { locale },
+        }
       );
       return {
         success: true,

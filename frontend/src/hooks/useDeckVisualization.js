@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import deckVisualizationService from "../services/deckVisualizationService";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export const useDeckVisualization = (deckId) => {
   const [visualization, setVisualization] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { currentLanguage } = useLanguage();
 
   // Charger la visualisation du deck
   const loadVisualization = useCallback(async () => {
@@ -15,7 +17,8 @@ export const useDeckVisualization = (deckId) => {
       setError(null);
 
       const result = await deckVisualizationService.getDeckVisualization(
-        deckId
+        deckId,
+        currentLanguage
       );
 
       if (result.success) {
@@ -63,7 +66,8 @@ export const useDeckVisualization = (deckId) => {
           }
         }
       } catch (err) {
-        const errorMessage = err.message || "Erreur lors de la création de la colonne";
+        const errorMessage =
+          err.message || "Erreur lors de la création de la colonne";
         setError(errorMessage);
         return { success: false, error: errorMessage };
       }
