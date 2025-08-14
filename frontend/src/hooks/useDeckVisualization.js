@@ -31,7 +31,7 @@ export const useDeckVisualization = (deckId) => {
     } finally {
       setLoading(false);
     }
-  }, [deckId]);
+  }, [deckId, currentLanguage]);
 
   // Créer une nouvelle colonne
   const createColumn = useCallback(
