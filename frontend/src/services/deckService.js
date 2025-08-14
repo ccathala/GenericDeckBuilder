@@ -49,6 +49,27 @@ export const deckService = {
     }
   },
 
+  // Créer un deck vide automatiquement
+  async createEmptyDeck() {
+    try {
+      const response = await axiosInstance.post("/api/decks", {
+        name: "Nouveau deck",
+        description: "",
+        gameId: "mage_noir",
+        cards: [],
+      });
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  },
+
   // Mettre à jour un deck
   async updateDeck(deckId, deckData) {
     try {
@@ -72,6 +93,24 @@ export const deckService = {
   async deleteDeck(deckId) {
     try {
       const response = await axiosInstance.delete(`/api/decks/${deckId}`);
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  },
+
+  // Mettre à jour les notes d'un deck
+  async updateDeckNotes(deckId, notes) {
+    try {
+      const response = await axiosInstance.patch(`/api/decks/${deckId}/notes`, {
+        notes: notes,
+      });
       return {
         success: true,
         data: response.data,

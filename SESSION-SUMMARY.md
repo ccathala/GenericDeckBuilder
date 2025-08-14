@@ -1,12 +1,94 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 6 Août 2025  
-**Branche:** `feature/add_card-url`  
-**Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
+**Date:** 6 Août 2025 - 12 Août 2025  
+**Branche principale:** `feat### Architecture technique
+
+### Panneau de Notes avec Sauvegarde Automatique (Nouveau)
+
+**Architecture Backend:**
+
+```
+📁 backend/src/main/java/com/suri/generic/deck/builder/
+├── 🔧 model/Deck.java                              # Ajout @Column(name = "notes", columnDefinition = "TEXT")
+├── 🆕 dto/request/DeckNotesUpdateRequestDTO.java   # DTO pour mise à jour des notes
+├── 🔧 dto/response/DeckResponseDTO.java            # Ajout du champ notes
+├── 🔧 service/DeckService.java                     # Interface updateDeckNotes(UUID, String, User)
+├── 🔧 service/impl/DeckServiceImpl.java            # Implémentation avec @Transactional
+├── 🔧 controller/DeckController.java               # Endpoint PATCH /api/decks/{id}/notes
+└── 🆕 test/.../DeckNotesServiceTest.java           # 6 tests unitaires complets
+```
+
+**Architecture Frontend:**
+
+```
+📁 frontend/src/
+├── 🆕 hooks/useNotesAutoSave.js                    # Hook sauvegarde automatique avec debounce
+├── 🆕 components/NotesPanel.jsx                    # Composant panneau transparent à droite
+├── 🔧 components/DeckVisualizationView.jsx         # Intégration layout avec panneau fixe
+├── 🔧 services/deckService.js                      # Méthode updateDeckNotes(deckId, notes)
+├── 🔧 locales/fr.json                              # Traductions notes, placeholder, indicateurs
+└── 🔧 locales/en.json                              # Traductions anglaises
+```
+
+**Migration SQL:**
+
+```
+📁 scripts/
+└── 🆕 add_notes_to_deck_20250811.sql               # ALTER TABLE deck ADD COLUMN notes TEXT
+```
+
+**Fonctionnalités du panneau de notes:**
+
+- **Positionnement fixe:** Largeur 320px à droite, ne dépend pas du nombre de colonnes
+- **Background transparent:** `bg-transparent` avec `bg-black/20` pour textarea, effet `backdrop-blur-sm`
+- **Sauvegarde automatique:** Debounce 5 secondes + sauvegarde immédiate au blur
+- **Indicateurs visuels:** Spinner pendant sauvegarde, timestamp de dernière sauvegarde avec CheckCircle
+- **Gestion d'état:** Loading initial, détection changements, évitement sauvegardes redondantes
+- **Design épuré:** Header avec `bg-black/10`, pas de bordures latérales, contraste léger
+
+**Fonctionnalités de sauvegarde:**
+
+- **Hook intelligent:** Comparaison avec valeur précédente, cleanup automatique des timers
+- **API REST:** Endpoint PATCH avec validation propriétaire, gestion erreurs HTTP
+- **Persistance BDD:** Colonne TEXT nullable, support contenu long (>10k caractères)
+- **UX optimale:** Pas de sauvegardes inutiles, feedback visuel immédiat, gestion offline
+
+### Champ cardUrl et Icône de Redirection (Ancien)/add_card-url` → `feature/preview`  
+**Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée + **✅ Vue de Visualisation de Deck complète avec colonnes personnalisables (11 Août 2025)** + **✅ Panneau de Notes avec Sauvegarde Automatique (12 Août 2025)**
 
 ## 🎯 Fonctionnalités implémentées
 
-### ✅ Champ cardUrl et Icône de Redirection (Nouveau - Session actuelle)
+### ✅ Panneau de Notes avec Sauvegarde Automatique (Nouveau - 12 Août 2025)
+
+- **Fonctionnalité majeure:** Panneau de notes transparent intégré à droite de la vue de visualisation des decks
+- **Architecture Backend:** Champ `notes` ajouté à l'entité `Deck`, nouveau DTO `DeckNotesUpdateRequestDTO`, endpoint PATCH `/api/decks/{id}/notes`
+- **Sauvegarde intelligente:** Hook `useNotesAutoSave` avec debounce de 5 secondes, sauvegarde au blur, indicateurs d'état visuels
+- **Interface utilisateur:** Composant `NotesPanel` avec background transparent, effet de verre, bordures semi-transparentes
+- **UX optimisée:** Indicateurs de sauvegarde (spinner + timestamp), chargement initial, gestion d'erreurs
+- **Design intégré:** Background transparent avec `bg-black/20` pour contraste léger, sans bordures latérales
+- **Tests unitaires:** 6 tests service backend couvrant tous les cas (update, erreurs, validation propriétaire)
+- **Persistance:** Notes stockées en base de données avec colonne TEXT, gestion des valeurs nulles/vides
+
+### ✅ Vue de Visualisation de Deck avec Colonnes Personnalisables (11 Août 2025)
+
+- **Fonctionnalité majeure:** Système complet de visualisation de deck avec colonnes personnalisables et glisser-déposer
+- **Architecture Backend:** Entités JPA `DeckColumnGroup`, services avec pattern interface/implémentation, 5 endpoints REST sécurisés
+- **Auto-assignation intelligente:** Service Java pour assignation automatique des cartes à la colonne par défaut "Deck"
+- **Frontend React:** Composant `DeckVisualizationView` avec hooks `useDeckVisualization`, drag & drop HTML5 complet
+- **Navigation simplifiée:** Pages indépendantes `/decks/:id/edit` (construction) et `/decks/:id/visualization` avec boutons bidirectionnels
+- **Gestion colonnes robuste:** Création, modification, suppression avec réordonnancement automatique des `displayOrder`
+- **Tests unitaires:** 15+ tests couvrant logique métier critique avec mocking complet
+- **Corrections bonus:** Auto-save opérationnel, spinner visible, import de decks restauré, assignation cartes automatique
+
+### ✅ Auto-save et Navigation Améliorée (Corrections 11 Août 2025)
+
+- **Auto-save corrigé:** Format DTO backend conforme (`cardId`/`quantity`), ajout `gameId` par défaut
+- **Spinner visible:** Modification hook `useAutoSave` pour affichage immédiat pendant debounce (~2+ secondes)
+- **Navigation bidirectionnelle:** Boutons "Vue Construction" ↔ "Vue Visualisation" + boutons retour vers page "Mes decks"
+- **Bouton "Voir" activé:** Navigation directe vers visualisation depuis la page des decks
+- **Architecture simplifiée:** Suppression du toggle complexe, pages indépendantes pour UX fluide
+
+### ✅ Champ cardUrl et Icône de Redirection (Session précédente)
 
 - **Fonctionnalité:** Ajout du champ `cardUrl` à l'entité `CardLocalization` pour liens vers sites officiels
 - **Backend:** Modification entité JPA, DTO, service et tests pour support `cardUrl`
@@ -407,6 +489,7 @@
 ### Backend
 
 ```bash
+✅ DeckNotesServiceTest: 6/6 tests passent (Notes avec sauvegarde)
 ✅ CardLocalization Tests: 164/164 tests passent (avec cardUrl)
 ✅ DTO et Service Tests: Tous adaptés pour cardUrl
 ✅ JwtTokenExpirationTest: 5/5 tests passent (Expiration JWT)
@@ -415,7 +498,7 @@
 ✅ DeckImportServiceTest: 15/15 tests passent (Import de deck)
 ✅ TextNormalizerTest: 17/17 tests passent (Normalisation texte)
 ✅ TextNormalizationIntegrationTest: 2/2 tests passent (Intégration)
-✅ Tous les tests backend: 164/164 tests passent (100%)
+✅ Tous les tests backend: 170/170 tests passent (100%)
 ✅ Compilation: aucune erreur
 ✅ Documentation sécurité: Guide SQL + Guide tests + Guide JWT créés
 ```
@@ -437,7 +520,20 @@
 
 ### Frontend
 
-**Icône de redirection cardUrl (Nouveau):**
+**Panneau de Notes avec Sauvegarde Automatique (Nouveau):**
+
+```bash
+✅ Composant NotesPanel: Background transparent avec bg-black/20 pour contraste
+✅ Hook useNotesAutoSave: Debounce 5s + sauvegarde au blur + indicateurs état
+✅ Layout DeckVisualizationView: Panneau fixe 320px à droite, indépendant colonnes
+✅ Service API: Méthode updateDeckNotes avec gestion erreurs
+✅ Traductions: Support FR/EN pour notes, placeholder, indicateurs sauvegarde
+✅ UX optimisée: Chargement initial, spinner, timestamp dernière sauvegarde
+✅ Design épuré: Effet verre header, bordures semi-transparentes, pas de bordure latérale
+✅ Gestion d'état: Évitement sauvegardes redondantes, cleanup automatique
+```
+
+**Icône de redirection cardUrl (Ancien):**
 
 ```bash
 ✅ Import ExternalLink: lucide-react cohérent avec DecksPage
@@ -497,6 +593,19 @@
 
 ## 🚀 Prochaines étapes possibles
 
+### TODO
+
+- [ ] DeckVisualizationView - Empêcher la création d'un colonne si une avec le même nom existe déjà
+- [x] ~~DeckVisualizationView - Ajouter un text-area note pour consigner les stratégies~~ ✅ **Complété le 12 Août 2025**
+
+### Améliorations du panneau de notes
+
+- [ ] Redimensionnement du panneau de notes (resize handle)
+- [ ] Export des notes dans l'export de deck
+- [ ] Historique des modifications de notes (versioning)
+- [ ] Mise en forme basique (gras, italique, listes)
+- [ ] Mode plein écran pour le panneau de notes
+
 ### Améliorations cardUrl et redirection
 
 - [ ] Ajout cardUrl pour d'autres jeux (pas seulement Mage Noir)
@@ -532,7 +641,20 @@
 
 ## 💡 Notes techniques importantes
 
-### Champ cardUrl et Icône de Redirection (Nouveau)
+### Panneau de Notes avec Sauvegarde Automatique (Nouveau)
+
+- **Architecture backend:** Entité `Deck` avec colonne `notes TEXT`, endpoint REST PATCH, validation propriétaire
+- **Hook intelligent:** `useNotesAutoSave` avec debounce 5s, comparaison valeur précédente, cleanup automatique
+- **Composant transparent:** `NotesPanel` avec `bg-transparent`, `bg-black/20` pour textarea, `backdrop-blur-sm`
+- **Layout fixe:** Largeur 320px à droite, indépendant du nombre de colonnes, `flex-1` pour colonnes
+- **Indicateurs visuels:** Spinner animé pendant sauvegarde, timestamp avec CheckCircle après succès
+- **Gestion d'état:** Loading initial, évitement sauvegardes redondantes, previousNotesRef pour comparaison
+- **UX optimisée:** Sauvegarde immédiate au blur, pas de bordures latérales, effet de verre sur header
+- **API REST:** Endpoint `PATCH /api/decks/{id}/notes` avec authentification JWT et validation autorisation
+- **Tests complets:** 6 tests unitaires backend (success, not found, unauthorized, null/empty/long values)
+- **Traductions:** Support FR/EN pour placeholder, indicateurs sauvegarde, labels notes
+
+### Champ cardUrl et Icône de Redirection (Ancien)
 
 - **Migration BDD:** Champ `cardUrl` nullable pour compatibilité avec données existantes
 - **Propagation entité:** CardLocalization → CardResponseDTO → CardServiceImpl (extraction via ::getCardUrl)
@@ -644,8 +766,8 @@
 
 1. **Projet:** GenericDeckBuilder (Spring Boot + React)
 2. **État:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image + Gestion expiration JWT + Backend sécurisé SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée
-3. **Dernière session:** Ajout champ `cardUrl` à CardLocalization + icône de redirection centrée bas des cartes + script SQL migration 410 entrées
-4. **Branche actuelle:** `feature/add_card-url`
+3. **Dernière session:** ✅ Panneau de Notes avec Sauvegarde Automatique - Ajout champ `notes` à entité Deck + composant NotesPanel transparent + hook useNotesAutoSave + 6 tests backend
+4. **Branche actuelle:** `feature/preview`
 5. **Objectif:** [Nouvelle fonctionnalité à définir]
 
 ### Fichiers de référence
@@ -660,16 +782,26 @@
 ### Commandes de vérification
 
 ```bash
-# Backend (avec tests JWT + sécurité SQL)
+# Backend (avec tests JWT + sécurité SQL + notes)
 cd backend && ./mvnw test
+cd backend && ./mvnw test -Dtest=DeckNotesServiceTest  # Tests notes spécifiques
 cd backend && ./mvnw test -Dtest=JwtTokenExpirationTest  # Tests JWT spécifiques
 cd backend && ./mvnw test -Dtest=SqlInjectionSecurityTest  # Tests sécurité SQL spécifiques
 
-# Frontend (avec tests JWT + contrôles zoom/aperçu)
+# Frontend (avec tests JWT + contrôles zoom/aperçu + notes)
 cd frontend && npm test -- jwtUtils.test.js  # Tests JWT spécifiques
 cd frontend && npm run build
 cd frontend && npm run preview:prod  # Test production sécurisée
-cd frontend && npm run dev  # Test contrôles zoom en développement
+cd frontend && npm run dev  # Test contrôles zoom + panneau notes en développement
+
+# Test panneau de notes (NOUVEAU)
+# 1. Démarrer backend: mvn spring-boot:run
+# 2. Exécuter migration SQL: psql -d db -f scripts/add_notes_to_deck_20250811.sql
+# 3. Démarrer frontend: npm run dev
+# 4. Aller sur vue visualisation d'un deck (/decks/{id}/visualization)
+# 5. Vérifier panneau notes transparent à droite (320px fixe)
+# 6. Taper du texte → vérifier sauvegarde automatique après 5s ou au blur
+# 7. Vérifier indicateurs visuels (spinner, timestamp dernière sauvegarde)
 
 # Test expiration JWT en local
 # 1. Modifier application-dev.yml: expiration: 60000 (1 minute)
@@ -692,4 +824,4 @@ cd frontend && npm run dev  # Test contrôles zoom en développement
 # 5. Vérifier positionnement intelligent image au survol
 ```
 
-**🎉 Session terminée avec succès - Champ cardUrl et icône de redirection complètement implémentés !**
+**🎉 Session terminée avec succès - Panneau de Notes avec Sauvegarde Automatique complètement implémenté !**

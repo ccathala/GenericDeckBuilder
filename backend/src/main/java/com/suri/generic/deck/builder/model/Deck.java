@@ -34,8 +34,15 @@ public class Deck {
     @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeckCard> cards = new ArrayList<>();
 
+    @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    private List<DeckColumnGroup> columnGroups = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "display_card_id")
     private Card displayCard;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
 
 }

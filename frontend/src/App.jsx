@@ -6,9 +6,9 @@ import NavBar from "./components/NavBar";
 import HomePage from "./pages/HomePage";
 import CardsPage from "./pages/CardsPage";
 import DecksPage from "./pages/DecksPage";
-import CreateDeckPage from "./pages/CreateDeckPage";
 import EditDeckPage from "./pages/EditDeckPage";
 import DeckDetailPage from "./pages/DeckDetailPage";
+import DeckVisualizationPage from "./pages/DeckVisualizationPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import "./App.css";
@@ -27,9 +27,12 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/cards" element={<CardsPage />} />
                 <Route path="/decks" element={<DecksPage />} />
-                <Route path="/decks/new" element={<CreateDeckPage />} />
                 <Route path="/decks/:id" element={<DeckDetailPage />} />
                 <Route path="/decks/:id/edit" element={<EditDeckPage />} />
+                <Route
+                  path="/decks/:id/visualization"
+                  element={<DeckVisualizationPage />}
+                />
                 <Route
                   path="/profile"
                   element={

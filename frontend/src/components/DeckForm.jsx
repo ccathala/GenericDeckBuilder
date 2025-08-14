@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useAuth } from "../contexts/AuthContext";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import deckService from "../services/deckService";
 import gameService from "../services/gameService";
 import CardBrowser from "./CardBrowser";
+import { useAutoSave } from "../hooks/useAutoSave";
 
 const DeckForm = ({ isEdit = false }) => {
   const { t } = useLanguage();
@@ -35,9 +37,34 @@ const DeckForm = ({ isEdit = false }) => {
 
   // UI state
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCards, setSelectedCards] = useState(new Set());
+
+  // NOUVEAU : Auto-save hook
+  const { isSaving, lastSaved } = useAutoSave(
+    { deck, deckCards },
+    async (data) => {
+      if (isEdit && id && data.deck.name.trim()) {
+        try {
+          console.log("🔄 Auto-save déclenchée pour deck:", id);
+          await deckService.updateDeck(id, {
+            name: data.deck.name,
+            description: data.deck.description,
+            gameId: data.deck.gameId || "mage_noir",
+            cards: data.deckCards.map((deckCard) => ({
+              cardId: deckCard.id,
+              quantity: deckCard.quantity,
+            })),
+          });
+          console.log("✅ Auto-save réussie");
+        } catch (error) {
+          console.error("❌ Erreur auto-save:", error);
+          throw error;
+        }
+      }
+    },
+    1500
+  );
 
   // États pour gestion image au survol
   const [hoveredCard, setHoveredCard] = useState(null);
@@ -365,43 +392,6 @@ const DeckForm = ({ isEdit = false }) => {
     handleCardSelectionChange(cardId, false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!deck.name.trim()) {
-      setError(t("decks.form.nameRequired"));
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError(null);
-
-      const deckData = {
-        ...deck,
-        cards: deckCards.map((card) => ({
-          cardId: card.id,
-          quantity: card.quantity,
-        })),
-      };
-
-      // Toujours sauvegarder, même si invalide (workflow utilisateur)
-      const result = isEdit
-        ? await deckService.updateDeck(id, deckData)
-        : await deckService.createDeck(deckData);
-
-      if (result.success) {
-        navigate("/decks");
-      } else {
-        setError(result.error);
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (!isAuthenticated) {
     return <AuthRequired />;
   }
@@ -415,6 +405,52 @@ const DeckForm = ({ isEdit = false }) => {
   return (
     <div className="bg-mage-bg-900 text-white">
       <div className="w-full px-6 py-4 h-[calc(105vh-6rem)] flex flex-col">
+        {/* NOUVEAU : Header avec bouton retour et indicateur auto-save */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate("/decks")}
+              className="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              title={t("common.back")}
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-2xl font-bold text-white">
+              {isEdit ? t("decks.form.editTitle") : t("decks.form.createTitle")}
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Indicateur auto-save */}
+            <div className="flex items-center gap-2 text-sm">
+              {isSaving ? (
+                <>
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                  <span className="text-blue-400">{t("common.saving")}</span>
+                </>
+              ) : lastSaved ? (
+                <>
+                  <CheckCircle size={16} className="text-green-400" />
+                  <span className="text-green-400">
+                    {t("common.autoSaved")} {lastSaved.toLocaleTimeString()}
+                  </span>
+                </>
+              ) : null}
+            </div>
+
+            {/* Bouton Vue Visualisation */}
+            {isEdit && (
+              <button
+                onClick={() => navigate(`/decks/${id}/visualization`)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                title={t("decks.form.goToVisualization")}
+              >
+                📊 {t("decks.form.viewVisualization")}
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="flex flex-col gap-4 h-full overflow-hidden">
           {/* Error Message */}
           {error && <ErrorMessage error={error} />}
@@ -612,27 +648,6 @@ const DeckForm = ({ isEdit = false }) => {
               )}
 
               {/* Boutons d'action */}
-              <div className="flex space-x-2 mt-3 pt-3 border-t border-gray-600">
-                <button
-                  type="button"
-                  onClick={() => navigate("/decks")}
-                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200"
-                >
-                  {t("common.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={saving || !deck.name.trim()}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white text-xs font-medium py-1.5 px-2 rounded transition-colors duration-200 disabled:cursor-not-allowed"
-                >
-                  {saving
-                    ? t("common.saving")
-                    : isEdit
-                    ? t("common.save")
-                    : t("common.create")}
-                </button>
-              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 package com.suri.generic.deck.builder.controller;
 
 import com.suri.generic.deck.builder.dto.request.DeckImportRequestDTO;
+import com.suri.generic.deck.builder.dto.request.DeckNotesUpdateRequestDTO;
 import com.suri.generic.deck.builder.dto.request.DeckRequestDTO;
 import com.suri.generic.deck.builder.dto.response.DeckExportResponseDTO;
 import com.suri.generic.deck.builder.dto.response.DeckResponseDTO;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.UUID;
 
 @RestController
@@ -80,6 +80,15 @@ public class DeckController {
             return ResponseEntity.badRequest().body(errorResponse);
 
         }
+    }
+
+    @PatchMapping("/{id}/notes")
+    public ResponseEntity<DeckResponseDTO> updateDeckNotes(
+            @PathVariable UUID id,
+            @RequestBody DeckNotesUpdateRequestDTO request,
+            @AuthenticationPrincipal User user) {
+        DeckResponseDTO updatedDeck = deckService.updateDeckNotes(id, request.getNotes(), user);
+        return ResponseEntity.ok(updatedDeck);
     }
 
     @GetMapping("/{id}/export")

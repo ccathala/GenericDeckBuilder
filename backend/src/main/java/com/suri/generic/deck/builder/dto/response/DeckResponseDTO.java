@@ -17,4 +17,5 @@ public class DeckResponseDTO {
     private String description;
     private String gameId;
     private List<DeckCardResponseDTO> cards;
+    private String notes;
 }

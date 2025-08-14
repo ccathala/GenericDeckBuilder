@@ -20,7 +20,10 @@
     "delete": "Delete",
     "edit": "Edit",
     "create": "Create",
-    "search": "Search"
+    "search": "Search",
+    "back": "Back",
+    "saving": "Saving...",
+    "autoSaved": "Saved at"
   },
   "pages": {
     "home": {
@@ -221,7 +224,49 @@
       "noDeckCards": "No cards in deck",
       "selectCardsBelow": "Select cards below to add them",
       "cardSelection": "Card Selection",
-      "loginMessage": "Login to create decks."
+      "loginMessage": "Login to create decks.",
+      "viewVisualization": "Preview",
+      "goToVisualization": "Go to preview"
+    },
+    "visualization": {
+      "title": "Preview",
+      "toggleConstruction": "🔧 Builder",
+      "toggleVisualization": "📊 Preview",
+      "saveFirstMessage": "Save your deck first to access the preview",
+      "createDeckFirst": "Create your deck first to organize your cards in columns",
+      "addColumn": "Add column",
+      "newColumnName": "New column",
+      "defaultColumnName": "Deck",
+      "editColumn": "Edit column",
+      "deleteColumn": "Delete column",
+      "cannotDeleteLastColumn": "Cannot delete the last column",
+      "viewConstruction": "Builder",
+      "goToConstruction": "Go to builder",
+      "confirmDeleteColumn": "Delete column \"{{name}}\"?",
+      "dropCardsHere": "Drop cards here",
+      "totalCards": "{{count}} cards",
+      "uniqueCards": "{{count}} unique cards",
+      "columnName": "Column name",
+      "columnColor": "Color",
+      "createColumn": "Create column",
+      "saveChanges": "Save",
+      "cancel": "Cancel",
+      "moveCard": "Move card",
+      "selectQuantity": "Select quantity to move",
+      "notes": "Notes",
+      "notesPlaceholder": "Write down your thoughts and strategies here...",
+      "errors": {
+        "loadFailed": "Unable to load visualization",
+        "saveFailed": "Unable to save changes",
+        "createFailed": "Unable to create column",
+        "updateFailed": "Unable to update column",
+        "deleteFailed": "Unable to delete column",
+        "moveFailed": "Unable to move card",
+        "invalidName": "Column name is required",
+        "invalidColor": "Invalid color format",
+        "networkError": "Server connection error",
+        "duplicateColumnName": "A column with the name '{{name}}' already exists"
+      }
     },
     "detail": {
       "public": "Public",

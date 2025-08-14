@@ -29,4 +29,6 @@ public interface DeckService {
     String getDisplayImageUrl(Deck deck);
 
     String getDefaultDisplayCard(Deck deck);
+
+    DeckResponseDTO updateDeckNotes(UUID deckId, String notes, User user);
 }

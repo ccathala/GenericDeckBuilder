@@ -5,7 +5,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "deck_card")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 public class DeckCard {
 
@@ -24,4 +25,11 @@ public class DeckCard {
 
     @Column(name = "quantity")
     private int quantity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "column_group_id")
+    private DeckColumnGroup columnGroup;
+
+    @Column(name = "position_in_column")
+    private Integer positionInColumn;
 }

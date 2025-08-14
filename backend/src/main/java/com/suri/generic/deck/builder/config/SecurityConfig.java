@@ -24,90 +24,100 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
-    private final UserService userService;
-    private final StaticResourceHeadersFilter staticResourceHeadersFilter;
+        private final JwtFilter jwtFilter;
+        private final UserService userService;
+        private final StaticResourceHeadersFilter staticResourceHeadersFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter, UserService userService,
-            StaticResourceHeadersFilter staticResourceHeadersFilter) {
-        this.jwtFilter = jwtFilter;
-        this.userService = userService;
-        this.staticResourceHeadersFilter = staticResourceHeadersFilter;
-    }
+        public SecurityConfig(JwtFilter jwtFilter, UserService userService,
+                        StaticResourceHeadersFilter staticResourceHeadersFilter) {
+                this.jwtFilter = jwtFilter;
+                this.userService = userService;
+                this.staticResourceHeadersFilter = staticResourceHeadersFilter;
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Add CORS explicitly
-                .headers(headers -> headers
-                        .disable() // Disable all security headers, including X-Frame-Options (iframe)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        // Frontend et assets en PREMIER (priorité maximale)
-                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js", "/*.svg", "/*.png", "/*.ico",
-                                "/*.txt")
-                        .permitAll()
-                        // Routes SPA (pages frontend accessibles publiquement)
-                        .requestMatchers("/cards", "/decks", "/profile", "/login", "/register").permitAll()
-                        // API et services
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers("/images/**").permitAll() // Autoriser l'accès aux images
-                        .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour Railway
-                        .requestMatchers("/api/components/translations").permitAll() // Autoriser l'accès aux
-                                                                                     // traductions de composants
-                        .requestMatchers(
-                                "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs.yaml",
-                                "/v3/api-docs",
-                                "/webjars/**")
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .addFilterBefore(staticResourceHeadersFilter,
-                        org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(csrf -> csrf.disable())
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Add CORS
+                                                                                                   // explicitly
+                                .headers(headers -> headers
+                                                .disable() // Disable all security headers, including X-Frame-Options
+                                                           // (iframe)
+                                )
+                                .authorizeHttpRequests(auth -> auth
+                                                // Frontend et assets en PREMIER (priorité maximale)
+                                                .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                                                .requestMatchers("/assets/**", "/static/**", "/*.css", "/*.js",
+                                                                "/*.svg", "/*.png", "/*.ico",
+                                                                "/*.txt")
+                                                .permitAll()
+                                                // Routes SPA (pages frontend accessibles publiquement)
+                                                .requestMatchers("/cards", "/decks", "/profile", "/login", "/register")
+                                                .permitAll()
+                                                // API et services
+                                                .requestMatchers("/auth/**").permitAll()
+                                                .requestMatchers("/h2-console/**").permitAll()
+                                                .requestMatchers("/api/public/**").permitAll()
+                                                .requestMatchers("/images/**").permitAll() // Autoriser l'accès aux
+                                                                                           // images
+                                                .requestMatchers("/actuator/**").permitAll() // Autoriser actuator pour
+                                                                                             // Railway
+                                                .requestMatchers("/api/components/translations").permitAll() // Autoriser
+                                                                                                             // l'accès
+                                                                                                             // aux
+                                                                                                             // traductions
+                                                                                                             // de
+                                                                                                             // composants
+                                                .requestMatchers(
+                                                                "/swagger-ui.html",
+                                                                "/swagger-ui/**",
+                                                                "/v3/api-docs/**",
+                                                                "/v3/api-docs.yaml",
+                                                                "/v3/api-docs",
+                                                                "/webjars/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .addFilterBefore(staticResourceHeadersFilter,
+                                                org.springframework.security.web.authentication.www.BasicAuthenticationFilter.class)
+                                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    // Bean to encode passwords using BCrypt
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        // Bean to encode passwords using BCrypt
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    // AuthenticationProvider using UserService and PasswordEncoder
-    @Bean
-    @SuppressWarnings("deprecation") // TODO: Update when Spring Security provides non-deprecated alternative
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
+        // AuthenticationProvider using UserService and PasswordEncoder
+        @Bean
+        @SuppressWarnings("deprecation") // TODO: Update when Spring Security provides non-deprecated alternative
+        public AuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+                provider.setUserDetailsService(userService);
+                provider.setPasswordEncoder(passwordEncoder());
+                return provider;
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+                return config.getAuthenticationManager();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Autoriser Railway ET développement local
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-                "https://mndb.up.railway.app"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                // Autoriser Railway ET développement local
+                configuration.setAllowedOriginPatterns(Arrays.asList(
+                                "https://mndb.up.railway.app"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("*"));
+                configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }
