@@ -33,7 +33,9 @@ export const useDeckVisualization = (deckId) => {
   // Créer une nouvelle colonne
   const createColumn = useCallback(
     async (name = "Nouvelle colonne") => {
-      if (!deckId) throw new Error("Deck ID requis");
+      if (!deckId) {
+        return { success: false, error: "Deck ID requis" };
+      }
 
       try {
         setError(null);
@@ -49,15 +51,21 @@ export const useDeckVisualization = (deckId) => {
             column_groups: [...(prev?.column_groups || []), result.data],
           }));
 
-          return result.data;
+          return { success: true, data: result.data };
         } else {
-          setError(result.error);
-          throw new Error(result.error);
+          // Les erreurs de validation (409) sont retournées pour être gérées localement
+          // Les autres erreurs sont mises dans l'état global
+          if (result.error && result.error.includes("existe déjà")) {
+            return { success: false, error: result.error };
+          } else {
+            setError(result.error);
+            return { success: false, error: result.error };
+          }
         }
       } catch (err) {
         const errorMessage = err.message || "Erreur lors de la création de la colonne";
         setError(errorMessage);
-        throw new Error(errorMessage);
+        return { success: false, error: errorMessage };
       }
     },
     [deckId]
