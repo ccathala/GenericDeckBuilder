@@ -30,7 +30,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
     // Constantes pour les colonnes par défaut
     private static final String DEFAULT_COLUMN_NAME = "Toutes les cartes";
-    private static final int MAX_COLUMNS_PER_DECK = 8;
+    private static final int MAX_COLUMNS_PER_DECK = 6;
 
     @Override
     @Transactional(readOnly = true)
