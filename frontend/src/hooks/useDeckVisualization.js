@@ -233,10 +233,10 @@ export const useDeckVisualization = (deckId) => {
     [deckId, loadVisualization]
   );
 
-  // Charger automatiquement les données au montage et changement de deckId
+  // Charger automatiquement les données au montage et changement de deckId ou langue
   useEffect(() => {
     loadVisualization();
-  }, [loadVisualization]);
+  }, [loadVisualization, currentLanguage]);
 
   // Fonction pour clear les erreurs manuellement
   const clearError = useCallback(() => {
