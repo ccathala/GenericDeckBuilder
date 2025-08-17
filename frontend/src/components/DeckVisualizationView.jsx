@@ -125,8 +125,9 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   // Gestion de la création de colonne
   const handleCreateColumn = async () => {
     setCreateColumnError(null); // Clear l'erreur avant de tenter
-    
-    const columnName = newColumnName.trim() || t("decks.visualization.newColumnName");
+
+    const columnName =
+      newColumnName.trim() || t("decks.visualization.newColumnName");
     const result = await createColumn(columnName);
 
     if (result.success) {
@@ -585,7 +586,7 @@ const DeckColumn = ({
 
   return (
     <div
-      className="deck-column w-[294px] min-w-[294px] max-w-[294px] bg-transparent flex flex-col border-r border-gray-600"
+      className="deck-column w-[260px] min-w-[260px] max-w-[260px] bg-transparent flex flex-col border-r border-gray-600"
       data-column-id={column.id}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
