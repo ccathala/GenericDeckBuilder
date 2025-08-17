@@ -106,6 +106,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   // États pour gestion image au survol
   const [hoveredCard, setHoveredCard] = useState(null);
   const [imageErrors, setImageErrors] = useState(new Set());
+  const [hoverPreviewEnabled, setHoverPreviewEnabled] = useState(true);
   const [hoveredCardPosition, setHoveredCardPosition] = useState({
     top: 0,
     left: 0,
@@ -151,6 +152,8 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   // Gestion du drag & drop (version simplifiée pour l'instant)
   const handleDragStart = (e, card, sourceColumnId) => {
     console.log("🎯 Drag start - Card ID:", card.id);
+    setHoverPreviewEnabled(false); // Désactive l'aperçu au survol
+    setHoveredCard(null); // Force la fermeture si un aperçu était ouvert
 
     setDraggedCard({
       card,
@@ -216,9 +219,10 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   };
 
   const handleDragEnd = (e) => {
+    setHoverPreviewEnabled(true); // Réactive l'aperçu au survol
     e.target.style.opacity = "1";
     setDraggedCard(null);
-    setDropIndicator(null); // Ajouter ici pour nettoyer l'indicateur
+    setDropIndicator(null);
   };
 
   const handleDragOver = (e) => {
@@ -498,6 +502,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 onUpdateColumn={updateColumn}
                 onDeleteColumn={deleteColumn}
                 canDelete={visualization.column_groups.length > 1}
+                hoverPreviewEnabled={hoverPreviewEnabled}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -610,6 +615,7 @@ const DeckColumn = ({
   column,
   onUpdateColumn,
   onDeleteColumn,
+  hoverPreviewEnabled,
   canDelete,
   onDragStart,
   onDragOver,
@@ -766,11 +772,15 @@ const DeckColumn = ({
                   onDragStart={(e) => onDragStart(e, card, column.id)}
                   onDrag={handleDrag}
                   onDragEnd={handleDragEnd}
-                  onMouseEnter={(e) => {
-                    setHoveredCard(card.card);
-                    const position = calculateImagePosition(e.currentTarget);
-                    setHoveredCardPosition(position);
-                  }}
+                  onMouseEnter={
+                    hoverPreviewEnabled
+                      ? (e) => {
+                          setHoveredCard(card.card);
+                          const position = calculateImagePosition(e.currentTarget);
+                          setHoveredCardPosition(position);
+                        }
+                      : undefined
+                  }
                   onMouseLeave={() => setHoveredCard(null)}
                 >
                   <img
