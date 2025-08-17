@@ -103,6 +103,13 @@ const cardImageStyles = `
 const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // États pour gestion image au survol
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [imageErrors, setImageErrors] = useState(new Set());
+  const [hoveredCardPosition, setHoveredCardPosition] = useState({
+    top: 0,
+    left: 0,
+  });
   const {
     visualization,
     loading,
@@ -154,9 +161,53 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
   };
 
   // Gestion des erreurs d'image
-  const handleImageError = (e) => {
-    e.target.src = "/images/card-placeholder.png";
-    e.target.alt = `Image non disponible pour ${e.target.alt}`;
+  // Gestion d'erreur de chargement d'image
+  const handleImageError = (cardId) => {
+    setImageErrors((prev) => new Set([...prev, cardId]));
+  };
+
+  // Calcul position dynamique pour éviter débordement
+  const calculateImagePosition = (cardElement) => {
+    if (!cardElement) return { top: 0, left: 0 };
+
+    const rect = cardElement.getBoundingClientRect();
+    const imageHeight = 420; // Hauteur approximative de l'image agrandie
+    const imageWidth = 288; // Largeur de l'image (w-72 = 18rem = 288px)
+    const viewportTop = 0;
+    const margin = 16; // Marge entre l'image et la carte
+
+    // Position de base : à gauche de la carte
+    let left = rect.left - imageWidth - margin;
+    let top = rect.top;
+
+    // Si l'image déborde à gauche, la positionner à droite
+    if (left < 0) {
+      left = rect.right + margin;
+    }
+
+    // Si l'image déborde en haut, l'ajuster vers le bas
+    if (top < viewportTop) {
+      top = Math.max(viewportTop + margin, rect.bottom - imageHeight);
+    }
+
+    // Si l'image déborde en bas, l'ajuster vers le haut
+    const viewportBottom = window.innerHeight;
+    if (top + imageHeight > viewportBottom) {
+      top = Math.max(
+        viewportTop + margin,
+        viewportBottom - imageHeight - margin
+      );
+    }
+
+    return { top, left };
+  };
+
+  // Obtenir URL d'image avec fallback
+  const getCardImageUrl = (card) => {
+    if (imageErrors.has(card.id) || !card.imageUrl) {
+      return "/images/card-placeholder.png";
+    }
+    return card.imageUrl;
   };
 
   // Gestion du drag pour les images
@@ -457,6 +508,10 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 handleImageError={handleImageError}
                 dropIndicator={dropIndicator}
                 isLastColumn={index === visualization.column_groups.length - 1}
+                hoveredCard={hoveredCard}
+                setHoveredCard={setHoveredCard}
+                calculateImagePosition={calculateImagePosition}
+                setHoveredCardPosition={setHoveredCardPosition}
               />
             ))}
           </div>
@@ -529,6 +584,23 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
           </div>
         </div>
       )}
+    {/* Aperçu d'image au survol */}
+    {hoveredCard && (
+      <div
+        className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+        style={{
+          left: `${hoveredCardPosition.left}px`,
+          top: `${hoveredCardPosition.top}px`,
+        }}
+      >
+        <img
+          src={getCardImageUrl(hoveredCard)}
+          alt={hoveredCard.name}
+          className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
+        />
+      </div>
+    )}
+
     </div>
   );
 };
@@ -549,6 +621,10 @@ const DeckColumn = ({
   handleImageError,
   dropIndicator,
   isLastColumn = false,
+  hoveredCard,
+  setHoveredCard,
+  calculateImagePosition,
+  setHoveredCardPosition,
 }) => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
@@ -690,6 +766,12 @@ const DeckColumn = ({
                   onDragStart={(e) => onDragStart(e, card, column.id)}
                   onDrag={handleDrag}
                   onDragEnd={handleDragEnd}
+                  onMouseEnter={(e) => {
+                    setHoveredCard(card.card);
+                    const position = calculateImagePosition(e.currentTarget);
+                    setHoveredCardPosition(position);
+                  }}
+                  onMouseLeave={() => setHoveredCard(null)}
                 >
                   <img
                     src={card.card.imageUrl}
