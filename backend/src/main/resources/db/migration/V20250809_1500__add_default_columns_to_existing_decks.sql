@@ -4,12 +4,11 @@
 -- Auteur: Migration automatique pour colonnes de visualisation par défaut
 
 -- Étape 1: Insérer une colonne par défaut UNIQUEMENT pour les decks sans aucune colonne
-INSERT INTO deck_column_group (id, deck_id, name, color_hex, display_order, created_at, updated_at)
+INSERT INTO deck_column_group (id, deck_id, name, display_order, created_at, updated_at)
 SELECT 
     gen_random_uuid() as id,
     d.id as deck_id,
     'Deck' as name,
-    '#6B7280' as color_hex,
     0 as display_order,
     NOW() as created_at,
     NOW() as updated_at
