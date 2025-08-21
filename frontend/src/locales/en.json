@@ -131,7 +131,9 @@
       "zoomOut": "Reduce cards per row",
       "zoomIn": "Increase cards per row",
       "showImagePreview": "Show image preview on hover",
-      "hideImagePreview": "Hide image preview on hover"
+      "hideImagePreview": "Hide image preview on hover",
+      "fanMade": "Fan made",
+      "fanMadeTooltip": "Include cards from fan made extensions"
     },
     "types": {
       "Sort": "Spell",

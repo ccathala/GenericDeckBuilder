@@ -47,27 +47,29 @@ public class CardServiceImpl implements CardService {
                     .filter(l -> l.getId().getLocale().equalsIgnoreCase(locale))
                     .findFirst();
 
-            String name = loc.map(CardLocalization::getName).orElse("Nom inconnu");
-            String description = loc.map(CardLocalization::getDescription).orElse("");
-            String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
-            String cardUrl = loc.map(CardLocalization::getCardUrl).orElse("");
+            if (loc.isPresent()) {
+                String name = loc.map(CardLocalization::getName).orElse("Nom inconnu");
+                String description = loc.map(CardLocalization::getDescription).orElse("");
+                String imageUrl = loc.map(CardLocalization::getImageUrl).orElse("");
+                String cardUrl = loc.map(CardLocalization::getCardUrl).orElse("");
 
-            // Parse properties
-            Map<String, Object> props;
-            try {
-                props = new ObjectMapper().readValue(card.getProperties(), MAP_TYPE_REF);
-            } catch (Exception e) {
-                props = Map.of(); // fail-safe
+                // Parse properties
+                Map<String, Object> props;
+                try {
+                    props = new ObjectMapper().readValue(card.getProperties(), MAP_TYPE_REF);
+                } catch (Exception e) {
+                    props = Map.of(); // fail-safe
+                }
+
+                result.add(CardResponseDTO.builder()
+                        .id(card.getId())
+                        .name(name)
+                        .description(description)
+                        .imageUrl(imageUrl)
+                        .cardUrl(cardUrl)
+                        .properties(props)
+                        .build());
             }
-
-            result.add(CardResponseDTO.builder()
-                    .id(card.getId())
-                    .name(name)
-                    .description(description)
-                    .imageUrl(imageUrl)
-                    .cardUrl(cardUrl)
-                    .properties(props)
-                    .build());
         }
 
         return result;
