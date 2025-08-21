@@ -28,12 +28,20 @@ const CardFilter = ({
   const cardTypes = ["Sort", "Permanent", "Équipement", "Rituel"];
 
   const elements = [
-    { key: "Végétal", cssClass: "vegetal" },
-    { key: "Feu", cssClass: "feu" },
-    { key: "Air", cssClass: "air" },
-    { key: "Eau", cssClass: "eau" },
-    { key: "Minéral", cssClass: "mineral" },
-    { key: "Arcane", cssClass: "arcane" },
+    {
+      key: "Végétal",
+      cssClass: "vegetal",
+      icon: "/src/assets/vegetal_icon.png",
+    },
+    { key: "Feu", cssClass: "feu", icon: "/src/assets/fire_icon.png" },
+    { key: "Air", cssClass: "air", icon: "/src/assets/air_icon.png" },
+    { key: "Eau", cssClass: "eau", icon: "/src/assets/water_icon.png" },
+    {
+      key: "Minéral",
+      cssClass: "mineral",
+      icon: "/src/assets/mineral_icon.png",
+    },
+    { key: "Arcane", cssClass: "arcane", icon: "/src/assets/arcane_icon.png" },
   ];
 
   const ComponentDropdown = () => (
@@ -183,7 +191,7 @@ const CardFilter = ({
                    rounded-md text-white placeholder-gray-400 
                    focus:outline-none focus:ring-2 focus:ring-mage-dark-500"
         />
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           {elements.map((element) => (
             <button
               key={element.key}
@@ -193,8 +201,13 @@ const CardFilter = ({
                   ? styles[element.cssClass]
                   : styles.inactive
               }`}
+              title={t(`cards.elements.${element.key}`)}
             >
-              {t(`cards.elements.${element.key}`)}
+              <img
+                src={element.icon}
+                alt={t(`cards.elements.${element.key}`)}
+                className="object-contain max-w-full max-h-full"
+              />
             </button>
           ))}
         </div>
