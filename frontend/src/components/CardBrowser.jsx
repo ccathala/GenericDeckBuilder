@@ -35,6 +35,10 @@ const CardBrowser = ({
     maxColumns ? Math.max(6, Math.min(10, maxColumns)) : 7
   ); // Nombre de colonnes pour le zoom (6-10)
   const [showImagePreview, setShowImagePreview] = useState(true); // État pour l'aperçu d'image
+  const [showFanMade, setShowFanMade] = useState(false); // État pour le filtre fan made
+
+  // Extensions fan made définies en dur
+  const FAN_MADE_EXTENSIONS = ["Nexus Noir"];
 
   // Hook pour les traductions des composants
   const {
@@ -148,7 +152,8 @@ const CardBrowser = ({
       searchTerm ||
       selectedElements.length > 0 ||
       selectedComponents.length > 0 ||
-      selectedType
+      selectedType ||
+      !showFanMade // Si showFanMade est false, on applique le filtre
     ) {
       const filtered = cardsToUse.filter((card) => {
         // Filtrage par texte (insensible aux accents)
@@ -193,8 +198,18 @@ const CardBrowser = ({
               .toLowerCase()
               .includes(selectedType.toLowerCase()));
 
+        // Filtrage par fan made
+        const matchesFanMadeFilter = showFanMade || (
+          !card.properties?.extension || 
+          !FAN_MADE_EXTENSIONS.includes(card.properties.extension)
+        );
+
         return (
-          matchesSearch && matchesElement && matchesComponent && matchesType
+          matchesSearch && 
+          matchesElement && 
+          matchesComponent && 
+          matchesType && 
+          matchesFanMadeFilter
         );
       });
       setFilteredCards(filtered);
@@ -207,6 +222,7 @@ const CardBrowser = ({
     selectedComponents,
     selectedType,
     cardsToUse,
+    showFanMade,
   ]);
 
   const handleSearchChange = (term) => {
@@ -233,11 +249,16 @@ const CardBrowser = ({
     setSelectedType(type);
   };
 
+  const handleFanMadeToggle = () => {
+    setShowFanMade(!showFanMade);
+  };
+
   const handleResetFilters = () => {
     setSearchTerm("");
     setSelectedElements([]);
     setSelectedComponents([]);
     setSelectedType("");
+    setShowFanMade(false);
   };
 
   const handleColumnsChange = (newCount) => {
@@ -292,6 +313,8 @@ const CardBrowser = ({
           onColumnsChange={handleColumnsChange}
           showImagePreview={showImagePreview}
           onImagePreviewToggle={handleImagePreviewToggle}
+          showFanMade={showFanMade}
+          onFanMadeToggle={handleFanMadeToggle}
         />
       </div>
 

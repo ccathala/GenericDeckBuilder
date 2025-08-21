@@ -132,7 +132,8 @@
       "zoomIn": "Augmenter le nombre de cartes par ligne",
       "showImagePreview": "Afficher l'aperçu d'image au survol",
       "hideImagePreview": "Masquer l'aperçu d'image au survol",
-      "fanMade": "Fan made"
+      "fanMade": "Fan made",
+      "fanMadeTooltip": "Inclure les cartes issues des extensions fan made"
     },
     "types": {
       "Sort": "Sort",

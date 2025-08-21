@@ -18,6 +18,8 @@ const CardFilter = ({
   onColumnsChange,
   showImagePreview = true,
   onImagePreviewToggle,
+  showFanMade = false,
+  onFanMadeToggle,
 }) => {
   const { t } = useLanguage();
   const [isComponentDropdownOpen, setIsComponentDropdownOpen] = useState(false);
@@ -200,6 +202,21 @@ const CardFilter = ({
         <ComponentDropdown />
 
         <TypeDropdown />
+
+        {/* Fan Made toggle button */}
+        <div className="flex items-center ml-2">
+          <button
+            onClick={() => onFanMadeToggle && onFanMadeToggle()}
+            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+              showFanMade
+                ? "bg-purple-600 text-white hover:bg-purple-700 border border-purple-500"
+                : "bg-mage-dark-700 text-gray-300 hover:text-white hover:bg-mage-dark-600 border border-mage-dark-600"
+            }`}
+            title={t("cards.filters.fanMadeTooltip")}
+          >
+            {t("cards.filters.fanMade")}
+          </button>
+        </div>
 
         <button
           onClick={onResetFilters}
