@@ -52,8 +52,12 @@ WORKDIR /app
 # Copie automatique des assets frontend dans backend
 COPY --from=frontend-build /app/frontend/dist ./backend/src/main/resources/static/
 
+# Copie des icônes de mana directement dans le dossier static
+COPY frontend/src/assets/*.png ./backend/src/main/resources/static/
+
 # Vérification que les assets sont bien copiés
 RUN test -f backend/src/main/resources/static/index.html || (echo "❌ Assets copy failed: index.html not found" && exit 1)
+RUN ls -l backend/src/main/resources/static/*.png
 
 # Build backend avec assets intégrés (mode production)
 COPY backend/src ./backend/src/
