@@ -55,7 +55,7 @@ class CardServiceImplTest {
         testCard = new Card();
         testCard.setId("card-001");
         testCard.setGame(testGame);
-        testCard.setProperties("{\"cost\": 5, \"power\": 3, \"type\": \"creature\"}");
+        testCard.setProperties("{\"cost\": 5, \"power\": 3, \"type\": \"creature\", \"extension\": \"Jeu de base\"}");
 
         // Créer des localisations
         frenchLocalization = new CardLocalization();
@@ -125,7 +125,7 @@ class CardServiceImplTest {
     }
 
     @Test
-    void testGetCardsByLocale_WithUnknownLocale_UsesDefaultValues() {
+    void testGetCardsByLocale_WithUnknownLocale_ReturnNone() {
         // Given
         String gameId = "mage-noir";
         String locale = "es"; // Non existant
@@ -137,12 +137,7 @@ class CardServiceImplTest {
         List<CardResponseDTO> result = cardService.getCardsByLocale(gameId, locale);
 
         // Then
-        assertThat(result).hasSize(1);
-        CardResponseDTO dto = result.get(0);
-        assertThat(dto.getId()).isEqualTo("card-001");
-        assertThat(dto.getName()).isEqualTo("Nom inconnu");
-        assertThat(dto.getDescription()).isEmpty();
-        assertThat(dto.getImageUrl()).isEmpty();
+        assertThat(result).hasSize(0);
     }
 
     @Test
