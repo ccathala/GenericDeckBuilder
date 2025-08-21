@@ -1,15 +1,46 @@
 /* CardFilter CSS Modules - Couleurs personnalisées pour les éléments de mana */
 
 .elementButton {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  color: white;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 9999px; /* Complètement rond */
+  transition-property: background-color, color, border-color, text-decoration,
+    box-shadow;
+  transition-duration: 0.2s;
   border: none;
   cursor: pointer;
-  outline: none; /* Supprime l'outline par défaut */
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* Largeur fixe */
+  height: 40px; /* Hauteur fixe */
+}
+
+.elementButton:active {
+  transform: scale(0.95); /* Petit effet de pression */
+}
+
+.elementButton img {
+  max-width: 24px; /* Limite la largeur de l'icône */
+  max-height: 24px; /* Limite la hauteur de l'icône */
+  object-fit: contain; /* Garde les proportions */
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Ajustements spécifiques pour chaque élément */
+.elementButton.vegetal img,
+.elementButton.feu img,
+.elementButton.air img,
+.elementButton.eau img,
+.elementButton.mineral img,
+.elementButton.arcane img {
+  filter: none;
+}
+
+/* Effet hover et active */
+.elementButton img:hover,
+.elementButton img:active {
+  transform: scale(1.1);
 }
 
 /* Focus visible uniquement pour la navigation clavier */
@@ -25,11 +56,14 @@
 
 /* État inactif (non sélectionné) */
 .elementButton.inactive {
-  background-color: #7c3aed; /* bg-mage-dark-700 équivalent */
+  background-color: transparent;
+  color: #9ca3af; /* text-gray-400 */
+  border: none;
 }
 
 .elementButton.inactive:hover {
-  background-color: #8b45ff; /* bg-mage-dark-600 équivalent */
+  color: #ffffff;
+  background-color: #6b7280; /* bg-gray-600 */
 }
 
 /* Couleurs spécifiques par élément - États actifs */
@@ -43,6 +77,11 @@
   background-color: #4a7d35;
 }
 
+.elementButton.vegetal img {
+  filter: brightness(2.5) contrast(2)
+    drop-shadow(0 0 3px rgba(93, 156, 67, 0.7));
+}
+
 /* Feu - Rouge intense */
 .elementButton.feu {
   background-color: #cd281e;
@@ -50,6 +89,11 @@
 
 .elementButton.feu:hover {
   background-color: #a52018;
+}
+
+.elementButton.feu img {
+  filter: brightness(2.5) contrast(2)
+    drop-shadow(0 0 3px rgba(205, 40, 30, 0.7));
 }
 
 /* Air - Bleu clair/blanc */
@@ -63,6 +107,11 @@
   color: #1f2937;
 }
 
+.elementButton.air img {
+  filter: brightness(2.2) contrast(1.8)
+    drop-shadow(0 0 3px rgba(194, 213, 238, 0.7));
+}
+
 /* Eau - Bleu océan */
 .elementButton.eau {
   background-color: #378dcb;
@@ -70,6 +119,11 @@
 
 .elementButton.eau:hover {
   background-color: #2c71a3;
+}
+
+.elementButton.eau img {
+  filter: brightness(2.5) contrast(2)
+    drop-shadow(0 0 3px rgba(55, 141, 203, 0.7));
 }
 
 /* Minéral - Brun/beige */
@@ -81,6 +135,11 @@
   background-color: #7c735f;
 }
 
+.elementButton.mineral img {
+  filter: brightness(2.5) contrast(2)
+    drop-shadow(0 0 3px rgba(155, 143, 119, 0.7));
+}
+
 /* Arcane - Violet mystique */
 .elementButton.arcane {
   background-color: #9c469a;
@@ -88,4 +147,9 @@
 
 .elementButton.arcane:hover {
   background-color: #7d387b;
+}
+
+.elementButton.arcane img {
+  filter: brightness(2.5) contrast(2)
+    drop-shadow(0 0 3px rgba(156, 70, 154, 0.7));
 }
