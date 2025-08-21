@@ -31,32 +31,50 @@ const CardFilter = ({
     {
       key: "Végétal",
       cssClass: "vegetal",
-      icon: process.env.NODE_ENV === 'production' ? '/vegetal_icon.png' : '/assets/vegetal_icon.png',
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/vegetal_icon.png"
+          : "/src/assets/vegetal_icon.png",
     },
-    { 
-      key: "Feu", 
-      cssClass: "feu", 
-      icon: process.env.NODE_ENV === 'production' ? '/fire_icon.png' : '/assets/fire_icon.png' 
+    {
+      key: "Feu",
+      cssClass: "feu",
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/fire_icon.png"
+          : "/src/assets/fire_icon.png",
     },
-    { 
-      key: "Air", 
-      cssClass: "air", 
-      icon: process.env.NODE_ENV === 'production' ? '/air_icon.png' : '/assets/air_icon.png' 
+    {
+      key: "Air",
+      cssClass: "air",
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/air_icon.png"
+          : "/src/assets/air_icon.png",
     },
-    { 
-      key: "Eau", 
-      cssClass: "eau", 
-      icon: process.env.NODE_ENV === 'production' ? '/water_icon.png' : '/assets/water_icon.png' 
+    {
+      key: "Eau",
+      cssClass: "eau",
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/water_icon.png"
+          : "/src/assets/water_icon.png",
     },
     {
       key: "Minéral",
       cssClass: "mineral",
-      icon: process.env.NODE_ENV === 'production' ? '/mineral_icon.png' : '/assets/mineral_icon.png',
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/mineral_icon.png"
+          : "/src/assets/mineral_icon.png",
     },
-    { 
-      key: "Arcane", 
-      cssClass: "arcane", 
-      icon: process.env.NODE_ENV === 'production' ? '/arcane_icon.png' : '/assets/arcane_icon.png' 
+    {
+      key: "Arcane",
+      cssClass: "arcane",
+      icon:
+        process.env.NODE_ENV === "production"
+          ? "/arcane_icon.png"
+          : "/src/assets/arcane_icon.png",
     },
   ];
 
