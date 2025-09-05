@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useDeckVisualization } from "../hooks/useDeckVisualization";
-import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, ArrowLeft } from "lucide-react";
 import NotesPanel from "./NotesPanel";
+import DeckColumn from "./DeckColumn";
 
 // Styles CSS pour l'affichage des images de cartes
 const cardImageStyles = `
@@ -98,6 +99,38 @@ const cardImageStyles = `
     0%, 100% { opacity: 0.8; }
     50% { opacity: 1; }
   }
+
+  /* Styles pour le drag & drop des colonnes */
+  .deck-column.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  .deck-column.drop-target::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #8B5CF6, #A855F7);
+    border-radius: 2px;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+    z-index: 100;
+    animation: pulse 1s infinite;
+  }
+
+  .deck-column.drop-target-left::before {
+    left: -2px;
+  }
+
+  .deck-column.drop-target-right::before {
+    right: -2px;
+  }
+
+  .deck-column:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease;
+  }
 `;
 
 const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
@@ -120,12 +153,15 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     deleteColumn,
     moveCard,
     reorderColumns,
+    updateColumnDisplayOrder, // Fonction manquante ajoutée
     clearError,
   } = useDeckVisualization(deckId);
 
   // État local pour le drag & drop
   const [draggedCard, setDraggedCard] = useState(null);
+  const [draggedColumn, setDraggedColumn] = useState(null); // Nouvel état pour le drag de colonne
   const [dropIndicator, setDropIndicator] = useState(null); // { columnId, position }
+  const [columnDropIndicator, setColumnDropIndicator] = useState(null); // Nouvel indicateur pour les colonnes
   const [showCreateColumnModal, setShowCreateColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState("");
   const [createColumnError, setCreateColumnError] = useState(null); // Erreur spécifique au modal
@@ -149,7 +185,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     }
   };
 
-  // Gestion du drag & drop (version simplifiée pour l'instant)
+  // Gestion du drag & drop des cartes
   const handleDragStart = (e, card, sourceColumnId) => {
     console.log("🎯 Drag start - Card ID:", card.id);
     setHoverPreviewEnabled(false); // Désactive l'aperçu au survol
@@ -161,6 +197,128 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     });
 
     e.dataTransfer.effectAllowed = "move";
+  };
+
+  // Gestion du drag & drop des colonnes
+  const handleColumnDragStart = (e, columnId) => {
+    // Vérifier si l'événement vient d'une carte (ne pas traiter les drag de cartes)
+    if (e.target.closest('.deck-card-image')) {
+      console.log("Ignorer drag de colonne - événement vient d'une carte");
+      return;
+    }
+    
+    console.log("🎯 Column drag start - Column ID:", columnId);
+    setDraggedColumn(columnId);
+    e.dataTransfer.effectAllowed = "move";
+    
+    // Ajouter un effet visuel pour la colonne en cours de déplacement
+    e.currentTarget.style.opacity = "0.5";
+  };
+
+  const handleColumnDragEnd = (e) => {
+    console.log("🎯 Column drag end");
+    setDraggedColumn(null);
+    setColumnDropIndicator(null);
+    
+    // Réinitialiser l'effet visuel
+    e.currentTarget.style.opacity = "1";
+  };
+
+  const handleColumnDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    if (draggedColumn) {
+      const targetColumnElement = e.currentTarget.closest('[data-column-id]');
+      if (targetColumnElement) {
+        const targetColumnId = targetColumnElement.getAttribute('data-column-id');
+        if (targetColumnId !== draggedColumn) {
+          // Calculer la position de drop relative
+          const rect = targetColumnElement.getBoundingClientRect();
+          const dropX = e.clientX;
+          const columnCenter = rect.left + rect.width / 2;
+          
+          // Déterminer si on drop avant ou après la colonne cible
+          const insertBefore = dropX < columnCenter;
+          
+          setColumnDropIndicator({
+            targetColumnId,
+            insertBefore,
+            draggedColumnId: draggedColumn
+          });
+        }
+      }
+    }
+  };
+
+  const handleColumnDragLeave = (e) => {
+    // Masquer l'indicateur seulement si on sort vraiment de la zone
+    const currentTarget = e.currentTarget;
+    const relatedTarget = e.relatedTarget;
+
+    if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
+      setColumnDropIndicator(null);
+    }
+  };
+
+  const handleColumnDrop = async (e, targetColumnId) => {
+    e.preventDefault();
+    setColumnDropIndicator(null);
+
+    if (!draggedColumn || draggedColumn === targetColumnId) {
+      console.log("Pas de colonne déplacée ou même colonne, abandon");
+      setDraggedColumn(null);
+      return;
+    }
+
+    try {
+      // Trouver les colonnes actuelles
+      const columns = visualization?.column_groups || [];
+      const draggedCol = columns.find(col => col.id === draggedColumn);
+      const targetCol = columns.find(col => col.id === targetColumnId);
+      
+      if (!draggedCol || !targetCol) {
+        console.error("Colonne source ou cible non trouvée");
+        return;
+      }
+
+      // Trouver les index actuels
+      const draggedIndex = columns.findIndex(col => col.id === draggedColumn);
+      const targetIndex = columns.findIndex(col => col.id === targetColumnId);
+      
+      // Déterminer la nouvelle position basée sur l'indicateur
+      const dropIndicator = columnDropIndicator;
+      let newPosition = targetIndex;
+      
+      if (dropIndicator && dropIndicator.insertBefore && draggedIndex > targetIndex) {
+        // Déplacer avant la colonne cible
+        newPosition = targetIndex;
+      } else if (dropIndicator && !dropIndicator.insertBefore && draggedIndex < targetIndex) {
+        // Déplacer après la colonne cible
+        newPosition = targetIndex + 1;
+      } else if (draggedIndex < targetIndex) {
+        // Déplacement vers la droite
+        newPosition = targetIndex;
+      } else {
+        // Déplacement vers la gauche
+        newPosition = targetIndex;
+      }
+
+      // Ajuster la position si nécessaire
+      if (newPosition > columns.length - 1) {
+        newPosition = columns.length - 1;
+      }
+
+      console.log(`Déplacement colonne ${draggedIndex} → ${newPosition}`);
+
+      // Appeler l'API pour mettre à jour le displayOrder
+      await updateColumnDisplayOrder(draggedColumn, newPosition);
+
+    } catch (err) {
+      console.error("❌ Erreur lors du déplacement de colonne:", err);
+    } finally {
+      setDraggedColumn(null);
+    }
   };
 
   // Gestion des erreurs d'image
@@ -517,6 +675,14 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 setHoveredCard={setHoveredCard}
                 calculateImagePosition={calculateImagePosition}
                 setHoveredCardPosition={setHoveredCardPosition}
+                // Nouvelles props pour le drag & drop des colonnes
+                onColumnDragStart={handleColumnDragStart}
+                onColumnDragOver={handleColumnDragOver}
+                onColumnDragLeave={handleColumnDragLeave}
+                onColumnDrop={handleColumnDrop}
+                onColumnDragEnd={handleColumnDragEnd}
+                columnDropIndicator={columnDropIndicator}
+                draggedColumn={draggedColumn}
               />
             ))}
           </div>
@@ -589,224 +755,23 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
           </div>
         </div>
       )}
-    {/* Aperçu d'image au survol */}
-    {hoveredCard && (
-      <div
-        className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
-        style={{
-          left: `${hoveredCardPosition.left}px`,
-          top: `${hoveredCardPosition.top}px`,
-        }}
-      >
-        <img
-          src={getCardImageUrl(hoveredCard)}
-          alt={hoveredCard.name}
-          className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
-        />
-      </div>
-    )}
 
-    </div>
-  );
-};
-
-// Composant de colonne temporaire (sera créé dans un fichier séparé plus tard)
-const DeckColumn = ({
-  column,
-  onUpdateColumn,
-  onDeleteColumn,
-  hoverPreviewEnabled,
-  canDelete,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragLeave,
-  draggedCard,
-  handleDrag,
-  handleDragEnd,
-  handleImageError,
-  dropIndicator,
-  isLastColumn = false,
-  hoveredCard,
-  setHoveredCard,
-  calculateImagePosition,
-  setHoveredCardPosition,
-}) => {
-  const { t } = useLanguage();
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(column.name);
-
-  const handleSave = async () => {
-    try {
-      await onUpdateColumn(column.id, {
-        name: editName,
-      });
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Erreur lors de la modification:", err);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!canDelete) {
-      alert(t("decks.visualization.cannotDeleteLastColumn"));
-      return;
-    }
-
-    if (
-      confirm(
-        t("decks.visualization.confirmDeleteColumn", { name: column.name })
-      )
-    ) {
-      try {
-        await onDeleteColumn(column.id);
-      } catch (err) {
-        console.error("Erreur lors de la suppression:", err);
-      }
-    }
-  };
-
-  return (
-    <div
-      className="deck-column w-[260px] min-w-[260px] max-w-[260px] bg-transparent flex flex-col border-r border-gray-600"
-      data-column-id={column.id}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={(e) => onDrop(e, column.id)}
-    >
-      {/* Header de colonne */}
-      <div className="p-3">
-        {/* Header transparent */}
-        {isEditing ? (
-          <div className="space-y-3">
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              className="w-full px-2 py-1 bg-mage-dark-700 border border-gray-600 rounded text-white text-sm"
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditName(column.name);
-                }}
-                className="px-2 py-1 text-xs text-gray-300 hover:text-white"
-              >
-                {t("common.cancel")}
-              </button>
-              <button
-                onClick={handleSave}
-                className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded"
-              >
-                {t("common.save")}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-medium text-white">{column.name}</h3>
-              <p className="text-xs text-gray-400">
-                {t("decks.visualization.totalCards", {
-                  count: column.cards?.length || 0,
-                })}
-              </p>
-            </div>
-            <div className="flex space-x-1">
-              <button
-                onClick={() => setIsEditing(true)}
-                className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-                title={t("columns.edit")}
-              >
-                <Pencil size={14} />
-              </button>
-              {canDelete && (
-                <button
-                  onClick={handleDelete}
-                  className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
-                  title={t("columns.delete")}
-                >
-                  <Trash2 size={14} />
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Corps de colonne avec cartes */}
-      <div
-        className="cards-container flex-1 p-3 overflow-y-auto min-h-40"
-        style={{ paddingTop: "12px", position: "relative" }}
-      >
-        {column.cards?.length === 0 ? (
-          <>
-            {/* Indicateur pour colonne vide */}
-            {dropIndicator && dropIndicator.columnId === column.id && (
-              <div className="drop-indicator-container">
-                <div className="drop-indicator"></div>
-              </div>
-            )}
-            <div className="text-center text-gray-400 text-sm py-8">
-              {t("decks.visualization.dropCardsHere")}
-            </div>
-          </>
-        ) : (
-          <>
-            {column.cards?.map((card, index) => (
-              <React.Fragment key={`${card.card.id}-${index}`}>
-                {/* Indicateur de drop AVANT cette carte */}
-                {dropIndicator &&
-                  dropIndicator.columnId === column.id &&
-                  dropIndicator.position === index && (
-                    <div className="drop-indicator-container">
-                      <div className="drop-indicator"></div>
-                    </div>
-                  )}
-
-                <div
-                  className="deck-card-image"
-                  style={{ zIndex: index + 1 }}
-                  draggable
-                  onDragStart={(e) => onDragStart(e, card, column.id)}
-                  onDrag={handleDrag}
-                  onDragEnd={handleDragEnd}
-                  onMouseEnter={
-                    hoverPreviewEnabled
-                      ? (e) => {
-                          setHoveredCard(card.card);
-                          const position = calculateImagePosition(e.currentTarget);
-                          setHoveredCardPosition(position);
-                        }
-                      : undefined
-                  }
-                  onMouseLeave={() => setHoveredCard(null)}
-                >
-                  <img
-                    src={card.card.imageUrl}
-                    alt={card.card.name}
-                    className="card-image"
-                    onError={handleImageError}
-                  />
-                  {card.quantity > 1 && (
-                    <span className="quantity-badge">{card.quantity}</span>
-                  )}
-                </div>
-              </React.Fragment>
-            ))}
-
-            {/* Indicateur de drop APRÈS la dernière carte */}
-            {dropIndicator &&
-              dropIndicator.columnId === column.id &&
-              dropIndicator.position === column.cards.length && (
-                <div className="drop-indicator-container">
-                  <div className="drop-indicator"></div>
-                </div>
-              )}
-          </>
-        )}
-      </div>
+      {/* Aperçu d'image au survol */}
+      {hoveredCard && (
+        <div
+          className="fixed z-[9999] pointer-events-none transition-opacity duration-200"
+          style={{
+            left: `${hoveredCardPosition.left}px`,
+            top: `${hoveredCardPosition.top}px`,
+          }}
+        >
+          <img
+            src={getCardImageUrl(hoveredCard)}
+            alt={hoveredCard.name}
+            className="w-72 h-auto rounded-lg shadow-2xl bg-gray-800"
+          />
+        </div>
+      )}
     </div>
   );
 };

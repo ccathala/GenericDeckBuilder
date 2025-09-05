@@ -165,4 +165,31 @@ public class DeckVisualizationController {
                         return ResponseEntity.status(500).build();
                 }
         }
+
+        @PatchMapping("/columns/{columnId}/display-order")
+        @Operation(summary = "Modifier l'ordre d'affichage d'une colonne", description = "Modifie la position d'une colonne et réorganise les autres colonnes")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Ordre d'affichage modifié avec succès"),
+                        @ApiResponse(responseCode = "400", description = "Position invalide"),
+                        @ApiResponse(responseCode = "404", description = "Colonne ou deck non trouvé"),
+                        @ApiResponse(responseCode = "403", description = "Accès non autorisé")
+        })
+        public ResponseEntity<Void> updateColumnDisplayOrder(
+                        @Parameter(description = "ID du deck") @PathVariable UUID deckId,
+                        @Parameter(description = "ID de la colonne") @PathVariable UUID columnId,
+                        @RequestParam Integer newDisplayOrder,
+                        @AuthenticationPrincipal User user) {
+
+                log.info("Modification displayOrder colonne {} vers position {} pour deck {} par utilisateur {}",
+                                columnId, newDisplayOrder, deckId, user.getEmail());
+
+                try {
+                        visualizationService.updateColumnDisplayOrder(deckId, columnId, newDisplayOrder, user.getId());
+                        log.info("✅ DisplayOrder modifié avec succès");
+                        return ResponseEntity.ok().build();
+                } catch (Exception e) {
+                        log.error("❌ Erreur lors de la modification du displayOrder", e);
+                        return ResponseEntity.badRequest().build();
+                }
+        }
 }

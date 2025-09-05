@@ -145,6 +145,28 @@ export const deckVisualizationService = {
       };
     }
   },
+
+  // Mettre à jour l'ordre d'affichage d'une colonne
+  async updateColumnDisplayOrder(deckId, columnId, newDisplayOrder) {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/decks/${deckId}/visualization/columns/${columnId}/display-order`,
+        null,
+        {
+          params: { newDisplayOrder }
+        }
+      );
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message,
+      };
+    }
+  },
 };
 
 export default deckVisualizationService;

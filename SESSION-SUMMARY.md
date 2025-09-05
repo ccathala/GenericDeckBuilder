@@ -1,7 +1,47 @@
 # 📋 GenericDeckBuilder - Résumé de Session
 
-**Date:** 6 Août 2025 - 12 Août 2025  
+**Date:** 6 Août 2025 - 5 Septembre 2025  
 **Branche principale:** `feat### Architecture technique
+
+### Drag & Drop des Colonnes pour Réorganisation (Nouveau)
+
+**Architecture Backend:**
+
+```
+📁 backend/src/main/java/com/suri/generic/deck/builder/
+├── 🔧 service/DeckVisualizationService.java              # Ajout méthode updateColumnDisplayOrder
+├── 🔧 service/impl/DeckVisualizationServiceImpl.java     # Implémentation avec algorithme 2 phases
+├── 🔧 controller/DeckVisualizationController.java        # Endpoint PATCH /columns/{id}/display-order
+└── 🆕 test/.../DeckVisualizationServiceImplTest.java     # 12 tests unitaires complets
+```
+
+**Architecture Frontend:**
+
+```
+📁 frontend/src/
+├── 🔧 services/deckVisualizationService.js               # Méthode updateColumnDisplayOrder
+├── 🔧 hooks/useDeckVisualization.js                      # Hook avec nouvelle fonction
+├── 🔧 components/DeckVisualizationView.jsx               # Gestionnaires drag & drop colonnes
+├── 🔧 components/DeckColumn.jsx                          # Support drag colonne + indicateurs
+└── 🔧 styles intégrés                                    # Indicateurs visuels drop
+```
+
+**Fonctionnalités du drag & drop des colonnes:**
+
+- **Drag intuitif:** Glisser-déposer des colonnes avec feedback visuel
+- **Indicateurs de position:** Barres colorées montrant où la colonne sera déposée
+- **Algorithme robuste:** Gestion des contraintes d'unicité en base de données
+- **Séparation propre:** Aucun conflit avec le drag & drop existant des cartes
+- **UX optimale:** Opacité pendant le drag, animations fluides
+
+### Drag & Drop des Colonnes pour Réorganisation (Nouveau)
+
+- **Architecture backend:** Endpoint REST PATCH avec validation propriétaire, algorithme en deux phases pour éviter les conflits de contraintes
+- **Algorithme intelligent:** Phase 1: valeurs temporaires négatives → Phase 2: valeurs définitives consécutives
+- **Séparation des événements:** `e.stopPropagation()` pour éviter les conflits entre drag de cartes et colonnes
+- **Indicateurs visuels:** Barres colorées avec animation pulse, opacité pendant le drag
+- **Tests complets:** 12 tests unitaires couvrant déplacements, erreurs, validations
+- **UX optimisée:** Feedback visuel immédiat, gestion fluide des contraintes base de données
 
 ### Panneau de Notes avec Sauvegarde Automatique (Nouveau)
 
@@ -53,7 +93,20 @@
 - **Persistance BDD:** Colonne TEXT nullable, support contenu long (>10k caractères)
 - **UX optimale:** Pas de sauvegardes inutiles, feedback visuel immédiat, gestion offline
 
-### Champ cardUrl et Icône de Redirection (Ancien)/add_card-url` → `feature/preview`  
+### DeckVisualization Drag & Drop des colonnes `feature/preview-move-column`
+
+## 🎯 Fonctionnalités implémentées
+
+### ✅ Drag & Drop des Colonnes pour Réorganisation (Nouveau)
+
+- **Fonctionnalité majeure:** Système complet de drag & drop pour réorganiser l'ordre des colonnes
+- **Architecture Backend:** Nouvelle méthode `updateColumnDisplayOrder` dans `DeckVisualizationService`, endpoint PATCH `/api/decks/{deckId}/visualization/columns/{columnId}/display-order`
+- **Algorithme intelligent:** Réorganisation en deux phases pour éviter les conflits de contraintes d'unicité (valeurs temporaires négatives → valeurs définitives)
+- **Tests unitaires:** 12 tests complets couvrant tous les cas (déplacement, erreurs, validation)
+- **Sécurité:** Validation des permissions utilisateur et appartenance au deck
+
+### Champ cardUrl et Icône de Redirection (Ancien)/add_card-url`→`feature/preview`
+
 **Statut:** ✅ Champ cardUrl + Icône de redirection + Contrôles de zoom + Aperçu d'image au survol + Gestion expiration JWT + Backend sécurisé contre les injections SQL + Code source frontend sécurisé + Tests corrigés + Documentation créée + **✅ Vue de Visualisation de Deck complète avec colonnes personnalisables (11 Août 2025)** + **✅ Panneau de Notes avec Sauvegarde Automatique (12 Août 2025)**
 
 ## 🎯 Fonctionnalités implémentées
@@ -595,8 +648,9 @@
 
 ### TODO
 
-- [ ] DeckVisualizationView - Empêcher la création d'un colonne si une avec le même nom existe déjà
+- [x] ~~DeckVisualizationView - Empêcher la création d'un colonne si une avec le même nom existe déjà~~
 - [x] ~~DeckVisualizationView - Ajouter un text-area note pour consigner les stratégies~~ ✅ **Complété le 12 Août 2025**
+- [x] ~~Drag & Drop des Colonnes pour Réorganisation~~ ✅ **Complété**
 
 ### Améliorations du panneau de notes
 
@@ -794,34 +848,7 @@ cd frontend && npm run build
 cd frontend && npm run preview:prod  # Test production sécurisée
 cd frontend && npm run dev  # Test contrôles zoom + panneau notes en développement
 
-# Test panneau de notes (NOUVEAU)
-# 1. Démarrer backend: mvn spring-boot:run
-# 2. Exécuter migration SQL: psql -d db -f scripts/add_notes_to_deck_20250811.sql
-# 3. Démarrer frontend: npm run dev
-# 4. Aller sur vue visualisation d'un deck (/decks/{id}/visualization)
-# 5. Vérifier panneau notes transparent à droite (320px fixe)
-# 6. Taper du texte → vérifier sauvegarde automatique après 5s ou au blur
-# 7. Vérifier indicateurs visuels (spinner, timestamp dernière sauvegarde)
 
-# Test expiration JWT en local
-# 1. Modifier application-dev.yml: expiration: 60000 (1 minute)
-# 2. Redémarrer backend: mvn spring-boot:run -Dspring-boot.run.profiles=dev
-# 3. Se connecter et attendre 1 minute pour test automatique déconnexion
-
-# Test cardUrl et icône de redirection
-# 1. Démarrer backend: mvn spring-boot:run
-# 2. Exécuter script SQL: psql -d db -f update_card_localization_with_card_url.sql
-# 3. Démarrer frontend: npm run dev
-# 4. Aller sur page "Cartes" et survoler une carte Mage Noir
-# 5. Vérifier icône ExternalLink apparaît en bas centre
-# 6. Cliquer icône → redirection vers site officiel dans nouvel onglet
-
-# Test contrôles zoom (Session précédente)
-# 1. Démarrer frontend: npm run dev
-# 2. Aller sur page "Cartes"
-# 3. Tester boutons -/+ pour colonnes 6-10
-# 4. Tester toggle aperçu image (icône œil)
-# 5. Vérifier positionnement intelligent image au survol
 ```
 
 **🎉 Session terminée avec succès - Panneau de Notes avec Sauvegarde Automatique complètement implémenté !**
