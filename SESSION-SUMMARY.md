@@ -10,6 +10,17 @@
 
 ## 🎯 Fonctionnalités implémentées (du plus récent au plus ancien)
 
+### ✅ Persistance des Filtres de Carte
+
+**Fonctionnalité:** Sauvegarde automatique des filtres dans le localStorage
+
+**Implémentation:**
+
+- Tous les filtres (recherche, éléments, composants, type, zoom, aperçu d'image) sont persistés
+- Chargement automatique au démarrage du composant
+- Réinitialisation complète avec le bouton reset
+- **Clé localStorage:** `cardFilters`
+
 ### ✅ Drag & Drop des Colonnes pour Réorganisation
 
 **Fonctionnalité majeure:** Système complet de drag & drop pour réorganiser l'ordre des colonnes
@@ -332,7 +343,7 @@
 
 - [ ] Redimensionnement du panneau de notes (resize handle)
 - [ ] Export des notes dans l'export de deck
-- [ ] Persistance des préférences de zoom dans localStorage
+- [x] ✅ Persistance des préférences de zoom dans localStorage (implémenté)
 
 ### Améliorations UX
 
