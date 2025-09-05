@@ -22,6 +22,14 @@ const DeckColumn = ({
   setHoveredCard,
   calculateImagePosition,
   setHoveredCardPosition,
+  // Nouvelles props pour le drag & drop des colonnes
+  onColumnDragStart,
+  onColumnDragOver,
+  onColumnDragLeave,
+  onColumnDrop,
+  onColumnDragEnd,
+  columnDropIndicator,
+  draggedColumn,
 }) => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
@@ -57,14 +65,69 @@ const DeckColumn = ({
     }
   };
 
+  // Gestionnaire de drop combiné pour cartes et colonnes
+  const handleDrop = (e) => {
+    e.preventDefault();
+    
+    // Vérifier d'abord si on a un draggedColumn (priorité aux colonnes)
+    if (draggedColumn && onColumnDrop) {
+      onColumnDrop(e, column.id);
+    } 
+    // Sinon vérifier si on a un draggedCard
+    else if (draggedCard && onDrop) {
+      onDrop(e, column.id);
+    }
+  };
+
+  // Gestionnaire de dragOver combiné
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    
+    // Priorité au drag de colonne
+    if (draggedColumn && onColumnDragOver) {
+      onColumnDragOver(e);
+    } else if (draggedCard && onDragOver) {
+      onDragOver(e);
+    }
+  };
+
+  // Gestionnaire de dragLeave combiné
+  const handleDragLeave = (e) => {
+    // Priorité au drag de colonne
+    if (draggedColumn && onColumnDragLeave) {
+      onColumnDragLeave(e);
+    } else if (draggedCard && onDragLeave) {
+      onDragLeave(e);
+    }
+  };
+
   return (
     <div
-      className="deck-column w-[260px] min-w-[260px] max-w-[260px] bg-transparent flex flex-col border-r border-gray-600"
+      className="deck-column w-[260px] min-w-[260px] max-w-[260px] bg-transparent flex flex-col border-r border-gray-600 relative group"
       data-column-id={column.id}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={(e) => onDrop(e, column.id)}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      // Drag & drop pour les colonnes
+      draggable={true}
+      onDragStart={(e) => onColumnDragStart && onColumnDragStart(e, column.id)}
+      onDragEnd={(e) => onColumnDragEnd && onColumnDragEnd(e)}
+      style={{
+        opacity: draggedColumn === column.id ? 0.5 : 1,
+        transition: 'opacity 0.2s ease',
+      }}
     >
+      {/* Indicateur de drop pour les colonnes */}
+      {columnDropIndicator && columnDropIndicator.targetColumnId === column.id && (
+        <div
+          className={`absolute top-0 w-2 h-full bg-purple-500 z-50 ${
+            columnDropIndicator.insertBefore ? '-left-1' : '-right-1'
+          }`}
+          style={{
+            boxShadow: '0 0 10px rgba(139, 92, 246, 0.8)',
+          }}
+        />
+      )}
       {/* Header de colonne */}
       <div className="p-3">
         {/* Header transparent */}
@@ -160,9 +223,15 @@ const DeckColumn = ({
                   className="deck-card-image"
                   style={{ zIndex: index + 1 }}
                   draggable
-                  onDragStart={(e) => onDragStart(e, card, column.id)}
+                  onDragStart={(e) => {
+                    onDragStart(e, card, column.id);
+                    e.stopPropagation(); // Empêche la propagation vers le drag de colonne
+                  }}
                   onDrag={handleDrag}
-                  onDragEnd={handleDragEnd}
+                  onDragEnd={(e) => {
+                    handleDragEnd(e);
+                    e.stopPropagation(); // Empêche la propagation vers le drag de colonne
+                  }}
                   onMouseEnter={
                     hoverPreviewEnabled
                       ? (e) => {

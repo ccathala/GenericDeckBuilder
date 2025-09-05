@@ -99,6 +99,38 @@ const cardImageStyles = `
     0%, 100% { opacity: 0.8; }
     50% { opacity: 1; }
   }
+
+  /* Styles pour le drag & drop des colonnes */
+  .deck-column.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  .deck-column.drop-target::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #8B5CF6, #A855F7);
+    border-radius: 2px;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+    z-index: 100;
+    animation: pulse 1s infinite;
+  }
+
+  .deck-column.drop-target-left::before {
+    left: -2px;
+  }
+
+  .deck-column.drop-target-right::before {
+    right: -2px;
+  }
+
+  .deck-column:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease;
+  }
 `;
 
 const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
@@ -121,12 +153,15 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     deleteColumn,
     moveCard,
     reorderColumns,
+    updateColumnDisplayOrder, // Fonction manquante ajoutée
     clearError,
   } = useDeckVisualization(deckId);
 
   // État local pour le drag & drop
   const [draggedCard, setDraggedCard] = useState(null);
+  const [draggedColumn, setDraggedColumn] = useState(null); // Nouvel état pour le drag de colonne
   const [dropIndicator, setDropIndicator] = useState(null); // { columnId, position }
+  const [columnDropIndicator, setColumnDropIndicator] = useState(null); // Nouvel indicateur pour les colonnes
   const [showCreateColumnModal, setShowCreateColumnModal] = useState(false);
   const [newColumnName, setNewColumnName] = useState("");
   const [createColumnError, setCreateColumnError] = useState(null); // Erreur spécifique au modal
@@ -150,7 +185,7 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     }
   };
 
-  // Gestion du drag & drop (version simplifiée pour l'instant)
+  // Gestion du drag & drop des cartes
   const handleDragStart = (e, card, sourceColumnId) => {
     console.log("🎯 Drag start - Card ID:", card.id);
     setHoverPreviewEnabled(false); // Désactive l'aperçu au survol
@@ -162,6 +197,128 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
     });
 
     e.dataTransfer.effectAllowed = "move";
+  };
+
+  // Gestion du drag & drop des colonnes
+  const handleColumnDragStart = (e, columnId) => {
+    // Vérifier si l'événement vient d'une carte (ne pas traiter les drag de cartes)
+    if (e.target.closest('.deck-card-image')) {
+      console.log("Ignorer drag de colonne - événement vient d'une carte");
+      return;
+    }
+    
+    console.log("🎯 Column drag start - Column ID:", columnId);
+    setDraggedColumn(columnId);
+    e.dataTransfer.effectAllowed = "move";
+    
+    // Ajouter un effet visuel pour la colonne en cours de déplacement
+    e.currentTarget.style.opacity = "0.5";
+  };
+
+  const handleColumnDragEnd = (e) => {
+    console.log("🎯 Column drag end");
+    setDraggedColumn(null);
+    setColumnDropIndicator(null);
+    
+    // Réinitialiser l'effet visuel
+    e.currentTarget.style.opacity = "1";
+  };
+
+  const handleColumnDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+
+    if (draggedColumn) {
+      const targetColumnElement = e.currentTarget.closest('[data-column-id]');
+      if (targetColumnElement) {
+        const targetColumnId = targetColumnElement.getAttribute('data-column-id');
+        if (targetColumnId !== draggedColumn) {
+          // Calculer la position de drop relative
+          const rect = targetColumnElement.getBoundingClientRect();
+          const dropX = e.clientX;
+          const columnCenter = rect.left + rect.width / 2;
+          
+          // Déterminer si on drop avant ou après la colonne cible
+          const insertBefore = dropX < columnCenter;
+          
+          setColumnDropIndicator({
+            targetColumnId,
+            insertBefore,
+            draggedColumnId: draggedColumn
+          });
+        }
+      }
+    }
+  };
+
+  const handleColumnDragLeave = (e) => {
+    // Masquer l'indicateur seulement si on sort vraiment de la zone
+    const currentTarget = e.currentTarget;
+    const relatedTarget = e.relatedTarget;
+
+    if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
+      setColumnDropIndicator(null);
+    }
+  };
+
+  const handleColumnDrop = async (e, targetColumnId) => {
+    e.preventDefault();
+    setColumnDropIndicator(null);
+
+    if (!draggedColumn || draggedColumn === targetColumnId) {
+      console.log("Pas de colonne déplacée ou même colonne, abandon");
+      setDraggedColumn(null);
+      return;
+    }
+
+    try {
+      // Trouver les colonnes actuelles
+      const columns = visualization?.column_groups || [];
+      const draggedCol = columns.find(col => col.id === draggedColumn);
+      const targetCol = columns.find(col => col.id === targetColumnId);
+      
+      if (!draggedCol || !targetCol) {
+        console.error("Colonne source ou cible non trouvée");
+        return;
+      }
+
+      // Trouver les index actuels
+      const draggedIndex = columns.findIndex(col => col.id === draggedColumn);
+      const targetIndex = columns.findIndex(col => col.id === targetColumnId);
+      
+      // Déterminer la nouvelle position basée sur l'indicateur
+      const dropIndicator = columnDropIndicator;
+      let newPosition = targetIndex;
+      
+      if (dropIndicator && dropIndicator.insertBefore && draggedIndex > targetIndex) {
+        // Déplacer avant la colonne cible
+        newPosition = targetIndex;
+      } else if (dropIndicator && !dropIndicator.insertBefore && draggedIndex < targetIndex) {
+        // Déplacer après la colonne cible
+        newPosition = targetIndex + 1;
+      } else if (draggedIndex < targetIndex) {
+        // Déplacement vers la droite
+        newPosition = targetIndex;
+      } else {
+        // Déplacement vers la gauche
+        newPosition = targetIndex;
+      }
+
+      // Ajuster la position si nécessaire
+      if (newPosition > columns.length - 1) {
+        newPosition = columns.length - 1;
+      }
+
+      console.log(`Déplacement colonne ${draggedIndex} → ${newPosition}`);
+
+      // Appeler l'API pour mettre à jour le displayOrder
+      await updateColumnDisplayOrder(draggedColumn, newPosition);
+
+    } catch (err) {
+      console.error("❌ Erreur lors du déplacement de colonne:", err);
+    } finally {
+      setDraggedColumn(null);
+    }
   };
 
   // Gestion des erreurs d'image
@@ -518,6 +675,14 @@ const DeckVisualizationView = ({ deckId, deckCards, onCardUpdate }) => {
                 setHoveredCard={setHoveredCard}
                 calculateImagePosition={calculateImagePosition}
                 setHoveredCardPosition={setHoveredCardPosition}
+                // Nouvelles props pour le drag & drop des colonnes
+                onColumnDragStart={handleColumnDragStart}
+                onColumnDragOver={handleColumnDragOver}
+                onColumnDragLeave={handleColumnDragLeave}
+                onColumnDrop={handleColumnDrop}
+                onColumnDragEnd={handleColumnDragEnd}
+                columnDropIndicator={columnDropIndicator}
+                draggedColumn={draggedColumn}
               />
             ))}
           </div>

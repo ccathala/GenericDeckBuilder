@@ -446,6 +446,7 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
 
     /**
      * Réorganise les displayOrder des colonnes lors d'un déplacement
+     * Version corrigée pour éviter les conflits de contraintes d'unicité
      */
     private void reorderColumnsWithMove(List<DeckColumnGroup> columns, DeckColumnGroup columnToMove, int newPosition) {
         // Trier par displayOrder actuel
@@ -459,15 +460,24 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
         // Insérer la colonne à la nouvelle position
         columns.add(newPosition, columnToMove);
         
-        // Réassigner les displayOrder de façon consécutive
+        // D'abord, réinitialiser tous les displayOrder à des valeurs temporaires négatives
+        // pour éviter les conflits de contraintes d'unicité
         for (int i = 0; i < columns.size(); i++) {
             DeckColumnGroup column = columns.get(i);
-            if (column.getDisplayOrder() != i) {
-                log.debug("Mise à jour displayOrder colonne '{}' : {} → {}", 
-                        column.getName(), column.getDisplayOrder(), i);
-                column.setDisplayOrder(i);
-                columnGroupRepository.save(column);
-            }
+            column.setDisplayOrder(-(i + 1)); // Valeurs temporaires négatives
+            columnGroupRepository.save(column);
+        }
+        
+        // Flusher les changements pour s'assurer que les valeurs temporaires sont enregistrées
+        columnGroupRepository.flush();
+        
+        // Maintenant, assigner les displayOrder définitifs consécutifs
+        for (int i = 0; i < columns.size(); i++) {
+            DeckColumnGroup column = columns.get(i);
+            log.debug("Mise à jour displayOrder colonne '{}' : {} → {}", 
+                    column.getName(), column.getDisplayOrder(), i);
+            column.setDisplayOrder(i);
+            columnGroupRepository.save(column);
         }
         
         log.debug("Colonne '{}' déplacée de la position {} vers {}", 

@@ -85,7 +85,7 @@ class DeckVisualizationServiceImplTest {
         // Assert
         // Vérifier que toutes les colonnes ont été sauvegardées avec les nouveaux
         // displayOrder
-        verify(columnGroupRepository, times(2)).save(any(DeckColumnGroup.class));
+        verify(columnGroupRepository, times(6)).save(any(DeckColumnGroup.class));
 
         // Vérifier l'ordre final attendu: [Colonne2, Colonne1, Colonne3]
         assertEquals(0, columns.get(0).getDisplayOrder()); // Ancienne colonne 1 devient position 0
@@ -107,7 +107,7 @@ class DeckVisualizationServiceImplTest {
         deckVisualizationService.updateColumnDisplayOrder(deckId, columnToMoveId, newPosition, userId);
 
         // Assert
-        verify(columnGroupRepository, times(3)).save(any(DeckColumnGroup.class));
+        verify(columnGroupRepository, times(6)).save(any(DeckColumnGroup.class));
 
         // Vérifier l'ordre final attendu: [Colonne2, Colonne3, Colonne1]
         assertEquals(0, columns.get(0).getDisplayOrder()); // Colonne 2 devient position 0

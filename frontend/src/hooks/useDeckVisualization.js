@@ -233,6 +233,41 @@ export const useDeckVisualization = (deckId) => {
     [deckId, loadVisualization]
   );
 
+  // Mettre à jour l'ordre d'affichage d'une colonne
+  const updateColumnDisplayOrder = useCallback(
+    async (columnId, newDisplayOrder) => {
+      if (!deckId || !columnId || newDisplayOrder === undefined) {
+        throw new Error("Deck ID, Column ID et nouveau displayOrder requis");
+      }
+
+      try {
+        setError(null);
+
+        const result = await deckVisualizationService.updateColumnDisplayOrder(
+          deckId,
+          columnId,
+          newDisplayOrder
+        );
+
+        if (result.success) {
+          // Recharger les données pour avoir l'ordre correct
+          await loadVisualization();
+
+          return result.data;
+        } else {
+          setError(result.error);
+          throw new Error(result.error);
+        }
+      } catch (err) {
+        setError(
+          err.message || "Erreur lors de la modification de l'ordre d'affichage"
+        );
+        throw err;
+      }
+    },
+    [deckId, loadVisualization]
+  );
+
   // Charger automatiquement les données au montage et changement de deckId ou langue
   useEffect(() => {
     loadVisualization();
@@ -256,6 +291,7 @@ export const useDeckVisualization = (deckId) => {
     deleteColumn,
     moveCard,
     reorderColumns,
+    updateColumnDisplayOrder,
     clearError,
   };
 };
