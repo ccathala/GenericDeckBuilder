@@ -45,4 +45,9 @@ public interface DeckVisualizationService {
          * Vérifie si une colonne avec ce nom existe déjà pour ce deck
          */
         boolean existsByDeckAndName(UUID deckId, String columnName);
+
+        /**
+         * Met à jour l'ordre d'affichage d'une colonne et réorganise les autres colonnes
+         */
+        void updateColumnDisplayOrder(UUID deckId, UUID columnGroupId, Integer newDisplayOrder, Long userId);
 }

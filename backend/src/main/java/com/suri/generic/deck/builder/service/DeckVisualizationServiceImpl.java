@@ -394,6 +394,87 @@ public class DeckVisualizationServiceImpl implements DeckVisualizationService {
     }
 
     @Override
+    public void updateColumnDisplayOrder(UUID deckId, UUID columnGroupId, Integer newDisplayOrder, Long userId) {
+        log.debug("Mise à jour displayOrder colonne {} vers position {} pour deck {} par utilisateur {}", 
+                columnGroupId, newDisplayOrder, deckId, userId);
+
+        // Vérifier l'existence et les permissions du deck
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new ValidationException("Deck non trouvé"));
+
+        if (!deck.getOwner().getId().equals(userId)) {
+            throw new ValidationException("Accès non autorisé à ce deck");
+        }
+
+        // Récupérer la colonne à déplacer
+        DeckColumnGroup columnToMove = columnGroupRepository.findByIdAndUserId(columnGroupId, userId)
+                .orElseThrow(() -> new ValidationException("Colonne non trouvée ou accès non autorisé"));
+
+        // Vérifier que la colonne appartient au bon deck
+        if (!columnToMove.getDeck().getId().equals(deckId)) {
+            throw new ValidationException("La colonne n'appartient pas à ce deck");
+        }
+
+        // Récupérer toutes les colonnes du deck
+        List<DeckColumnGroup> allColumns = columnGroupRepository.findByDeckIdAndUserIdOrderByDisplayOrder(deckId, userId);
+        
+        if (allColumns.isEmpty()) {
+            throw new ValidationException("Aucune colonne trouvée pour ce deck");
+        }
+
+        // Valider la nouvelle position
+        if (newDisplayOrder < 0 || newDisplayOrder >= allColumns.size()) {
+            throw new ValidationException("Position invalide. Doit être entre 0 et " + (allColumns.size() - 1));
+        }
+
+        int oldPosition = columnToMove.getDisplayOrder();
+        
+        // Si la position n'a pas changé, rien à faire
+        if (oldPosition == newDisplayOrder) {
+            log.debug("Position inchangée ({}), aucune action nécessaire", newDisplayOrder);
+            return;
+        }
+
+        log.debug("Déplacement colonne '{}' de la position {} vers {}", 
+                columnToMove.getName(), oldPosition, newDisplayOrder);
+
+        // Réorganiser les displayOrder
+        reorderColumnsWithMove(allColumns, columnToMove, newDisplayOrder);
+
+        log.debug("DisplayOrder mis à jour avec succès");
+    }
+
+    /**
+     * Réorganise les displayOrder des colonnes lors d'un déplacement
+     */
+    private void reorderColumnsWithMove(List<DeckColumnGroup> columns, DeckColumnGroup columnToMove, int newPosition) {
+        // Trier par displayOrder actuel
+        columns.sort(Comparator.comparing(DeckColumnGroup::getDisplayOrder));
+        
+        int oldPosition = columnToMove.getDisplayOrder();
+        
+        // Retirer la colonne à déplacer de la liste temporairement
+        columns.remove(columnToMove);
+        
+        // Insérer la colonne à la nouvelle position
+        columns.add(newPosition, columnToMove);
+        
+        // Réassigner les displayOrder de façon consécutive
+        for (int i = 0; i < columns.size(); i++) {
+            DeckColumnGroup column = columns.get(i);
+            if (column.getDisplayOrder() != i) {
+                log.debug("Mise à jour displayOrder colonne '{}' : {} → {}", 
+                        column.getName(), column.getDisplayOrder(), i);
+                column.setDisplayOrder(i);
+                columnGroupRepository.save(column);
+            }
+        }
+        
+        log.debug("Colonne '{}' déplacée de la position {} vers {}", 
+                columnToMove.getName(), oldPosition, newPosition);
+    }
+
+    @Override
     public boolean existsByDeckAndName(UUID deckId, String columnName) {
         return columnGroupRepository.existsByDeckIdAndName(deckId, columnName.trim());
     }
