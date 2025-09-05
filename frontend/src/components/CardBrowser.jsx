@@ -5,6 +5,29 @@ import CardFilter from "./CardFilter";
 import CardGallery from "./CardGallery";
 import cardService from "../services/cardService";
 
+// Clé pour le localStorage
+const FILTERS_STORAGE_KEY = "cardFilters";
+
+// Fonction pour sauvegarder les filtres dans le localStorage
+const saveFiltersToStorage = (filters) => {
+  try {
+    localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde des filtres:", error);
+  }
+};
+
+// Fonction pour charger les filtres depuis le localStorage
+const loadFiltersFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(FILTERS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch (error) {
+    console.error("Erreur lors du chargement des filtres:", error);
+    return null;
+  }
+};
+
 const CardBrowser = ({
   cards = null, // Si null, on chargera les cartes nous-mêmes
   loading = false,
@@ -26,25 +49,43 @@ const CardBrowser = ({
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
   const [filteredCards, setFilteredCards] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedElements, setSelectedElements] = useState([]);
-  const [selectedComponents, setSelectedComponents] = useState([]);
-  const [selectedType, setSelectedType] = useState("");
+  
+  // Charger les filtres depuis le localStorage au démarrage
+  const [searchTerm, setSearchTerm] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.searchTerm || "";
+  });
+  const [selectedElements, setSelectedElements] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.selectedElements || [];
+  });
+  const [selectedComponents, setSelectedComponents] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.selectedComponents || [];
+  });
+  const [selectedType, setSelectedType] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.selectedType || "";
+  });
   const [availableComponents, setAvailableComponents] = useState([]);
-  const [columnsCount, setColumnsCount] = useState(
-    maxColumns ? Math.max(6, Math.min(10, maxColumns)) : 7
-  ); // Nombre de colonnes pour le zoom (6-10)
-  const [showImagePreview, setShowImagePreview] = useState(true); // État pour l'aperçu d'image
-  const [showFanMade, setShowFanMade] = useState(false); // État pour le filtre fan made
-
-  // Extensions fan made définies en dur
-  const FAN_MADE_EXTENSIONS = ["Nexus Noir"];
+  const [columnsCount, setColumnsCount] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.columnsCount || (maxColumns ? Math.max(6, Math.min(10, maxColumns)) : 7);
+  }); // Nombre de colonnes pour le zoom (6-10)
+  const [showImagePreview, setShowImagePreview] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.showImagePreview ?? true;
+  }); // État pour l'aperçu d'image
+  const [showFanMade, setShowFanMade] = useState(() => {
+    const stored = loadFiltersFromStorage();
+    return stored?.showFanMade ?? false;
+  }); // État pour le filtre fan made
 
   // Hook pour les traductions des composants
   const {
     translateComponent,
-    loading: translationsLoading,
-    isReady: translationsReady,
+    // loading: translationsLoading, // Non utilisé - commenté pour éviter l'erreur lint
+    // isReady: translationsReady,  // Non utilisé - commenté pour éviter l'erreur lint
   } = useComponentTranslations(gameId || "mage_noir");
 
   // Utiliser les cartes passées en props ou charger les cartes localement
@@ -123,6 +164,20 @@ const CardBrowser = ({
     }
   }, [gameId, currentLanguage, onCardsLoaded, extractUniqueComponents]);
 
+  // Effet pour sauvegarder les filtres dans le localStorage quand ils changent
+  useEffect(() => {
+    const filters = {
+      searchTerm,
+      selectedElements,
+      selectedComponents,
+      selectedType,
+      columnsCount,
+      showImagePreview,
+      showFanMade
+    };
+    saveFiltersToStorage(filters);
+  }, [searchTerm, selectedElements, selectedComponents, selectedType, columnsCount, showImagePreview, showFanMade]);
+
   // Charger les cartes si pas fournies en props
   useEffect(() => {
     if (cards === null) {
@@ -148,6 +203,9 @@ const CardBrowser = ({
   };
 
   useEffect(() => {
+    // Extensions fan made définies en dur (déplacé ici pour éviter l'avertissement lint)
+    const FAN_MADE_EXTENSIONS = ["Nexus Noir"];
+    
     if (
       searchTerm ||
       selectedElements.length > 0 ||
@@ -223,6 +281,7 @@ const CardBrowser = ({
     selectedType,
     cardsToUse,
     showFanMade,
+    // FAN_MADE_EXTENSIONS retiré car défini localement maintenant
   ]);
 
   const handleSearchChange = (term) => {
@@ -259,6 +318,8 @@ const CardBrowser = ({
     setSelectedComponents([]);
     setSelectedType("");
     setShowFanMade(false);
+    // Effacer aussi du localStorage
+    localStorage.removeItem(FILTERS_STORAGE_KEY);
   };
 
   const handleColumnsChange = (newCount) => {
