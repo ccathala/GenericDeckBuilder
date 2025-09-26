@@ -41,7 +41,7 @@ def generate_mapping_structure():
     print("📂 Chargement des URLs...")
     
     # Charger les données des URLs
-    with open('exact_410_card_urls_and_images_fr_en.json', 'r', encoding='utf-8') as f:
+    with open('exact_602_card_urls_and_images_fr_en.json', 'r', encoding='utf-8') as f:
         urls_data = json.load(f)
     
     # Extraire toutes les cartes françaises
@@ -97,7 +97,7 @@ def generate_mapping_structure():
     }
     
     # Sauvegarder
-    output_file = 'card_mapping_fr_en_structure.json'
+    output_file = 'card_mapping_fr_en_structure_season3.json'
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(mapping_structure, f, indent=2, ensure_ascii=False)
     

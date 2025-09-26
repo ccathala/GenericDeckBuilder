@@ -17,8 +17,8 @@ class ExactCardURLDiscoverer:
         self.base_url = "https://magenoir.com"
         self.collection_fr_url = f"{self.base_url}/collection_fr.html"
         self.collection_en_url = f"{self.base_url}/collection.html"
-        self.target_count_per_language = 205
-        self.target_count_total = 410  # 205 FR + 205 EN
+        self.target_count_per_language = 301  # Mise à jour: 301 cartes par langue
+        self.target_count_total = 602  # 301 FR + 301 EN
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -35,6 +35,53 @@ class ExactCardURLDiscoverer:
             print(f"❌ Erreur lors de la récupération de {url}: {e}")
             return None
     
+    def extract_image_from_card_page(self, card_url):
+        """Extrait l'URL de l'image depuis une page de carte individuelle"""
+        content = self.get_page_content(card_url)
+        if not content:
+            return None
+        
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Recherche de l'image de la carte dans la page
+        # Pattern pour les images: cards/{language}/{element}/{cardname}.png
+        image_pattern = re.compile(r'^cards/(FR|EN)/[^/]+/[^/]+\.png$')
+        
+        for img in soup.find_all('img', src=True):
+            src = img['src']
+            if image_pattern.match(src):
+                full_image_url = urljoin(self.base_url, src)
+                print(f"    🖼️ Image trouvée pour {card_url}: {full_image_url}")
+                return full_image_url
+        
+        # Si l'image n'est pas trouvée avec le pattern standard, chercher d'autres patterns
+        for img in soup.find_all('img', src=True):
+            src = img['src']
+            if 'cards' in src and (src.endswith('.png') or src.endswith('.jpg')):
+                full_image_url = urljoin(self.base_url, src)
+                print(f"    🖼️ Image alternative trouvée pour {card_url}: {full_image_url}")
+                return full_image_url
+        
+        print(f"    ⚠️ Aucune image trouvée pour {card_url}")
+        return None
+    
+    def extract_images_from_card_urls(self, card_urls, language_code):
+        """Extrait les URLs d'images pour une liste d'URLs de cartes"""
+        image_urls = set()
+        total_cards = len(card_urls)
+        
+        print(f"🔍 Extraction des images pour {total_cards} cartes {language_code}...")
+        
+        for i, card_url in enumerate(card_urls, 1):
+            print(f"  📄 [{i}/{total_cards}] Traitement de: {card_url}")
+            image_url = self.extract_image_from_card_page(card_url)
+            if image_url:
+                image_urls.add(image_url)
+            # Pause pour éviter de surcharger le serveur
+            time.sleep(0.5)
+        
+        return image_urls
+    
     def extract_exact_card_urls(self):
         """Extrait exactement les URLs de cartes ET images FR et EN"""
         print("🔍 Extraction des URLs de cartes ET images FR et EN...")
@@ -44,19 +91,28 @@ class ExactCardURLDiscoverer:
         
         # Récupération des cartes françaises
         print("\n📍 Récupération des cartes FRANÇAISES...")
-        fr_card_urls, fr_image_urls = self.extract_cards_and_images_from_language("FR", self.collection_fr_url)
-        all_card_urls.update(fr_card_urls)
-        all_image_urls.update(fr_image_urls)
+        fr_card_urls = self.extract_cards_from_language("FR", self.collection_fr_url)
         print(f"  ✅ {len(fr_card_urls)} cartes françaises trouvées")
-        print(f"  ✅ {len(fr_image_urls)} images françaises trouvées")
+        
+        # Extraction des images françaises depuis les pages de cartes
+        print("🔍 Extraction des images françaises depuis les pages de cartes...")
+        fr_image_urls = self.extract_images_from_card_urls(fr_card_urls, "FR")
+        print(f"  🖼️ {len(fr_image_urls)} images françaises trouvées")
         
         # Récupération des cartes anglaises
         print("\n📍 Récupération des cartes ANGLAISES...")
-        en_card_urls, en_image_urls = self.extract_cards_and_images_from_language("EN", self.collection_en_url)
-        all_card_urls.update(en_card_urls)
-        all_image_urls.update(en_image_urls)
+        en_card_urls = self.extract_cards_from_language("EN", self.collection_en_url)
         print(f"  ✅ {len(en_card_urls)} cartes anglaises trouvées")
-        print(f"  ✅ {len(en_image_urls)} images anglaises trouvées")
+        
+        # Extraction des images anglaises depuis les pages de cartes
+        print("🔍 Extraction des images anglaises depuis les pages de cartes...")
+        en_image_urls = self.extract_images_from_card_urls(en_card_urls, "EN")
+        print(f"  🖼️ {len(en_image_urls)} images anglaises trouvées")
+        
+        all_card_urls.update(fr_card_urls)
+        all_card_urls.update(en_card_urls)
+        all_image_urls.update(fr_image_urls)
+        all_image_urls.update(en_image_urls)
         
         return all_card_urls, all_image_urls, fr_card_urls, en_card_urls, fr_image_urls, en_image_urls
     
@@ -207,7 +263,7 @@ class ExactCardURLDiscoverer:
         en_image_urls_list = sorted(list(en_image_urls))
         
         # Sauvegarder toutes les URLs en format texte
-        txt_filepath = 'exact_410_card_urls_and_images_fr_en.txt'
+        txt_filepath = 'exact_602_card_urls_and_images_fr_en.txt'
         with open(txt_filepath, 'w', encoding='utf-8') as f:
             f.write(f"# URLs exactes des cartes ET images Mage Noir (FR + EN)\n")
             f.write(f"# Cartes totales: {len(all_card_urls_list)}\n")
@@ -238,7 +294,7 @@ class ExactCardURLDiscoverer:
         print(f"💾 URLs sauvegardées dans: {txt_filepath}")
         
         # Sauvegarder aussi en JSON
-        json_filepath = 'exact_410_card_urls_and_images_fr_en.json'
+        json_filepath = 'exact_602_card_urls_and_images_fr_en.json'
         with open(json_filepath, 'w', encoding='utf-8') as f:
             json.dump({
                 'cards_total_count': len(all_card_urls_list),
@@ -285,7 +341,7 @@ class ExactCardURLDiscoverer:
     def discover_exact_card_urls(self):
         """Méthode principale de découverte des URLs de cartes ET images FR et EN"""
         print("🚀 DÉCOUVERTE EXACTE DES URLs DE CARTES ET IMAGES MAGE NOIR (FR + EN)")
-        print("🎯 Objectif: 205 cartes françaises + 205 cartes anglaises = 410 URLs")
+        print("🎯 Objectif: 301 cartes françaises + 301 cartes anglaises = 602 URLs")
         print("🎯 + Images correspondantes selon pattern cards/{language}/{element}/{cardname}.png")
         print("=" * 80)
         
