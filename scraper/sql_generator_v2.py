@@ -921,7 +921,7 @@ class MageNoirSQLGeneratorV2:
         return len(duplicates) == 0
     
     def generate_sql(self, cards_data):
-        """Génère le script SQL complet"""
+        """Génère le script SQL complet avec vérification d'existence"""
         sql_lines = []
         
         # En-tête du fichier
@@ -934,16 +934,10 @@ class MageNoirSQLGeneratorV2:
         sql_lines.append(f"-- Cartes avec correspondance FR/EN : {matched_count}")
         sql_lines.append("")
         
-        # Suppression des données existantes
-        sql_lines.append("-- Delete CardLocalization")
-        sql_lines.append("DELETE FROM card_localization")
-        sql_lines.append("WHERE card_id IN (")
-        sql_lines.append("  SELECT id FROM card WHERE game_id = 'mage_noir'")
-        sql_lines.append(");")
-        sql_lines.append("")
-        sql_lines.append("-- Delete Card")
-        sql_lines.append("DELETE FROM card")
-        sql_lines.append("WHERE game_id = 'mage_noir';")
+        # Instructions sur le comportement du script
+        sql_lines.append("-- Ce script vérifie si chaque carte existe déjà avant de l'ajouter")
+        sql_lines.append("-- Si la carte existe, elle n'est PAS ajoutée (ON CONFLICT DO NOTHING)")
+        sql_lines.append("-- Si la carte n'existe pas, elle est ajoutée avec ses localisations")
         sql_lines.append("")
         
         # Générer les cartes par élément
@@ -961,8 +955,17 @@ class MageNoirSQLGeneratorV2:
             sql_lines.append("")
             
             for card in sorted(element_cards, key=lambda x: x['card_id']):
-                self.generate_card_sql(card, sql_lines)
+                self.generate_card_sql_with_conflict_check(card, sql_lines)
                 sql_lines.append("")
+            
+            # Ajouter le compteur de cartes à la fin de chaque bloc d'élément
+            sql_lines.append(f"-- Nombre de cartes pour {element}: {len(element_cards)}")
+            sql_lines.append("")
+        
+        # Ajouter le total général à la fin du fichier
+        sql_lines.append("--" + ("=" * 120))
+        sql_lines.append(f"-- TOTAL GÉNÉRAL: {len(cards_data)} cartes")
+        sql_lines.append("--" + ("=" * 120))
         
         return '\n'.join(sql_lines)
 
@@ -1095,6 +1098,137 @@ class MageNoirSQLGeneratorV2:
         # Joindre les localisations avec des virgules
         sql_lines.append(',\n'.join(localizations) + ';')
 
+    def generate_card_sql_with_conflict_check(self, card, sql_lines):
+        """Génère le SQL pour une carte avec vérification de conflit"""
+        card_id = card['card_id']
+        element = card['element']
+        
+        # Nom d'affichage (français en priorité)
+        display_name = card['localizations'].get('fr', {}).get('name', 
+                      card['localizations'].get('en', {}).get('name', card_id))
+        
+        # Utiliser les données extraites des pages web
+        total_cost = card.get('total_cost', 0)
+        mana_costs = card.get('mana_costs', {
+            'manaVegetal': 0,
+            'manaFeu': 0,
+            'manaAir': 0,
+            'manaEau': 0,
+            'manaMineral': 0,
+            'manaArcane': 0
+        })
+        component_costs = card.get('component_costs', [])
+        card_type = card.get('type', 'Sort')
+        extension = card.get('extension', 'Jeu de base')
+        artwork = card.get('artwork', 'Artiste inconnu')
+        
+        # Commentaire de séparation
+        sql_lines.append("--" + ("=" * 120))
+        sql_lines.append(f"-- {display_name}")
+        sql_lines.append("--" + ("=" * 120))
+        
+        # INSERT pour la carte principale avec vérification de conflit
+        sql_lines.append(f"INSERT INTO card (id, game_id, properties) VALUES")
+        sql_lines.append(f"('{card_id}', 'mage_noir', '{{")
+        sql_lines.append(f'  "type": "{card_type}",')
+        sql_lines.append(f'  "element": "{element}",')
+        sql_lines.append('  "manaCost": {')
+        sql_lines.append(f'    "total": {total_cost},')
+        sql_lines.append(f'    "manaVegetal": {mana_costs["manaVegetal"]},')
+        sql_lines.append(f'    "manaFeu": {mana_costs["manaFeu"]},')
+        sql_lines.append(f'    "manaAir": {mana_costs["manaAir"]},')
+        sql_lines.append(f'    "manaEau": {mana_costs["manaEau"]},')
+        sql_lines.append(f'    "manaMineral": {mana_costs["manaMineral"]},')
+        sql_lines.append(f'    "manaArcane": {mana_costs["manaArcane"]}')
+        sql_lines.append('  },')
+        
+        # Components reste toujours vide selon les spécifications
+        sql_lines.append('  "components": [],')
+        
+        # ComponentCost : tableau d'objets avec componentName et quantity
+        if component_costs:
+            sql_lines.append('  "componentCost": [')
+            for i, component_obj in enumerate(component_costs):
+                comma = ',' if i < len(component_costs) - 1 else ''
+                component_name = component_obj['componentName']
+                quantity = component_obj['quantity']
+                sql_lines.append(f'    {{"componentName": "{component_name}", "quantity": {quantity}}}{comma}')
+            sql_lines.append('  ],')
+        else:
+            sql_lines.append('  "componentCost": [],')
+        
+        sql_lines.append(f'  "extension": "{extension}",')
+        sql_lines.append(f'  "artwork": "{artwork}"')
+        sql_lines.append("}')")
+        sql_lines.append("ON CONFLICT (id) DO NOTHING;")
+        sql_lines.append("")
+        
+        # Commentaire pour les localisations
+        sql_lines.append(f"-- Localisations pour {display_name}")
+        sql_lines.append("INSERT INTO public.card_localization")
+        sql_lines.append("(card_id, description, image_url, card_url, locale, \"name\")")
+        sql_lines.append("VALUES")
+        
+        localizations = []
+        
+        # Localisation française (obligatoire)
+        if 'fr' in card['localizations']:
+            fr_loc = card['localizations']['fr']
+            fr_name = fr_loc.get('name', card_id)
+            fr_image = fr_loc.get('image_url', '')
+            fr_card_url = fr_loc.get('card_url', '')
+            fr_description = fr_loc.get('description', 'Description à compléter')
+            
+            # Validation et nettoyage de la description française
+            if not fr_description or fr_description.strip() == '':
+                fr_description = 'Description à compléter'
+            elif len(fr_description) < 10:
+                fr_description = 'Description à compléter'
+            elif "Déphase 0" in fr_description:
+                print(f"    ⚠️  Description FR suspecte pour {card_id}: contient 'Déphase 0'")
+            
+            # Échapper les apostrophes pour PostgreSQL
+            fr_description_escaped = fr_description.replace("'", "''")
+            fr_name_escaped = fr_name.replace("'", "''")
+            localizations.append(f"('{card_id}', E'{fr_description_escaped}', '{fr_image}', '{fr_card_url}', 'fr', '{fr_name_escaped}')")
+        else:
+            # Si pas de français, utiliser un placeholder
+            localizations.append(f"('{card_id}', E'Description à compléter', '', '', 'fr', '{display_name}')")
+        
+        # Localisation anglaise (obligatoire)
+        if 'en' in card['localizations']:
+            en_loc = card['localizations']['en']
+            en_name = en_loc.get('name', card_id)
+            en_image = en_loc.get('image_url', '')
+            en_card_url = en_loc.get('card_url', '')
+            en_description = en_loc.get('description', 'Description to complete')
+            
+            # Validation et nettoyage de la description anglaise
+            if not en_description or en_description.strip() == '':
+                en_description = 'Description to complete'
+            elif len(en_description) < 10:
+                en_description = 'Description to complete'
+            elif "Déphase 0" in en_description:
+                print(f"    ⚠️  Description EN suspecte pour {card_id}: contient 'Déphase 0'")
+            
+            # Vérifier si le nom anglais n'est pas identique au nom français
+            if 'fr' in card['localizations']:
+                fr_name = card['localizations']['fr'].get('name', '')
+                if en_name == fr_name and len(en_name) > 5:
+                    print(f"    ⚠️  Noms FR/EN identiques pour {card_id}: {en_name}")
+            
+            # Échapper les apostrophes pour PostgreSQL
+            en_description_escaped = en_description.replace("'", "''")
+            en_name_escaped = en_name.replace("'", "''")
+            localizations.append(f"('{card_id}', E'{en_description_escaped}', '{en_image}', '{en_card_url}', 'en', '{en_name_escaped}')")
+        else:
+            # Si pas d'anglais, utiliser un placeholder
+            localizations.append(f"('{card_id}', E'Description to complete', '', '', 'en', '{display_name}')")
+        
+        # Joindre les localisations avec des virgules et ajouter ON CONFLICT
+        sql_lines.append(',\n'.join(localizations))
+        sql_lines.append("ON CONFLICT (card_id, locale) DO NOTHING;")
+
 def main():
     """Fonction principale"""
     print("GENERATION DU SCRIPT SQL MAGE NOIR V2 (avec correspondance FR/EN)")
@@ -1104,7 +1238,7 @@ def main():
     
     # Charger les données des URLs
     print("Chargement des donnees des URLs...")
-    urls_data = generator.load_urls_data('exact_410_card_urls_and_images_fr_en.json')
+    urls_data = generator.load_urls_data('exact_602_card_urls_and_images_fr_en.json')
     print(f"{urls_data['cards_total_count']} cartes et {urls_data['images_total_count']} images chargees")
     
     # Traiter les URLs avec correspondance FR/EN
