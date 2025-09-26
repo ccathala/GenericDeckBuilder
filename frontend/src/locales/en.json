@@ -139,6 +139,7 @@
       "Sort": "Spell",
       "Permanent": "Permanent",
       "Équipement": "Equipment",
+      "Animal": "Animal",
       "Rituel": "Ritual"
     },
     "elements": {

@@ -25,7 +25,7 @@ const CardFilter = ({
   const [isComponentDropdownOpen, setIsComponentDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
 
-  const cardTypes = ["Sort", "Permanent", "Équipement", "Rituel"];
+  const cardTypes = ["Sort", "Permanent", "Équipement", "Animal", "Rituel"];
 
   const elements = [
     {
