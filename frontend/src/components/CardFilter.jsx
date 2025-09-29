@@ -78,6 +78,10 @@ const CardFilter = ({
     },
   ];
 
+  const translatedAvailableComponents = Array.from(
+    availableComponents.map((component) => translateComponent(component))
+  ).sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+
   const ComponentDropdown = () => (
     <div className="relative">
       <button
@@ -122,7 +126,7 @@ const CardFilter = ({
               {t("cards.filters.componentsLoading")}
             </div>
           ) : (
-            availableComponents.map((component) => (
+            translatedAvailableComponents.map((component) => (
               <label
                 key={component}
                 className="flex items-center px-4 py-2 hover:bg-mage-dark-700 cursor-pointer"
@@ -134,11 +138,7 @@ const CardFilter = ({
                   className="mr-3 text-mage-primary-500 rounded border-mage-dark-500 
                            focus:ring-mage-primary-500 focus:ring-2"
                 />
-                <span className="text-white text-sm">
-                  {translateComponent
-                    ? translateComponent(component)
-                    : component}
-                </span>
+                <span className="text-white text-sm">{component}</span>
               </label>
             ))
           )}
