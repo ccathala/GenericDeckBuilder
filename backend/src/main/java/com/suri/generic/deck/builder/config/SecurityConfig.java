@@ -111,7 +111,8 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
                 // Autoriser Railway ET développement local
                 configuration.setAllowedOriginPatterns(Arrays.asList(
-                                "https://mndb.up.railway.app"));
+                                "https://mndb.up.railway.app",
+                        "https://generic-deck-builder-frontend.vercel.app"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
