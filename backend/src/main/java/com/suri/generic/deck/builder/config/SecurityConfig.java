@@ -112,7 +112,7 @@ public class SecurityConfig {
                 // Autoriser Railway ET développement local
                 configuration.setAllowedOriginPatterns(Arrays.asList(
                                 "https://mndb.up.railway.app",
-                        "https://generic-deck-builder-frontend.vercel.app"));
+                        "https://mndb.app"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
